@@ -1,4 +1,3 @@
-// Lightweight client-side simulation for the static GitHub Pages demo.
 const stage = document.querySelector("#stage");
 const board = document.querySelector("#board");
 const gridLayer = document.querySelector("#grid-layer");
@@ -14,16 +13,18 @@ function addMessage(author, text, type = "chat") {
   const wrapper = document.createElement("div");
   if (type === "roll") {
     wrapper.className = "roll-message";
-    const label = document.createElement("span");
-    const content = document.createElement("div");
+    const details = document.createElement("span");
+    const label = document.createElement("small");
     const formula = document.createElement("b");
     const total = document.createElement("strong");
-    label.textContent = `ROLAGEM DE ${author.toUpperCase()}`;
+    const result = document.createElement("em");
     const parts = text.split("=");
+    label.textContent = `ROLAGEM DE ${author.toUpperCase()}`;
     formula.textContent = parts[0];
     total.textContent = parts[1];
-    content.append(formula, total);
-    wrapper.append(label, content);
+    result.textContent = Number(parts[1]) >= 20 ? "Resultado extraordinário" : "Resultado registrado";
+    details.append(label, formula);
+    wrapper.append(details, total, result);
   } else {
     wrapper.className = "chat-message";
     const avatar = document.createElement("i");
@@ -32,7 +33,7 @@ function addMessage(author, text, type = "chat") {
     const name = document.createElement("b");
     const time = document.createElement("small");
     const message = document.createElement("p");
-    avatar.textContent = author[0];
+    avatar.className = "portrait kael";
     name.textContent = author;
     time.textContent = "agora";
     message.textContent = text;
@@ -69,7 +70,7 @@ document.querySelector("#chat-form").addEventListener("submit", event => {
 });
 
 document.querySelectorAll("[data-tab]").forEach(button => button.addEventListener("click", () => {
-  document.querySelectorAll("[data-tab],.session-pane").forEach(element => element.classList.remove("active"));
+  document.querySelectorAll("[data-tab],.right-pane").forEach(element => element.classList.remove("active"));
   button.classList.add("active");
   document.querySelector(`#${button.dataset.tab}`).classList.add("active");
 }));
@@ -90,11 +91,9 @@ document.querySelector("#combat").addEventListener("click", event => {
   event.currentTarget.classList.toggle("active");
   const active = event.currentTarget.classList.contains("active");
   event.currentTarget.querySelector("span").textContent = active ? "Encerrar combate" : "Iniciar combate";
-  const indicator = document.querySelector("#combat-indicator");
-  indicator.classList.toggle("active", active);
-  indicator.querySelector("b").textContent = active ? "Rodada 1" : "Inativo";
-  addMessage("Apex Realms", active ? "Combate iniciado. Rolem iniciativa." : "Combate encerrado.");
+  addMessage("Apex Realms", active ? "Combate iniciado. A iniciativa está ativa." : "Combate encerrado.");
 });
+document.querySelector(".scene-alert button").addEventListener("click", event => event.currentTarget.closest(".scene-alert").remove());
 
 function applyZoom() {
   board.style.transform = `scale(${zoom})`;
@@ -116,18 +115,18 @@ document.querySelectorAll("[data-tool]").forEach(button => button.addEventListen
 }));
 
 const characterData = {
-  kael:{name:"Kael Ardent",className:"Patrulheiro · Nível 5",hp:"32 / 38",token:"#54d8ff"},
-  lyra:{name:"Lyra Voss",className:"Arcanista · Nível 4",hp:"21 / 30",token:"#a98cff"},
-  sentinela:{name:"Sentinela Vazia",className:"Constructo · Elite",hp:"48 / 86",token:"#ff657f"}
+  kael:{name:"Kael Ardent",className:"Patrulheiro · Nível 5",hp:"32 / 38",portrait:"kael"},
+  lyra:{name:"Lyra Voss",className:"Arcanista · Nível 4",hp:"21 / 30",portrait:"lyra"},
+  sentinela:{name:"Sentinela Vazia",className:"Constructo · Elite",hp:"48 / 86",portrait:"sentinel"}
 };
 function focusToken(id) {
-  document.querySelectorAll(".map-token,.character-card").forEach(item => item.classList.remove("selected","active"));
+  document.querySelectorAll(".map-token,.party-card").forEach(item => item.classList.remove("selected","active"));
   const token = document.querySelector(`#${id}`);
   token.classList.add("selected");
   document.querySelector(`[data-focus="${id}"]`)?.classList.add("active");
   const data = characterData[id];
-  document.querySelector("#inspect-avatar").textContent = data.name[0];
-  document.querySelector("#inspect-avatar").style.setProperty("--token",data.token);
+  const avatar = document.querySelector("#inspect-avatar");
+  avatar.className = `portrait ${data.portrait}`;
   document.querySelector("#inspect-name").textContent = data.name;
   document.querySelector("#inspect-class").textContent = data.className;
   document.querySelector("#inspect-hp").textContent = data.hp;
@@ -178,7 +177,7 @@ stage.addEventListener("click", event => {
 });
 
 document.querySelector("#next").addEventListener("click", () => {
-  const turns = [...document.querySelectorAll(".turn")];
+  const turns = [...document.querySelectorAll(".initiative-row")];
   const current = turns.findIndex(turn => turn.classList.contains("active"));
   turns[current].classList.remove("active");
   turns[current].querySelector("em")?.remove();
@@ -188,7 +187,7 @@ document.querySelector("#next").addEventListener("click", () => {
   label.textContent = "ATUAL";
   next.append(label);
   if (current === turns.length - 1) {
-    const round = document.querySelector("#round");
-    round.textContent = `RODADA ${Number(round.textContent.split(" ")[1]) + 1}`;
+    const round = document.querySelector("#round-number");
+    round.textContent = Number(round.textContent) + 1;
   }
 });
