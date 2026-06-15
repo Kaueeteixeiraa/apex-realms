@@ -15,7 +15,8 @@
     <nav>
       {% if current_user %}
         <a href="{{ url_for('dashboard') }}">Campanhas</a>
-        <span class="user-chip"><i>{{ current_user.nickname[0] }}</i>{{ current_user.nickname }}</span>
+        {% if current_user.role == 'admin' %}<a href="{{ url_for('admin_dashboard') }}">Admin</a>{% endif %}
+        <span class="user-chip"><i>{{ current_user.nickname[0] }}</i><span>{{ current_user.nickname }}<small>{{ role_label(current_user.role) }}</small></span></span>
         <a class="btn btn-ghost btn-sm" href="{{ url_for('logout') }}">Sair</a>
       {% else %}
         <a href="#features">Recursos</a>

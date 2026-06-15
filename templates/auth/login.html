@@ -1,7 +1,8 @@
 {% extends "base.html" %}{% block title %}Entrar · Apex Realms{% endblock %}
 {% block content %}
 <section class="auth-page"><div class="auth-art"><div class="mini-orb">20</div><h2>O portal está aberto.</h2><p>Reúna o grupo. A próxima história começa agora.</p></div>
-<form class="panel auth-form" method="post"><div class="eyebrow"><span></span> BEM-VINDO DE VOLTA</div><h1>Entre no seu reino</h1><p class="muted">Use a conta demo: mestre@apexrealms.com / apex123</p>
+<form class="panel auth-form" method="post"><div class="eyebrow"><span></span> BEM-VINDO DE VOLTA</div><h1>Entre no seu reino</h1><p class="muted">Use uma conta demo ou acesse com seu cadastro.</p>
+<div class="demo-accounts"><span><b>Mestre</b>mestre@apexrealms.com</span><span><b>Jogador</b>jogador@apexrealms.com</span><span><b>Admin</b>admin@apexrealms.com</span><small>Senha demo para todas: <strong>apex123</strong></small></div>
 <label>E-mail<input type="email" name="email" value="mestre@apexrealms.com" required></label>
 <label>Senha<input type="password" name="password" value="apex123" required></label>
 <button class="btn btn-primary btn-xl" type="submit">Entrar na plataforma →</button><p class="center muted">Novo por aqui? <a href="{{ url_for('register') }}">Crie sua conta</a></p></form></section>

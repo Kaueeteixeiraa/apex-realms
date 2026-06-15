@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     nickname TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'player',
+    role TEXT NOT NULL DEFAULT 'player' CHECK (role IN ('player', 'master', 'admin')),
     bio TEXT DEFAULT '',
     preferences TEXT DEFAULT '',
     avatar TEXT DEFAULT '',

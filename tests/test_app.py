@@ -25,6 +25,69 @@ class ApexRealmsTestCase(unittest.TestCase):
         self.assertEqual(self.client.get("/dashboard").status_code, 200)
         self.assertEqual(self.client.get("/game/1").status_code, 200)
 
+    def test_role_registration_login_and_admin_panel(self):
+        admin_login = self.login("admin@apexrealms.com")
+        self.assertEqual(admin_login.status_code, 302)
+        self.assertIn("/admin", admin_login.headers["Location"])
+        admin_page = self.client.get("/admin")
+        self.assertEqual(admin_page.status_code, 200)
+        self.assertIn(b"ADMINISTRA", admin_page.data)
+
+        self.client.get("/logout")
+        player_register = self.client.post("/register", data={
+            "name": "Bia Torres",
+            "nickname": "Bia",
+            "email": "bia@example.com",
+            "password": "apex123",
+            "role": "player",
+            "preferences": "Investigação",
+        })
+        self.assertEqual(player_register.status_code, 302)
+        self.assertEqual(self.client.get("/campaign/new").status_code, 403)
+        self.assertEqual(self.client.post("/campaign/quick").status_code, 403)
+        self.assertEqual(self.client.get("/admin").status_code, 403)
+        with self.app.app_context():
+            self.assertEqual(query("SELECT role FROM users WHERE email=?", ("bia@example.com",), one=True)["role"], "player")
+
+        self.client.get("/logout")
+        bad_admin = self.client.post("/register", data={
+            "name": "Admin Sem Código",
+            "nickname": "SemCodigo",
+            "email": "semcodigo@example.com",
+            "password": "apex123",
+            "role": "admin",
+            "admin_code": "ERRADO",
+        })
+        self.assertEqual(bad_admin.status_code, 200)
+        with self.app.app_context():
+            self.assertIsNone(query("SELECT id FROM users WHERE email=?", ("semcodigo@example.com",), one=True))
+
+        good_admin = self.client.post("/register", data={
+            "name": "Novo Admin",
+            "nickname": "NAdmin",
+            "email": "novo-admin@example.com",
+            "password": "apex123",
+            "role": "admin",
+            "admin_code": "APEX-ADMIN-2026",
+        })
+        self.assertEqual(good_admin.status_code, 302)
+        self.assertIn("/admin", good_admin.headers["Location"])
+        with self.app.app_context():
+            self.assertEqual(query("SELECT role FROM users WHERE email=?", ("novo-admin@example.com",), one=True)["role"], "admin")
+
+    def test_admin_can_change_user_roles(self):
+        self.login("admin@apexrealms.com")
+        with self.app.app_context():
+            player = query("SELECT id FROM users WHERE email=?", ("jogador@apexrealms.com",), one=True)
+        response = self.client.post(f"/admin/users/{player['id']}/role", data={"role": "master"})
+        self.assertEqual(response.status_code, 302)
+        with self.app.app_context():
+            self.assertEqual(query("SELECT role FROM users WHERE id=?", (player["id"],), one=True)["role"], "master")
+
+        self.client.get("/logout")
+        self.login("jogador@apexrealms.com")
+        self.assertEqual(self.client.get("/campaign/new").status_code, 200)
+
     def test_map_upload_grid_update_and_delete(self):
         self.login()
         png = b"\x89PNG\r\n\x1a\n" + b"0" * 100

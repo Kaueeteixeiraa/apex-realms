@@ -6,6 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-change-this-secret")
+    ADMIN_REGISTRATION_CODE = os.environ.get("ADMIN_REGISTRATION_CODE", "APEX-ADMIN-2026")
     DATABASE = BASE_DIR / "database" / "apex_realms.db"
     UPLOAD_FOLDER = BASE_DIR / "uploads"
     MAX_CONTENT_LENGTH = 8 * 1024 * 1024

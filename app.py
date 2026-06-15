@@ -2,6 +2,7 @@ import json
 import random
 import re
 import secrets
+import sqlite3
 from pathlib import Path
 
 from flask import Flask, abort, flash, jsonify, redirect, render_template, request, send_from_directory, session, url_for
@@ -10,7 +11,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from config import Config
 from database import execute, get_db, init_app, query
-from services.security import campaign_access, current_user, login_required
+from services.security import ROLES, admin_required, campaign_access, can_manage_campaign, current_user, login_required, master_required, role_label
 
 
 def roll_formula(formula):
@@ -32,7 +33,10 @@ def create_app():
 
     @app.context_processor
     def inject_user():
-        return {"current_user": current_user()}
+        return {"current_user": current_user(), "roles": ROLES, "role_label": role_label}
+
+    def post_login_redirect(user):
+        return url_for("admin_dashboard") if user["role"] == "admin" else url_for("dashboard")
 
     @app.get("/")
     def landing():
@@ -49,28 +53,42 @@ def create_app():
             if user and check_password_hash(user["password_hash"], request.form["password"]):
                 session.clear()
                 session["user_id"] = user["id"]
-                return redirect(url_for("dashboard"))
+                return redirect(post_login_redirect(user))
             flash("E-mail ou senha inválidos.", "error")
         return render_template("auth/login.html")
 
     @app.route("/register", methods=["GET", "POST"])
     def register():
         if request.method == "POST":
+            role = request.form.get("role", "player")
+            email = request.form.get("email", "").strip().lower()
+            password = request.form.get("password", "")
+            if role not in ROLES:
+                flash("Escolha um perfil válido para a conta.", "error")
+                return render_template("auth/register.html")
+            if len(password) < 6:
+                flash("A senha precisa ter pelo menos 6 caracteres.", "error")
+                return render_template("auth/register.html")
+            if role == "admin" and request.form.get("admin_code", "").strip() != app.config["ADMIN_REGISTRATION_CODE"]:
+                flash("Código interno de administrador inválido.", "error")
+                return render_template("auth/register.html")
             try:
                 user_id = execute(
                     "INSERT INTO users (name, nickname, email, password_hash, role, preferences) VALUES (?, ?, ?, ?, ?, ?)",
                     (
-                        request.form["name"],
-                        request.form["nickname"],
-                        request.form["email"].lower(),
-                        generate_password_hash(request.form["password"]),
-                        request.form["role"],
+                        request.form["name"].strip(),
+                        request.form["nickname"].strip(),
+                        email,
+                        generate_password_hash(password),
+                        role,
                         request.form.get("preferences", ""),
                     ),
                 )
+                session.clear()
                 session["user_id"] = user_id
-                return redirect(url_for("dashboard"))
-            except Exception:
+                flash(f"Conta de {role_label(role).lower()} criada com sucesso.", "success")
+                return redirect(url_for("admin_dashboard" if role == "admin" else "dashboard"))
+            except sqlite3.IntegrityError:
                 flash("Esse e-mail já está em uso.", "error")
         return render_template("auth/register.html")
 
@@ -83,19 +101,66 @@ def create_app():
     @login_required
     def dashboard():
         user = current_user()
-        campaigns = query(
-            """SELECT c.*, u.nickname AS owner_name,
-               CASE WHEN c.owner_id = ? THEN 'master' ELSE 'player' END AS access_role
-               FROM campaigns c JOIN users u ON u.id = c.owner_id
-               LEFT JOIN memberships m ON m.campaign_id = c.id
-               WHERE c.owner_id = ? OR m.user_id = ?
-               GROUP BY c.id ORDER BY c.last_session DESC""",
-            (user["id"], user["id"], user["id"]),
-        )
+        if user["role"] == "admin":
+            campaigns = query(
+                """SELECT c.*, u.nickname AS owner_name, 'admin' AS access_role
+                   FROM campaigns c JOIN users u ON u.id = c.owner_id
+                   ORDER BY c.last_session DESC"""
+            )
+        else:
+            campaigns = query(
+                """SELECT c.*, u.nickname AS owner_name,
+                   CASE WHEN c.owner_id = ? THEN 'master' ELSE 'player' END AS access_role
+                   FROM campaigns c JOIN users u ON u.id = c.owner_id
+                   LEFT JOIN memberships m ON m.campaign_id = c.id
+                   WHERE c.owner_id = ? OR m.user_id = ?
+                   GROUP BY c.id ORDER BY c.last_session DESC""",
+                (user["id"], user["id"], user["id"]),
+            )
         return render_template("dashboard.html", campaigns=campaigns)
 
+    @app.get("/admin")
+    @admin_required
+    def admin_dashboard():
+        stats = {
+            "users": query("SELECT COUNT(*) AS total FROM users", one=True)["total"],
+            "masters": query("SELECT COUNT(*) AS total FROM users WHERE role='master'", one=True)["total"],
+            "players": query("SELECT COUNT(*) AS total FROM users WHERE role='player'", one=True)["total"],
+            "admins": query("SELECT COUNT(*) AS total FROM users WHERE role='admin'", one=True)["total"],
+            "campaigns": query("SELECT COUNT(*) AS total FROM campaigns", one=True)["total"],
+        }
+        users = query(
+            """SELECT u.*,
+               (SELECT COUNT(*) FROM campaigns c WHERE c.owner_id = u.id) AS owned_campaigns,
+               (SELECT COUNT(*) FROM memberships m WHERE m.user_id = u.id) AS joined_campaigns
+               FROM users u ORDER BY u.created_at DESC, u.id DESC"""
+        )
+        campaigns = query(
+            """SELECT c.*, u.nickname AS owner_name,
+               (SELECT COUNT(*) FROM memberships m WHERE m.campaign_id = c.id) AS player_count
+               FROM campaigns c JOIN users u ON u.id = c.owner_id
+               ORDER BY c.last_session DESC LIMIT 8"""
+        )
+        return render_template("admin/dashboard.html", stats=stats, users=users, campaigns=campaigns)
+
+    @app.post("/admin/users/<int:user_id>/role")
+    @admin_required
+    def admin_user_role(user_id):
+        role = request.form.get("role", "")
+        if role not in ROLES:
+            abort(400)
+        if user_id == current_user()["id"] and role != "admin":
+            flash("Você não pode remover seu próprio acesso administrativo.", "error")
+            return redirect(url_for("admin_dashboard"))
+        user = query("SELECT id FROM users WHERE id = ?", (user_id,), one=True)
+        if not user:
+            abort(404)
+        execute("UPDATE users SET role = ? WHERE id = ?", (role, user_id))
+        flash("Perfil do usuário atualizado.", "success")
+        return redirect(url_for("admin_dashboard"))
+
     @app.route("/campaign/new", methods=["GET", "POST"])
-    @login_required
+    @master_required
     def campaign_new():
         if request.method == "POST":
             campaign_id = execute(
@@ -114,7 +179,7 @@ def create_app():
         return render_template("campaigns/new.html")
 
     @app.post("/campaign/quick")
-    @login_required
+    @master_required
     def quick_campaign():
         campaign_id = execute(
             """INSERT INTO campaigns (owner_id, name, description, system, invite_code, quick_session)
@@ -135,7 +200,7 @@ def create_app():
         assets = query("SELECT * FROM assets WHERE campaign_id = ? ORDER BY favorite DESC, id DESC", (campaign_id,))
         maps = query("SELECT * FROM maps WHERE campaign_id = ? ORDER BY active DESC, id DESC", (campaign_id,))
         tokens = query("SELECT * FROM tokens WHERE campaign_id = ? ORDER BY token_type, name", (campaign_id,))
-        return render_template("campaigns/detail.html", campaign=campaign, players=players, assets=assets, maps=maps, tokens=tokens, is_owner=campaign["owner_id"] == current_user()["id"])
+        return render_template("campaigns/detail.html", campaign=campaign, players=players, assets=assets, maps=maps, tokens=tokens, is_owner=can_manage_campaign(campaign))
 
     def save_upload(file, image_only=False):
         if not file or not file.filename:
@@ -235,7 +300,7 @@ def create_app():
         campaign = campaign_access(campaign_id)
         user = current_user()
         token_type = request.form.get("token_type", "player")
-        if campaign["owner_id"] != user["id"] and token_type != "player":
+        if not can_manage_campaign(campaign, user) and token_type != "player":
             abort(403)
         owner_id = user["id"] if token_type == "player" else None
         image_url = save_upload(request.files.get("image"), image_only=True)
@@ -280,7 +345,7 @@ def create_app():
     @login_required
     def game_room(campaign_id):
         campaign = campaign_access(campaign_id)
-        is_owner = campaign["owner_id"] == current_user()["id"]
+        is_owner = can_manage_campaign(campaign)
         tokens = query("SELECT * FROM tokens WHERE campaign_id = ?" + ("" if is_owner else " AND hidden = 0"), (campaign_id,))
         messages = query("SELECT * FROM chat_messages WHERE campaign_id = ? ORDER BY id DESC LIMIT 30", (campaign_id,))
         initiative = query(
@@ -326,7 +391,7 @@ def create_app():
         campaign = campaign_access(campaign_id)
         token = query("SELECT * FROM tokens WHERE id = ? AND campaign_id = ?", (token_id, campaign_id), one=True)
         user = current_user()
-        if not token or (campaign["owner_id"] != user["id"] and token["owner_id"] != user["id"]):
+        if not token or (not can_manage_campaign(campaign, user) and token["owner_id"] != user["id"]):
             return jsonify({"error": "Sem permissão para controlar este token."}), 403
         data = request.get_json()
         fields = {
@@ -356,7 +421,7 @@ def create_app():
         token = query("SELECT * FROM tokens WHERE id=? AND campaign_id=?", (token_id, campaign_id), one=True)
         if not token:
             abort(404)
-        if campaign["owner_id"] != current_user()["id"] and token["owner_id"] != current_user()["id"]:
+        if not can_manage_campaign(campaign) and token["owner_id"] != current_user()["id"]:
             abort(403)
         result = dict(token)
         result["attributes"] = json.loads(result["attributes"] or "{}")
@@ -495,7 +560,7 @@ def create_app():
         data = request.get_json() or {}
         public_notes = data.get("public_notes", "")[:10000]
         gm_notes = campaign["gm_notes"]
-        if campaign["owner_id"] == current_user()["id"]:
+        if can_manage_campaign(campaign):
             gm_notes = data.get("gm_notes", "")[:10000]
         execute("UPDATE campaigns SET public_notes = ?, gm_notes = ? WHERE id = ?", (public_notes, gm_notes, campaign_id))
         return jsonify({"ok": True})
@@ -521,6 +586,7 @@ def init_database(app):
         if "fog_enabled" not in map_columns:
             get_db().execute("ALTER TABLE maps ADD COLUMN fog_enabled INTEGER DEFAULT 0")
         get_db().commit()
+        execute("UPDATE users SET role = 'player' WHERE role NOT IN ('player', 'master', 'admin')")
         if not query("SELECT id FROM users LIMIT 1", one=True):
             gm_id = execute(
                 "INSERT INTO users (name, nickname, email, password_hash, role, bio, preferences) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -546,6 +612,11 @@ def init_database(app):
                 execute("INSERT INTO assets (campaign_id, name, kind, favorite) VALUES (?, ?, ?, ?)", (campaign_id, name, kind, favorite))
             execute("INSERT INTO chat_messages (campaign_id, author, kind, content) VALUES (?, ?, ?, ?)", (campaign_id, "Apex Realms", "system", "A sessão começou nas Ruínas do Observatório."))
             execute("INSERT INTO chat_messages (campaign_id, user_id, author, kind, content) VALUES (?, ?, ?, ?, ?)", (campaign_id, player_id, "Caio", "message", "Kael examina as inscrições na porta."))
+        if not query("SELECT id FROM users WHERE email = ?", ("admin@apexrealms.com",), one=True):
+            execute(
+                "INSERT INTO users (name, nickname, email, password_hash, role, bio, preferences) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                ("Admin Apex", "Admin", "admin@apexrealms.com", generate_password_hash("apex123"), "admin", "Administrador do sistema Apex Realms.", "Gestão, segurança e suporte"),
+            )
         demo_campaign = query("SELECT id FROM campaigns ORDER BY id LIMIT 1", one=True)
         if demo_campaign and not query("SELECT id FROM maps WHERE campaign_id = ? LIMIT 1", (demo_campaign["id"],), one=True):
             execute(

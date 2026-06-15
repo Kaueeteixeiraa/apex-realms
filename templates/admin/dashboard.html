@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% block title %}Administração · Apex Realms{% endblock %}
+{% block content %}
+<section class="page-shell admin-shell">
+  <div class="welcome">
+    <div><span class="eyebrow"><span></span> ADMINISTRAÇÃO DO SISTEMA</span><h1>Painel Apex Realms.</h1><p>Gerencie contas, papéis e acompanhe a operação da plataforma.</p></div>
+    <a class="btn btn-ghost" href="{{ url_for('dashboard') }}">Ver campanhas →</a>
+  </div>
+
+  <div class="admin-metrics">
+    <article><small>USUÁRIOS</small><b>{{ stats.users }}</b><span>Total cadastrado</span></article>
+    <article><small>MESTRES</small><b>{{ stats.masters }}</b><span>Podem criar campanhas</span></article>
+    <article><small>JOGADORES</small><b>{{ stats.players }}</b><span>Entram por convite</span></article>
+    <article><small>ADMINS</small><b>{{ stats.admins }}</b><span>Gerenciam o sistema</span></article>
+    <article><small>CAMPANHAS</small><b>{{ stats.campaigns }}</b><span>Mesas registradas</span></article>
+  </div>
+
+  <div class="admin-grid">
+    <section class="panel admin-panel">
+      <div class="section-line"><h2>Usuários</h2><span class="muted">Altere o perfil sem acessar o banco.</span></div>
+      <div class="admin-user-list">
+        {% for user in users %}
+        <article class="admin-user-row">
+          <i>{{ user.nickname[0] }}</i>
+          <span><b>{{ user.name }}</b><small>{{ user.email }} · {{ user.owned_campaigns }} campanhas · {{ user.joined_campaigns }} participações</small></span>
+          <form method="post" action="{{ url_for('admin_user_role', user_id=user.id) }}">
+            <select name="role" aria-label="Perfil de {{ user.nickname }}">
+              {% for value, label in roles.items() %}<option value="{{ value }}" {% if user.role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+            <button class="btn btn-ghost btn-sm">Salvar</button>
+          </form>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <aside class="panel admin-panel">
+      <div class="section-line"><h2>Campanhas recentes</h2></div>
+      <div class="admin-campaign-list">
+        {% for campaign in campaigns %}
+        <a href="{{ url_for('campaign_detail', campaign_id=campaign.id) }}">
+          <span><b>{{ campaign.name }}</b><small>{{ campaign.system }} · {{ campaign.player_count }} jogadores</small></span>
+          <em>{{ campaign.owner_name }}</em>
+        </a>
+        {% else %}
+        <p class="muted">Nenhuma campanha cadastrada ainda.</p>
+        {% endfor %}
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

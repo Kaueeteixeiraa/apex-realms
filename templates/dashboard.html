@@ -1,14 +1,18 @@
 {% extends "base.html" %}{% block title %}Campanhas · Apex Realms{% endblock %}
 {% block content %}
 <section class="page-shell">
-  <div class="welcome"><div><span class="eyebrow"><span></span> CENTRAL DE CAMPANHAS</span><h1>Boa noite, {{ current_user.nickname }}.</h1><p>Qual mundo vamos explorar hoje?</p></div><a class="btn btn-primary" href="{{ url_for('campaign_new') }}">＋ Nova campanha</a></div>
+  <div class="welcome"><div><span class="eyebrow"><span></span> CENTRAL DE CAMPANHAS</span><h1>Boa noite, {{ current_user.nickname }}.</h1><p>{{ role_label(current_user.role) }} · Qual mundo vamos explorar hoje?</p></div>{% if current_user.role in ['master','admin'] %}<a class="btn btn-primary" href="{{ url_for('campaign_new') }}">＋ Nova campanha</a>{% else %}<a class="btn btn-ghost" href="#join-code">Entrar com convite</a>{% endif %}</div>
+  {% if current_user.role in ['master','admin'] %}
   <form class="quick-strip" method="post" action="{{ url_for('quick_campaign') }}"><div><i>⚡</i><div><b>Sessão rápida</b><span>Abra uma sala livre e comece a jogar agora</span></div></div><button class="btn btn-ghost">Iniciar agora</button></form>
+  {% else %}
+  <div class="quick-strip player-strip"><div><i>◇</i><div><b>Modo jogador</b><span>Acesse campanhas por código de convite e controle seus personagens.</span></div></div><a class="btn btn-ghost" href="{{ url_for('landing') }}">Conhecer recursos</a></div>
+  {% endif %}
   <div class="toolbar"><div class="tabs campaign-tabs"><button class="active" data-filter="all">Todas</button><button data-filter="master">Como mestre</button><button data-filter="player">Como jogador</button></div><form class="join-form" method="post" action="{{ url_for('campaign_join') }}"><input name="code" placeholder="Código de convite" required><button class="btn btn-ghost btn-sm">Entrar</button></form></div>
   <div class="campaign-grid">
   {% for c in campaigns %}
     <article class="campaign-card" data-role="{{ c.access_role }}">
       <a href="{{ url_for('campaign_detail', campaign_id=c.id) }}" class="campaign-cover cover-{{ loop.index }}"><span class="system-tag">{{ c.system }}</span><div class="cover-symbol">✦</div></a>
-      <div class="campaign-body"><div class="role-tag {{ c.access_role }}">{{ 'Mestrando' if c.access_role == 'master' else 'Jogando' }}</div><h3>{{ c.name }}</h3><p>{{ c.description }}</p>
+      <div class="campaign-body"><div class="role-tag {{ c.access_role }}">{{ 'Administrando' if c.access_role == 'admin' else ('Mestrando' if c.access_role == 'master' else 'Jogando') }}</div><h3>{{ c.name }}</h3><p>{{ c.description }}</p>
       <div class="campaign-meta"><span>◷ {{ c.last_session[:10] }}</span><span>por {{ c.owner_name }}</span></div>
       <a class="btn btn-primary wide" href="{{ url_for('game_room', campaign_id=c.id) }}">Entrar na sala →</a></div>
     </article>

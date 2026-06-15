@@ -4,7 +4,8 @@ Plataforma de mesa virtual de RPG online da Apex Technologies. Este MVP reúne a
 
 ## Recursos implementados
 
-- Cadastro, login, senha com hash e perfis de mestre/jogador
+- Cadastro, login, senha com hash e perfis de jogador, mestre e administrador
+- Painel administrativo para acompanhar usuários, campanhas e alterar papéis
 - Dashboard com campanhas mestradas e jogadas
 - Criação de campanha e entrada por código de convite
 - Página da campanha com resumo, jogadores e biblioteca
@@ -39,8 +40,12 @@ O banco e os dados de demonstração são criados automaticamente na primeira ex
 | --- | --- | --- |
 | Mestre | `mestre@apexrealms.com` | `apex123` |
 | Jogador | `jogador@apexrealms.com` | `apex123` |
+| Administrador | `admin@apexrealms.com` | `apex123` |
 
 Código de convite da campanha demo: `APEX2026`.
+
+Para criar administradores pelo formulário de cadastro local, use o código interno padrão `APEX-ADMIN-2026`.
+Em produção, defina outro valor com a variável de ambiente `ADMIN_REGISTRATION_CODE`.
 
 ## Estrutura
 
@@ -60,7 +65,7 @@ apex-realms/
 
 ## Segurança e evolução
 
-As senhas usam hash do Werkzeug, campanhas e tokens validam permissões no servidor, e o limite global de upload é de 8 MB. Para produção, defina `SECRET_KEY`, use PostgreSQL, implemente CSRF, armazenamento externo de arquivos e substitua o chat HTTP por WebSocket.
+As senhas usam hash do Werkzeug, campanhas e tokens validam permissões no servidor, administradores usam código interno de cadastro, e o limite global de upload é de 8 MB. Para produção, defina `SECRET_KEY`, altere `ADMIN_REGISTRATION_CODE`, use PostgreSQL, implemente CSRF, armazenamento externo de arquivos e substitua o chat HTTP por WebSocket.
 
 O código concentra as rotas em `app.py` para manter este MVP fácil de executar. A camada de banco e permissões já está separada, facilitando mover cada domínio para Blueprints em `routes/` conforme o produto crescer.
 
@@ -72,4 +77,4 @@ Execute a suíte completa:
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-Ela valida autenticação, permissões, upload e grid, fichas, chat, dados, iniciativa, rodadas, dano, cura, PV temporários e ataques contra Defesa.
+Ela valida autenticação, papéis de jogador/mestre/admin, painel administrativo, permissões, upload e grid, fichas, chat, dados, iniciativa, rodadas, dano, cura, PV temporários e ataques contra Defesa.
