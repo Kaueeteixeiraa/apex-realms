@@ -1,12 +1,52 @@
 <!doctype html>
 <html lang="pt-BR">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mesa Demo · Apex Realms</title><link rel="stylesheet" href="pages.css"></head>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mesa interativa | Apex Realms</title>
+  <meta name="description" content="Experimente a mesa virtual interativa do Apex Realms com mapa, tokens, dados, chat e iniciativa.">
+  <meta name="theme-color" content="#09080e">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="pages.css">
+</head>
 <body class="demo">
-  <header class="demo-top"><a class="brand" href="index.html"><i>A</i></a><div><small>D&D 5E</small><b>Ecos de Vhal'Tor</b></div><div class="scene"><small>CENA ATIVA</small><b>Ruínas do Observatório</b></div><button id="combat">Iniciar combate</button><button id="fog">Névoa</button><button id="grid">Grid</button></header>
-  <div class="demo-layout">
-    <aside class="demo-side"><h3>PERSONAGENS</h3><button class="person" data-focus="kael"><i>K</i><span><b>Kael Ardent</b><small>32 / 38 PV</small></span></button><button class="person" data-focus="lyra"><i>L</i><span><b>Lyra Voss</b><small>21 / 24 PV</small></span></button><button class="person" data-focus="sentinela"><i>S</i><span><b>Sentinela Vazia</b><small>48 / 60 PV</small></span></button><p class="demo-note">Arraste os tokens. Use o scroll para zoom.</p></aside>
-    <main class="demo-stage" id="stage"><div class="demo-board" id="board"><div class="demo-map"></div><div class="demo-grid" id="grid-layer"></div><div class="demo-fog hidden" id="fog-layer"></div><button class="demo-token" id="kael" style="left:34%;top:62%">K<small>Kael</small></button><button class="demo-token enemy" id="sentinela" style="left:68%;top:35%">S<small>Sentinela</small></button><button class="demo-token npc" id="lyra" style="left:49%;top:49%">L<small>Lyra</small></button></div><div class="zoom"><button id="minus">−</button><span id="zoom">100%</span><button id="plus">＋</button></div></main>
-    <aside class="demo-right"><div class="demo-tabs"><button class="active" data-tab="chat">Chat</button><button data-tab="turns">Turnos</button></div><section id="chat" class="demo-pane active"><div class="demo-messages" id="messages"><p><b>Apex Realms</b>A sessão começou.</p><p><b>Caio</b>Kael examina as inscrições.</p></div><div class="dice"></div><form id="chat-form"><input id="chat-input" placeholder="Mensagem ou 1d20+5"><button>↑</button></form></section><section id="turns" class="demo-pane"><h3>ORDEM DE TURNO</h3><div class="turn active"><strong>19</strong> Kael Ardent</div><div class="turn"><strong>14</strong> Sentinela Vazia</div><div class="turn"><strong>11</strong> Lyra Voss</div><button class="button small" id="next">Avançar turno</button></section></aside>
+  <header class="vtt-topbar">
+    <a class="brand brand-compact" href="index.html" aria-label="Voltar ao Apex Realms"><span class="brand-sigil"><i></i></span></a>
+    <div class="campaign-title"><small>D&D 5E · CAMPANHA</small><b>Ecos de Vhal'Tor</b></div>
+    <div class="active-scene"><span class="pulse"></span><div><small>CENA ATIVA</small><b>Ruínas do Observatório</b></div><em>AO VIVO</em></div>
+    <div class="combat-indicator" id="combat-indicator"><i></i><span><small>COMBATE</small><b>Inativo</b></span></div>
+    <div class="vtt-actions"><button class="vtt-action" id="combat">⚔ <span>Iniciar combate</span></button><button class="icon-action active" id="grid" title="Alternar grid">#</button><button class="icon-action" id="fog" title="Alternar névoa">◐</button><a class="icon-action" href="index.html" title="Sair da mesa">↗</a></div>
+  </header>
+  <div class="vtt-layout">
+    <aside class="character-sidebar">
+      <div class="panel-heading"><span>PERSONAGENS</span><button aria-label="Adicionar personagem">＋</button></div>
+      <div class="character-list">
+        <button class="character-card active" data-focus="kael" style="--token:#54d8ff"><i>K</i><span><b>Kael Ardent</b><small>Patrulheiro · Nv. 5</small><em><u style="width:84%"></u></em><strong>32 / 38 PV</strong></span><mark>JOGADOR</mark></button>
+        <button class="character-card" data-focus="lyra" style="--token:#a98cff"><i>L</i><span><b>Lyra Voss</b><small>Arcanista · Nv. 4</small><em><u style="width:70%"></u></em><strong>21 / 30 PV</strong></span><mark>NPC</mark></button>
+        <button class="character-card" data-focus="sentinela" style="--token:#ff657f"><i>S</i><span><b>Sentinela Vazia</b><small>Constructo · Elite</small><em><u style="width:55%"></u></em><strong>48 / 86 PV</strong></span><mark>HOSTIL</mark></button>
+      </div>
+      <div class="sidebar-section"><span>FERRAMENTAS</span><div class="tool-grid"><button class="active" data-tool="select">⌁<small>Selecionar</small></button><button data-tool="pan">✥<small>Mover</small></button><button data-tool="measure">⌇<small>Medir</small></button><button data-tool="ping">◎<small>Ping</small></button></div></div>
+      <div class="session-summary"><span>SESSÃO 08</span><b>O chamado sob as ruínas</b><small>3 jogadores conectados</small></div>
+    </aside>
+
+    <main class="map-stage" id="stage">
+      <div class="map-board" id="board"><div class="map-image"></div><div class="map-grid-layer" id="grid-layer"></div><div class="map-fog hidden" id="fog-layer"></div><div id="effects"></div>
+        <button class="map-token player-token" id="kael" style="left:34%;top:62%;--token:#54d8ff"><span>K</span><small>Kael Ardent</small><em><i style="width:84%"></i></em></button>
+        <button class="map-token enemy-token" id="sentinela" style="left:68%;top:35%;--token:#ff657f"><span>S</span><small>Sentinela Vazia</small><em><i style="width:55%"></i></em><mark>Atordoado</mark></button>
+        <button class="map-token npc-token" id="lyra" style="left:49%;top:49%;--token:#a98cff"><span>L</span><small>Lyra Voss</small><em><i style="width:70%"></i></em></button>
+      </div>
+      <div class="floating-tools"><button class="active" data-tool="select" title="Selecionar">⌁</button><button data-tool="pan" title="Mover mapa">✥</button><button data-tool="measure" title="Medir">⌇</button><button data-tool="ping" title="Marcar ponto">◎</button><i></i><button class="active" id="snap" title="Snap no grid">⊞</button></div>
+      <div class="map-meta"><small>MAPA ATIVO</small><b>Observatório em ruínas</b><span>Grid 5 pés</span></div>
+      <div class="zoom-controls"><button id="minus">−</button><span id="zoom">100%</span><button id="plus">＋</button><button id="center" title="Centralizar">⌖</button></div>
+      <div class="interaction-hint">Arraste tokens · Scroll aplica zoom · Use as ferramentas para explorar</div>
+    </main>
+
+    <aside class="session-sidebar">
+      <div class="session-tabs"><button class="active" data-tab="chat">Chat</button><button data-tab="turns">Turnos <i>3</i></button><button data-tab="inspect">Ficha</button></div>
+      <section id="chat" class="session-pane active"><div class="message-list" id="messages"><div class="system-message"><span>✦</span><p>A sessão começou nas Ruínas do Observatório.</p></div><div class="chat-message"><i>C</i><div><span><b>Caio</b><small>21:42</small></span><p>Kael examina as inscrições na porta.</p></div></div><div class="roll-message"><span>ROLAGEM DE KAEL</span><div><b>1d20 + 5</b><strong>24</strong></div><small>Sucesso crítico</small></div><div class="chat-message npc-chat"><i>M</i><div><span><b>Mestre</b><small>21:43</small></span><p>As runas respondem à presença do cristal.</p></div></div></div><div class="dice-tray"><span>DADOS RÁPIDOS</span><div class="dice"></div></div><form id="chat-form"><input id="chat-input" aria-label="Mensagem ou fórmula de dados" placeholder="Mensagem ou 1d20+5"><button aria-label="Enviar">↑</button></form></section>
+      <section id="turns" class="session-pane"><div class="turn-heading"><span>ORDEM DE TURNO</span><b id="round">RODADA 1</b></div><div class="turn-list"><button class="turn active"><strong>19</strong><i style="--token:#54d8ff">K</i><span><b>Kael Ardent</b><small>32 / 38 PV</small></span><em>ATUAL</em></button><button class="turn"><strong>14</strong><i style="--token:#ff657f">S</i><span><b>Sentinela Vazia</b><small>Atordoado</small></span></button><button class="turn"><strong>11</strong><i style="--token:#a98cff">L</i><span><b>Lyra Voss</b><small>21 / 30 PV</small></span></button></div><button class="btn btn-primary advance-turn" id="next">Avançar turno →</button><div class="condition-legend"><span>CONDIÇÕES ATIVAS</span><p><i></i> Sentinela Vazia · Atordoado</p></div></section>
+      <section id="inspect" class="session-pane inspect-pane"><div class="inspect-avatar" id="inspect-avatar" style="--token:#54d8ff">K</div><span class="overline">TOKEN SELECIONADO</span><h3 id="inspect-name">Kael Ardent</h3><p id="inspect-class">Patrulheiro · Nível 5</p><div class="stat-pair"><div><small>VIDA</small><b id="inspect-hp">32 / 38</b></div><div><small>DEFESA</small><b>17</b></div></div><div class="attribute-row"><span><small>FOR</small><b>16</b></span><span><small>DES</small><b>14</b></span><span><small>CON</small><b>15</b></span></div><button class="btn btn-secondary">Abrir ficha completa</button></section>
+    </aside>
   </div>
   <script src="demo.js"></script>
 </body>

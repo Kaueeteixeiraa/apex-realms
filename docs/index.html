@@ -3,18 +3,80 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Apex Realms · Mesa virtual de RPG</title>
-  <meta name="description" content="Apex Realms, a mesa virtual de RPG da Apex Technologies.">
+  <title>Apex Realms | Mesa virtual de RPG premium</title>
+  <meta name="description" content="Crie campanhas, explore mapas e conduza combates em uma mesa virtual de RPG imersiva criada pela Apex Technologies.">
+  <meta name="theme-color" content="#08070d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="pages.css">
 </head>
-<body>
-  <nav><a class="brand" href="index.html"><i>A</i> APEX <b>REALMS</b></a><div><a href="#features">Recursos</a><a class="button small" href="demo.html">Abrir demonstração</a></div></nav>
-  <main class="hero">
-    <section><span class="tag">UMA EXPERIÊNCIA APEX TECHNOLOGIES</span><h1>Seu universo.<br><em>Suas regras.</em></h1><p>Uma mesa virtual moderna para criar mundos, reunir o grupo e transformar cada sessão em uma história inesquecível.</p><div class="actions"><a class="button" href="demo.html">Explorar mesa interativa →</a><a class="ghost" href="#features">Conhecer recursos</a></div><div class="proof"><span>∞ mundos possíveis</span><span>7 tipos de dados</span><span>1 lugar para jogar</span></div></section>
-    <div class="hero-preview"><div class="preview-top">Ecos de Vhal'Tor <span>AO VIVO</span></div><div class="preview-body"><aside><b>PERSONAGENS</b><p>◉ Kael Ardent</p><p>◉ Lyra Voss</p></aside><div class="preview-map"><i>K</i><i>S</i></div><aside><b>CHAT</b><p>Kael examina a porta.</p><p>1d20+5 = <strong>24</strong></p></aside></div></div>
+<body class="landing">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div><div class="rune-field" aria-hidden="true"></div>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Apex Realms"><span class="brand-sigil"><i></i></span><span><b>APEX</b><em>REALMS</em></span></a>
+    <nav aria-label="Navegação principal"><a href="#experience">Experiência</a><a href="#features">Recursos</a><a href="#roadmap">Roadmap</a></nav>
+    <a class="btn btn-small btn-primary" href="demo.html">Abrir demonstração <span>↗</span></a>
+  </header>
+
+  <main>
+    <section class="hero-premium">
+      <div class="hero-copy reveal">
+        <div class="eyebrow"><span></span> UMA MESA VIRTUAL APEX TECHNOLOGIES</div>
+        <h1>Seu universo.<br><em>Suas regras.</em></h1>
+        <p class="hero-lead">Construa mundos, reúna seu grupo e conduza cada momento da aventura em uma plataforma criada para mestres exigentes.</p>
+        <div class="hero-actions"><a class="btn btn-primary btn-large" href="demo.html">Abrir demonstração <span>→</span></a><a class="btn btn-secondary btn-large" href="#features">Conhecer recursos</a></div>
+        <div class="hero-metrics"><div><strong>12+</strong><span>ferramentas de sessão</span></div><div><strong>∞</strong><span>sistemas possíveis</span></div><div><strong>1</strong><span>reino compartilhado</span></div></div>
+      </div>
+
+      <div class="hero-product reveal delay-1">
+        <div class="product-glow"></div>
+        <div class="product-frame">
+          <div class="product-topbar"><span class="mini-sigil"></span><div><small>D&D 5E</small><b>Ecos de Vhal'Tor</b></div><div class="live-pill"><i></i> AO VIVO</div><span class="product-action">CENA ATIVA · OBSERVATÓRIO</span></div>
+          <div class="product-workspace">
+            <aside><span class="micro-title">PERSONAGENS</span><div class="mini-character"><i class="cyan">K</i><div><b>Kael Ardent</b><small>Patrulheiro · Nv. 5</small><em><u style="width:84%"></u></em></div></div><div class="mini-character"><i class="violet">L</i><div><b>Lyra Voss</b><small>Arcanista · Nv. 4</small><em><u style="width:70%"></u></em></div></div><div class="mini-character"><i class="red">S</i><div><b>Sentinela</b><small>Constructo</small><em><u style="width:55%"></u></em></div></div></aside>
+            <div class="product-map"><div class="product-grid"></div><span class="map-rune r-a">ᚱ</span><span class="map-rune r-b">ᛉ</span><i class="preview-token token-kael">K</i><i class="preview-token token-enemy">S</i><div class="map-toolbar"><b>⌁</b><b>✥</b><b>#</b><b>◐</b></div><div class="scene-badge"><small>CENA ATIVA</small><b>Ruínas do Observatório</b></div></div>
+            <aside class="product-chat"><span class="micro-title">CHAT DA SESSÃO</span><div class="chat-bubble"><b>Caio</b><p>Kael examina as inscrições.</p></div><div class="chat-bubble roll"><b>ROLAGEM</b><p>1d20 + 5 <strong>24</strong></p></div><div class="turn-preview"><span>PRÓXIMO TURNO</span><b>Sentinela Vazia</b></div></aside>
+          </div>
+        </div>
+        <div class="floating-note note-left"><span>⚔</span><div><small>COMBATE</small><b>Rodada 3</b></div></div>
+        <div class="floating-note note-right"><span>✦</span><div><small>ÚLTIMA ROLAGEM</small><b>Crítico natural</b></div></div>
+      </div>
+    </section>
+
+    <section class="trust-strip"><span>CRIADO PARA</span><b>D&D</b><b>TORMENTA</b><b>ORDEM PARANORMAL</b><b>SISTEMAS PRÓPRIOS</b><b>QUALQUER AVENTURA</b></section>
+
+    <section class="section process" id="experience">
+      <div class="section-heading reveal"><div class="eyebrow centered"><span></span> DA IDEIA À SESSÃO <span></span></div><h2>Menos preparação.<br><em>Mais aventura.</em></h2><p>Um fluxo natural que acompanha o mestre do primeiro rascunho ao momento mais épico da campanha.</p></div>
+      <div class="process-grid">
+        <article class="process-card reveal"><span class="step">01</span><div class="icon-box">✦</div><h3>Forje o mundo</h3><p>Organize campanhas, lore, personagens e segredos antes da primeira rolagem.</p><i class="connector"></i></article>
+        <article class="process-card reveal delay-1"><span class="step">02</span><div class="icon-box">⌖</div><h3>Prepare a cena</h3><p>Escolha o mapa, posicione tokens e defina o que seus jogadores podem ver.</p><i class="connector"></i></article>
+        <article class="process-card reveal delay-2"><span class="step">03</span><div class="icon-box">⚔</div><h3>Conduza a lenda</h3><p>Narre, role dados e controle o combate sem quebrar o ritmo da história.</p></article>
+      </div>
+    </section>
+
+    <section class="section audience">
+      <div class="audience-card master reveal"><div class="audience-art"><span>♜</span><i></i></div><div><span class="overline">PARA MESTRES</span><h2>Comande cada detalhe.<br>Esconda cada segredo.</h2><p>Centralize tudo que precisa para criar sessões memoráveis e manter o grupo imerso.</p><ul><li>Organize campanhas e lore</li><li>Crie mapas, cenas e NPCs</li><li>Gerencie combates e iniciativa</li><li>Guarde anotações privadas</li></ul><a href="demo.html">Explorar ferramentas de mestre →</a></div></div>
+      <div class="audience-card player reveal delay-1"><div><span class="overline">PARA JOGADORES</span><h2>Entre no mundo.<br>Viva seu personagem.</h2><p>Tenha tudo que importa ao alcance sem perder a atenção na aventura.</p><ul><li>Acesse sua ficha e inventário</li><li>Explore o mapa da sessão</li><li>Role dados e acompanhe turnos</li><li>Interaja com o grupo no chat</li></ul><a href="demo.html">Abrir experiência do jogador →</a></div><div class="audience-art"><span>♞</span><i></i></div></div>
+    </section>
+
+    <section class="section feature-section" id="features">
+      <div class="section-heading reveal"><div class="eyebrow centered"><span></span> ARSENAL DA MESA <span></span></div><h2>Uma plataforma.<br><em>Todos os seus mundos.</em></h2><p>Ferramentas profundas quando você precisa. Interface limpa quando a história começa.</p></div>
+      <div class="feature-grid">
+        <article class="feature-card featured reveal"><div class="feature-visual map-visual"><div></div><i>⌖</i></div><span class="feature-number">01</span><h3>Mapas e cenas</h3><p>Prepare ambientes, troque cenas e posicione cada elemento da narrativa.</p></article>
+        <article class="feature-card featured reveal delay-1"><div class="feature-visual sheet-visual"><span>FOR <b>16</b></span><span>DES <b>14</b></span><span>CON <b>15</b></span></div><span class="feature-number">02</span><h3>Fichas customizáveis</h3><p>Atributos, magias, inventário e campos para qualquer sistema.</p></article>
+        <article class="feature-card reveal"><i class="feature-icon">◉</i><h3>Tokens</h3><p>Heróis, NPCs e ameaças vivos no mapa.</p></article><article class="feature-card reveal"><i class="feature-icon">✦</i><h3>Rolagem de dados</h3><p>Dados rápidos e fórmulas completas no chat.</p></article><article class="feature-card reveal"><i class="feature-icon">⚔</i><h3>Combate e iniciativa</h3><p>Turnos, condições, dano e defesa organizados.</p></article><article class="feature-card reveal"><i class="feature-icon">◌</i><h3>Chat da sessão</h3><p>Mensagens, rolagens e eventos em uma linha do tempo.</p></article><article class="feature-card reveal"><i class="feature-icon">▧</i><h3>Diário da campanha</h3><p>Resumos, lore e pistas sempre acessíveis.</p></article><article class="feature-card reveal"><i class="feature-icon">◇</i><h3>Inventário</h3><p>Itens, equipamentos e tesouros de cada herói.</p></article><article class="feature-card reveal"><i class="feature-icon">♟</i><h3>NPCs</h3><p>Elenco completo para povoar qualquer reino.</p></article><article class="feature-card reveal"><i class="feature-icon">◐</i><h3>Névoa de guerra</h3><p>Revele a cena no tempo certo da narrativa.</p></article><article class="feature-card reveal"><i class="feature-icon">#</i><h3>Grid e zoom</h3><p>Movimento preciso e visão flexível do mapa.</p></article><article class="feature-card reveal"><i class="feature-icon">✎</i><h3>Anotações do mestre</h3><p>Segredos seguros, separados da visão do grupo.</p></article>
+      </div>
+    </section>
+
+    <section class="section roadmap" id="roadmap">
+      <div class="roadmap-copy reveal"><span class="overline">O REINO CONTINUA CRESCENDO</span><h2>Roadmap de<br><em>novas aventuras.</em></h2><p>Apex Realms nasce como uma visão de como mesas online podem ser mais bonitas, focadas e imersivas.</p><a class="btn btn-secondary" href="demo.html">Experimentar o presente</a></div>
+      <div class="roadmap-list reveal delay-1"><div class="road-item done"><i></i><span><small>DISPONÍVEL NA VISÃO</small><b>Mapas, tokens e combate</b></span><em>01</em></div><div class="road-item"><i></i><span><small>PRÓXIMO CAPÍTULO</small><b>Login, contas e campanhas salvas</b></span><em>02</em></div><div class="road-item"><i></i><span><small>EM DESENVOLVIMENTO</small><b>Salas online e convites</b></span><em>03</em></div><div class="road-item"><i></i><span><small>NO HORIZONTE</small><b>Biblioteca de monstros e NPCs</b></span><em>04</em></div><div class="road-item"><i></i><span><small>FUTURO ARCANO</small><b>Trilha sonora sincronizada</b></span><em>05</em></div></div>
+    </section>
+
+    <section class="final-cta reveal"><div class="cta-rune">A</div><span class="overline">O PORTAL ESTÁ ABERTO</span><h2>Sua próxima história<br>começa agora.</h2><p>Entre na demonstração interativa e descubra como é conduzir uma sessão no Apex Realms.</p><a class="btn btn-primary btn-large" href="demo.html">Abrir demonstração <span>→</span></a></section>
   </main>
-  <section class="flow"><span class="tag">DA IDEIA À SESSÃO</span><h2>Menos preparação.<br>Mais aventura.</h2><div class="cards"><article><strong>01</strong><h3>Crie seu universo</h3><p>Organize campanhas, mapas, fichas e lore em um só lugar.</p></article><article><strong>02</strong><h3>Reúna o grupo</h3><p>Convide jogadores e prepare cenas para a próxima sessão.</p></article><article><strong>03</strong><h3>Jogue sua história</h3><p>Mova tokens, role dados e conduza combates sem perder o ritmo.</p></article></div></section>
-  <section class="features" id="features"><span class="tag">FERRAMENTAS DE MESTRE</span><h2>Tudo que a mesa precisa.</h2><div class="cards"><article><i>⌖</i><h3>Mapas e cenas</h3><p>Grid ajustável, zoom, névoa e tokens livres.</p></article><article><i>◈</i><h3>Fichas completas</h3><p>Atributos, inventário, magias e qualquer sistema.</p></article><article><i>⚔</i><h3>Combate fluido</h3><p>Iniciativa, condições, vida, defesa e ataques.</p></article></div></section>
-  <footer><span class="brand"><i>A</i> APEX REALMS</span><span>Demonstração estática para GitHub Pages</span></footer>
+  <footer class="site-footer"><a class="brand" href="index.html"><span class="brand-sigil"><i></i></span><span><b>APEX</b><em>REALMS</em></span></a><p>Uma experiência Apex Technologies · 2026</p><div><a href="#features">Recursos</a><a href="#roadmap">Roadmap</a><a href="demo.html">Demonstração</a></div></footer>
+  <script src="site.js"></script>
 </body>
 </html>
