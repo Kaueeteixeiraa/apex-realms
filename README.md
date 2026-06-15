@@ -38,6 +38,12 @@ O banco e os dados de demonstração são criados automaticamente na primeira ex
 
 O GitHub Pages publica apenas os arquivos estáticos da pasta `docs/`. Para cadastro, login, dashboard real e painel admin, publique o backend Flask em um host Python.
 
+No Pages, a demonstração estática tem entradas visíveis para testar os perfis:
+
+- Login demo: `https://kaueeteixeiraa.github.io/apex-realms/login.html`
+- Cadastro demo: `https://kaueeteixeiraa.github.io/apex-realms/cadastro.html`
+- Dashboard: `https://kaueeteixeiraa.github.io/apex-realms/dashboard.html`
+
 Este repositório já inclui:
 
 - `wsgi.py` como ponto de entrada WSGI

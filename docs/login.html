@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Entrar | Apex Realms</title>
+  <meta name="description" content="Entre no Apex Realms como jogador, mestre ou administrador em uma demonstração estática da plataforma.">
+  <meta name="theme-color" content="#07070c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="auth-static-page">
+  <div class="page-noise"></div>
+  <div class="particles" id="particles" aria-hidden="true"></div>
+
+  <header class="auth-topbar">
+    <a class="brand" href="index.html" aria-label="Apex Realms">
+      <svg class="realm-mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="#a47cff" stroke-width="4"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="#55dfff" stroke-width="2"/></svg>
+      <span><b>APEX</b><em>REALMS</em></span>
+    </a>
+    <nav aria-label="Acesso rápido">
+      <a href="index.html">Início</a>
+      <a href="cadastro.html">Criar conta</a>
+      <a class="btn btn-ghost btn-small" href="dashboard.html">Abrir demo</a>
+    </nav>
+  </header>
+
+  <main class="auth-shell">
+    <section class="auth-copy reveal">
+      <div class="eyebrow"><span></span> ACESSO DA PLATAFORMA</div>
+      <h1>Entre no seu reino.</h1>
+      <p>Escolha um perfil e acesse a demonstração do Apex Realms como jogador, mestre ou administrador do sistema.</p>
+      <div class="auth-role-showcase">
+        <article><i>♛</i><b>Mestre</b><span>Campanhas, mapas, NPCs e combate.</span></article>
+        <article><i>◇</i><b>Jogador</b><span>Ficha, dados, chat e turnos.</span></article>
+        <article><i>⚙</i><b>Admin</b><span>Visão de usuários, salas e operação.</span></article>
+      </div>
+      <div class="auth-note">
+        <b>Nota rápida</b>
+        <span>No GitHub Pages este login é uma sessão demo salva no navegador. O login real do Flask existe em <code>/login</code> quando o backend estiver hospedado.</span>
+      </div>
+    </section>
+
+    <section class="auth-card reveal delay-1">
+      <small>LOGIN DEMONSTRAÇÃO</small>
+      <h2>Entrar</h2>
+      <p>Use qualquer e-mail de teste abaixo. A senha demo padrão é <strong>apex123</strong>.</p>
+
+      <form class="auth-form" data-auth-form data-auth-mode="login" autocomplete="on">
+        <label>E-mail
+          <input name="email" type="email" value="mestre@apexrealms.com" required>
+        </label>
+        <label>Senha
+          <input name="password" type="password" value="apex123" minlength="4" required>
+        </label>
+        <label>Perfil
+          <select name="role" required>
+            <option value="master">Mestre</option>
+            <option value="player">Jogador</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </label>
+        <button class="btn btn-primary btn-large" type="submit">Entrar na plataforma <span>→</span></button>
+        <p class="auth-status" data-auth-status aria-live="polite"></p>
+      </form>
+
+      <div class="auth-demo-grid" aria-label="Contas demo">
+        <button type="button" data-demo-login data-role="master" data-name="Kaue Teixeira" data-nickname="Kaue" data-email="mestre@apexrealms.com"><b>♛ Mestre</b><span>mestre@apexrealms.com</span></button>
+        <button type="button" data-demo-login data-role="player" data-name="Lyra Voss" data-nickname="Lyra" data-email="jogador@apexrealms.com"><b>◇ Jogador</b><span>jogador@apexrealms.com</span></button>
+        <button type="button" data-demo-login data-role="admin" data-name="Admin Apex" data-nickname="Admin" data-email="admin@apexrealms.com"><b>⚙ Admin</b><span>admin@apexrealms.com</span></button>
+      </div>
+
+      <p class="auth-switch">Ainda não tem conta? <a href="cadastro.html">Criar conta demo</a></p>
+    </section>
+  </main>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/auth.js"></script>
+</body>
+</html>
