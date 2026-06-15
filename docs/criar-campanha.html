@@ -1,31 +1,86 @@
 <!doctype html>
 <html lang="pt-BR">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Criar campanha | Apex Realms</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/css/style.css"></head>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Criar campanha | Apex Realms</title>
+  <meta name="theme-color" content="#08080d">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
 <body class="product-page campaign-builder-page">
-  <aside class="app-sidebar"><a class="app-logo" href="index.html"><svg class="realm-mark" viewBox="0 0 64 64"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="#a47cff" stroke-width="4"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="#55dfff" stroke-width="2"/></svg><span><b>APEX</b><em>REALMS</em></span></a><nav class="app-nav"><small>GERENCIAMENTO</small><a href="dashboard.html"><i>⌂</i>Dashboard</a><a class="active" href="campanhas.html"><i>◈</i>Campanhas</a><a href="salas.html"><i>◇</i>Salas</a><a href="fichas.html"><i>◫</i>Minhas fichas</a><a href="biblioteca.html"><i>▤</i>Biblioteca do mestre</a><small>MESTRE</small><a href="mestre.html"><i>♛</i>Painel do Mestre</a><a href="fichas-jogadores.html"><i>☷</i>Fichas dos jogadores</a><a href="configuracoes.html"><i>⚙</i>Configurações</a><a href="demo.html"><i>✦</i>Abrir mesa</a></nav><a class="creation-cancel" href="campanhas.html">← Voltar para campanhas</a></aside>
+  <aside class="app-sidebar">
+    <a class="app-logo" href="index.html"><svg class="realm-mark" viewBox="0 0 64 64"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="#a47cff" stroke-width="4"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="#55dfff" stroke-width="2"/></svg><span><b>APEX</b><em>REALMS</em></span></a>
+    <nav class="app-nav">
+      <small>NAVEGAÇÃO</small>
+      <a href="dashboard.html"><i>⌂</i>Dashboard</a>
+      <a class="active" href="campanhas.html"><i>◈</i>Campanhas</a>
+      <a href="salas.html"><i>◇</i>Salas</a>
+      <a href="fichas.html"><i>◫</i>Minhas fichas</a>
+      <a href="biblioteca.html"><i>▤</i>Biblioteca</a>
+      <a href="configuracoes.html"><i>⚙</i>Configurações</a>
+    </nav>
+    <div class="campaign-builder-help"><i>✦</i><span><b>Salvamento local</b><small>A campanha ficará disponível neste navegador.</small></span></div>
+    <div class="sidebar-profile"><i class="portrait kael"></i><span><b>Kaue Teixeira</b><small>Mestre · Plano Arcano</small></span></div>
+  </aside>
+
   <main class="app-main campaign-builder-main">
-    <header class="app-topbar"><div><small>NOVA CAMPANHA</small><h1>Criar campanha</h1></div><div class="top-actions"><span class="autosave-status"><i></i> Rascunho salvo localmente</span><button class="btn btn-primary" form="campaign-form">Criar campanha</button></div></header>
+    <header class="app-topbar"><div><small>CAMPANHAS · NOVA</small><h1>Criar campanha</h1></div><span class="autosave-status" id="draft-status"><i></i> Rascunho salvo localmente</span></header>
+
     <form class="campaign-builder-layout" id="campaign-form">
       <div class="campaign-builder-content">
-        <section class="builder-section"><header><span class="modal-icon">◈</span><div><small>IDENTIDADE</small><h2>Informações principais</h2><p>O necessário para jogadores entenderem e encontrarem sua campanha.</p></div></header><div class="campaign-form-grid">
-          <label>Nome da campanha<input id="campaign-name" required value="Crônicas do Portal Perdido"></label>
-          <label>Sistema de RPG<select id="campaign-system"><option>D&D 5ª edição</option><option>Tormenta 20</option><option>Pathfinder 2e</option><option>Sistema próprio</option></select></label>
-          <label class="field-wide">Descrição<textarea id="campaign-description" required>As antigas runas despertaram e o grupo deve descobrir o que existe além do último portal.</textarea></label>
-          <label>Limite de jogadores<input id="campaign-limit" type="number" min="1" value="6" required></label>
-          <label>Tipo de campanha<select id="campaign-visibility"><option value="private">Privada por convite</option><option value="public">Pública</option></select></label>
-          <label class="field-wide">Observações do mestre<textarea id="campaign-notes" placeholder="Notas privadas, acordos da mesa e lembretes para a sessão zero."></textarea></label>
-        </div></section>
-        <section class="builder-section"><header><span class="modal-icon">▧</span><div><small>APRESENTAÇÃO</small><h2>Imagem da campanha</h2><p>Envie JPG, PNG ou WEBP. Sem imagem, o portal padrão será usado.</p></div></header><div class="campaign-upload"><div class="campaign-upload-preview ruins-cover" id="campaign-upload-preview"><span>PREVIEW DA CAMPANHA</span><b id="preview-name">Crônicas do Portal Perdido</b></div><div><label class="upload-button">Enviar imagem<input id="campaign-image" type="file" accept="image/jpeg,image/png,image/webp"></label><button type="button" class="quiet-button" id="remove-campaign-image">Usar imagem padrão</button><small id="campaign-image-status">Imagem padrão selecionada.</small></div></div></section>
-        <section class="builder-section" id="visibility-section"><header><span class="modal-icon">◇</span><div><small>ACESSO</small><h2>Entrada de jogadores</h2><p>Campanhas públicas dispensam código. Campanhas privadas sempre recebem um código novo.</p></div></header><div class="private-code-card" id="private-code-card"><span><small>CÓDIGO PRIVADO</small><b id="campaign-code">REALM-0000</b></span><button type="button" class="quiet-button" id="new-campaign-code">Gerar novo código</button><button type="button" class="quiet-button" id="copy-campaign-code">Copiar</button></div><div class="public-access-note" id="public-access-note">Esta campanha aparecerá na busca pública e jogadores poderão solicitar entrada sem código.</div></section>
-        <section class="builder-section"><header><span class="modal-icon">⚙</span><div><small>PERMISSÕES INICIAIS</small><h2>Regras da mesa</h2><p>Você poderá alterar tudo depois nas configurações da campanha.</p></div></header><div class="permission-list creation-permissions">
-          <label><span><i>⌖</i><b>Jogador pode mover o próprio token</b><small>O mapa só se move usando a ferramenta Pan.</small></span><input type="checkbox" data-campaign-permission="moveTokens" checked><em></em></label>
-          <label><span><i>╱</i><b>Jogador pode usar régua</b><small>Permite criar e limpar medições.</small></span><input type="checkbox" data-campaign-permission="ruler" checked><em></em></label>
-          <label><span><i>◫</i><b>Jogador pode editar a própria ficha</b><small>O Mestre pode bloquear durante a sessão.</small></span><input type="checkbox" data-campaign-permission="editSheet" checked><em></em></label>
-          <label><span><i>♥</i><b>Jogador pode ver PV dos monstros</b><small>Quando desativado, vê somente o estado.</small></span><input type="checkbox" data-campaign-permission="monsterHp"><em></em></label>
-          <label><span><i>☷</i><b>Jogador pode usar chat e rolar dados</b><small>Mantém comunicação e histórico de rolagens acessíveis.</small></span><input type="checkbox" data-campaign-permission="chatDice" checked><em></em></label>
-        </div></section>
+        <section class="builder-section">
+          <header><span class="modal-icon">◈</span><div><small>INFORMAÇÕES</small><h2>Defina sua campanha</h2><p>Preencha apenas o necessário para preparar o novo grupo.</p></div></header>
+          <div class="campaign-form-grid">
+            <label>Nome da campanha<input id="campaign-name" name="name" required maxlength="70" placeholder="Ex.: Crônicas do Portal Perdido"></label>
+            <label>Sistema de RPG<select id="campaign-system" name="system" required><option value="">Selecione o sistema</option><option>D&D 5ª edição</option><option>Tormenta 20</option><option>Pathfinder 2e</option><option>Sistema próprio</option></select></label>
+            <label class="field-wide">Descrição<textarea id="campaign-description" name="description" required maxlength="500" placeholder="Apresente o mundo, a proposta e o ponto de partida da aventura."></textarea><small><span id="description-count">0</span>/500 caracteres</small></label>
+            <label>Limite de jogadores<input id="campaign-limit" name="limit" type="number" min="1" step="1" value="6" required><small>Escolha qualquer número a partir de 1.</small></label>
+            <label>Tipo de campanha<select id="campaign-visibility" name="visibility" required><option value="private">Privada por convite</option><option value="public">Pública</option></select><small>Você poderá mudar isso depois.</small></label>
+          </div>
+        </section>
+
+        <section class="builder-section">
+          <header><span class="modal-icon">▧</span><div><small>BANNER</small><h2>Imagem da campanha</h2><p>Use JPG, PNG ou WEBP. A imagem padrão será usada quando nenhum arquivo for enviado.</p></div></header>
+          <div class="campaign-upload">
+            <div class="campaign-upload-preview ruins-cover" id="campaign-upload-preview"><span>PREVIEW DO BANNER</span><b id="preview-name">Sua nova campanha</b></div>
+            <div class="campaign-upload-actions">
+              <label class="upload-button">Enviar imagem da campanha<input id="campaign-image" type="file" accept="image/jpeg,image/png,image/webp"></label>
+              <button type="button" class="quiet-button" id="remove-campaign-image">Remover imagem</button>
+              <small id="campaign-image-status">Imagem padrão selecionada.</small>
+              <small>Recomendação: imagem horizontal com até 1 MB.</small>
+            </div>
+          </div>
+        </section>
+
+        <section class="builder-section" id="visibility-section">
+          <header><span class="modal-icon">◇</span><div><small>ACESSO</small><h2>Entrada de jogadores</h2><p>Campanhas públicas não usam código. Campanhas privadas recebem um convite exclusivo.</p></div></header>
+          <div class="private-code-card" id="private-code-card">
+            <span><small>CÓDIGO DE CONVITE</small><b id="campaign-code">REALM-000000</b><em id="copy-code-status">Compartilhe apenas com seu grupo.</em></span>
+            <button type="button" class="quiet-button" id="new-campaign-code">Gerar novo código</button>
+            <button type="button" class="quiet-button" id="copy-campaign-code">Copiar código</button>
+          </div>
+          <div class="public-access-note" id="public-access-note" hidden>Esta campanha será pública. Jogadores poderão encontrá-la sem código de convite.</div>
+        </section>
+
+        <section class="builder-section">
+          <header><span class="modal-icon">✎</span><div><small>ANOTAÇÕES</small><h2>Observações do mestre</h2><p>Notas privadas para sessão zero, acordos e preparação.</p></div></header>
+          <label class="campaign-notes-field">Observações do mestre<textarea id="campaign-notes" name="notes" maxlength="1000" placeholder="Estas observações não serão mostradas aos jogadores."></textarea></label>
+        </section>
       </div>
-      <aside class="campaign-builder-summary"><small>RESUMO</small><h2 id="summary-name">Crônicas do Portal Perdido</h2><p id="summary-description">As antigas runas despertaram e o grupo deve descobrir o que existe além do último portal.</p><dl><span><dt>SISTEMA</dt><dd id="summary-system">D&D 5ª edição</dd></span><span><dt>JOGADORES</dt><dd id="summary-limit">Até 6</dd></span><span><dt>ACESSO</dt><dd id="summary-visibility">Privada</dd></span></dl><button class="btn btn-primary">Criar campanha →</button><a class="quiet-button" href="campanhas.html">Cancelar</a></aside>
+
+      <aside class="campaign-builder-summary">
+        <small>RESUMO DA CAMPANHA</small>
+        <div class="campaign-summary-cover ruins-cover" id="summary-cover"></div>
+        <h2 id="summary-name">Sua nova campanha</h2>
+        <p id="summary-description">Preencha a descrição para visualizar o resumo.</p>
+        <dl><span><dt>SISTEMA</dt><dd id="summary-system">Não selecionado</dd></span><span><dt>JOGADORES</dt><dd id="summary-limit">Até 6</dd></span><span><dt>ACESSO</dt><dd id="summary-visibility">Privada</dd></span></dl>
+        <button class="btn btn-primary" id="create-campaign-button">Criar campanha</button>
+        <a class="quiet-button" href="dashboard.html">Voltar ao dashboard</a>
+        <small class="campaign-submit-status" id="campaign-submit-status" aria-live="polite"></small>
+      </aside>
     </form>
-  </main><script src="assets/js/app.js"></script><script src="assets/js/session-state.js"></script><script src="assets/js/campaign.js"></script>
-</body></html>
+  </main>
+  <script src="assets/js/app.js"></script><script src="assets/js/campaign.js"></script>
+</body>
+</html>
