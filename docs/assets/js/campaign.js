@@ -1,32 +1,89 @@
-// Multi-step campaign creation prototype.
-const steps = [...document.querySelectorAll("[data-create-step]")];
-const panels = [...document.querySelectorAll("[data-create-panel]")];
-const nextButton = document.querySelector("#wizard-next");
-const backButton = document.querySelector("#wizard-back");
-const progress = document.querySelector(".wizard-actions span i");
-const titles = {
-  identity:"Dê vida ao seu próximo mundo.",
-  system:"Defina as regras da aventura.",
-  players:"Reúna o seu grupo.",
-  permissions:"Escolha como todos podem interagir.",
-  review:"Revise e abra o portal."
-};
-let currentStep = 0;
+const campaignForm = document.querySelector("#campaign-form");
+const campaignName = document.querySelector("#campaign-name");
+const campaignDescription = document.querySelector("#campaign-description");
+const campaignSystem = document.querySelector("#campaign-system");
+const campaignLimit = document.querySelector("#campaign-limit");
+const campaignVisibility = document.querySelector("#campaign-visibility");
+const codeCard = document.querySelector("#private-code-card");
+const publicNote = document.querySelector("#public-access-note");
+const codeValue = document.querySelector("#campaign-code");
+const imageInput = document.querySelector("#campaign-image");
+const imagePreview = document.querySelector("#campaign-upload-preview");
+const imageStatus = document.querySelector("#campaign-image-status");
+const draftKey = "apex-realms-campaign-draft";
 
-function renderStep() {
-  steps.forEach((step,index) => step.classList.toggle("active", index === currentStep));
-  panels.forEach((panel,index) => panel.classList.toggle("active", index === currentStep));
-  document.querySelector("#step-number").textContent = currentStep + 1;
-  document.querySelector("#step-title").textContent = titles[steps[currentStep].dataset.createStep];
-  progress.style.width = `${(currentStep + 1) / steps.length * 100}%`;
-  backButton.disabled = currentStep === 0;
-  nextButton.textContent = currentStep === steps.length - 1 ? "Criar campanha →" : "Continuar →";
+function createInviteCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  return `REALM-${Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("")}`;
 }
 
-steps.forEach((step,index) => step.addEventListener("click", () => { currentStep = index; renderStep(); }));
-nextButton.addEventListener("click", () => {
-  if (currentStep < steps.length - 1) { currentStep += 1; renderStep(); return; }
+function syncSummary() {
+  document.querySelector("#summary-name").textContent = campaignName.value || "Campanha sem nome";
+  document.querySelector("#preview-name").textContent = campaignName.value || "Campanha sem nome";
+  document.querySelector("#summary-description").textContent = campaignDescription.value || "Sem descrição.";
+  document.querySelector("#summary-system").textContent = campaignSystem.value;
+  document.querySelector("#summary-limit").textContent = `Até ${Math.max(1, Number(campaignLimit.value) || 1)}`;
+  const isPrivate = campaignVisibility.value === "private";
+  document.querySelector("#summary-visibility").textContent = isPrivate ? "Privada" : "Pública";
+  codeCard.hidden = !isPrivate;
+  publicNote.hidden = isPrivate;
+  if (isPrivate && !codeValue.textContent.includes("REALM-")) codeValue.textContent = createInviteCode();
+  const draft = {
+    name: campaignName.value, description: campaignDescription.value, system: campaignSystem.value,
+    limit: Math.max(1, Number(campaignLimit.value) || 1), visibility: campaignVisibility.value,
+    code: isPrivate ? codeValue.textContent : null, notes: document.querySelector("#campaign-notes").value
+  };
+  localStorage.setItem(draftKey, JSON.stringify(draft));
+}
+
+document.querySelectorAll("#campaign-form input,#campaign-form select,#campaign-form textarea").forEach(field => field.addEventListener("input", syncSummary));
+document.querySelector("#new-campaign-code").addEventListener("click", () => { codeValue.textContent = createInviteCode(); syncSummary(); });
+document.querySelector("#copy-campaign-code").addEventListener("click", async () => {
+  await navigator.clipboard?.writeText(codeValue.textContent);
+  showPrototypeToast("Código privado copiado.");
+});
+
+imageInput.addEventListener("change", () => {
+  const file = imageInput.files[0];
+  if (!file) return;
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    imageInput.value = "";
+    imageStatus.textContent = "Formato inválido. Use JPG, PNG ou WEBP.";
+    return;
+  }
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    imagePreview.classList.remove("ruins-cover");
+    imagePreview.style.backgroundImage = `url("${reader.result}")`;
+    localStorage.setItem("apex-realms-campaign-image", reader.result);
+    imageStatus.textContent = `${file.name} pronto para uso.`;
+  });
+  reader.readAsDataURL(file);
+});
+
+document.querySelector("#remove-campaign-image").addEventListener("click", () => {
+  imageInput.value = "";
+  imagePreview.style.backgroundImage = "";
+  imagePreview.classList.add("ruins-cover");
+  localStorage.removeItem("apex-realms-campaign-image");
+  imageStatus.textContent = "Imagem padrão selecionada.";
+});
+
+campaignForm.addEventListener("submit", event => {
+  event.preventDefault();
+  if (!campaignForm.reportValidity()) return;
+  const permissions = {};
+  document.querySelectorAll("[data-campaign-permission]").forEach(input => { permissions[input.dataset.campaignPermission] = input.checked; });
+  if (Object.hasOwn(permissions, "chatDice")) {
+    permissions.chat = permissions.chatDice;
+    permissions.dice = permissions.chatDice;
+    delete permissions.chatDice;
+  }
+  sessionState.permissions = { ...sessionState.permissions, ...permissions };
+  saveSessionState();
+  localStorage.setItem("apex-realms-last-campaign", localStorage.getItem(draftKey));
   window.location.href = "campanhas.html";
 });
-backButton.addEventListener("click", () => { if (currentStep > 0) { currentStep -= 1; renderStep(); } });
-renderStep();
+
+codeValue.textContent = createInviteCode();
+syncSummary();
