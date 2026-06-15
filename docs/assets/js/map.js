@@ -243,6 +243,10 @@ document.addEventListener("click", event => {
 });
 
 function applyMode(mode) {
+  if (mode === "master" && window.ApexStaticAuth?.getUser?.()?.role !== "master") {
+    mode = "player";
+    showPrototypeToast("Apenas contas de Mestre podem usar o modo Mestre.");
+  }
   sessionState.mode = mode;
   document.body.dataset.sessionMode = mode;
   document.body.dataset.canSeeMonsterHp = sessionState.permissions.monsterHp;

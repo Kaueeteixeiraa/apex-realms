@@ -32,16 +32,16 @@ python app.py
 
 Abra `http://127.0.0.1:5000`.
 
-O banco e os dados de demonstração são criados automaticamente na primeira execução.
+O banco e os dados iniciais são criados automaticamente na primeira execução.
 
 ## Publicação
 
 O GitHub Pages publica apenas os arquivos estáticos da pasta `docs/`. Para cadastro, login, dashboard real e painel admin, publique o backend Flask em um host Python.
 
-No Pages, a demonstração estática tem entradas visíveis para testar os perfis:
+No Pages, o ambiente publicado tem entradas visíveis para acessar os perfis:
 
-- Login demo: `https://kaueeteixeiraa.github.io/apex-realms/login.html`
-- Cadastro demo: `https://kaueeteixeiraa.github.io/apex-realms/cadastro.html`
+- Login: `https://kaueeteixeiraa.github.io/apex-realms/login.html`
+- Cadastro: `https://kaueeteixeiraa.github.io/apex-realms/cadastro.html`
 - Dashboard: `https://kaueeteixeiraa.github.io/apex-realms/dashboard.html`
 
 Este repositório já inclui:
@@ -53,7 +53,7 @@ Este repositório já inclui:
 
 Em produção, use variáveis de ambiente seguras e armazenamento persistente para banco e uploads.
 
-## Contas de demonstração
+## Contas iniciais
 
 | Perfil | E-mail | Senha |
 | --- | --- | --- |
@@ -61,7 +61,7 @@ Em produção, use variáveis de ambiente seguras e armazenamento persistente pa
 | Jogador | `jogador@apexrealms.com` | `apex123` |
 | Administrador | `admin@apexrealms.com` | `apex123` |
 
-Código de convite da campanha demo: `APEX2026`.
+Código de convite da campanha inicial: `APEX2026`.
 
 Para criar administradores pelo formulário de cadastro local, use o código interno padrão `APEX-ADMIN-2026`.
 Em produção, defina outro valor com a variável de ambiente `ADMIN_REGISTRATION_CODE`.

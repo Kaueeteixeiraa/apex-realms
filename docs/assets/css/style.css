@@ -304,6 +304,7 @@
 }
 
 /* Static GitHub Pages authentication screens. */
+[hidden]{display:none!important}
 .site-actions{display:flex;align-items:center;gap:8px}
 .auth-static-page{min-height:100vh;overflow-x:hidden;background:radial-gradient(circle at 12% 10%,#58359b33,transparent 30%),radial-gradient(circle at 88% 70%,#087f9d20,transparent 28%),#07070c;color:var(--text)}
 .auth-topbar{position:relative;z-index:5;min-height:86px;padding:18px 5vw;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff0f;background:#08080dc9;backdrop-filter:blur(22px)}

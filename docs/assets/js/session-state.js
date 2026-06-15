@@ -33,6 +33,11 @@ const defaultSessionState = {
 const savedSessionState = JSON.parse(localStorage.getItem("apex-realms-session-state") || "null");
 window.sessionState = Object.assign(structuredClone(defaultSessionState), savedSessionState || {});
 
+const activeAccount = window.ApexStaticAuth?.getUser?.();
+if (activeAccount?.role !== "master") {
+  window.sessionState.mode = "player";
+}
+
 window.saveSessionState = function saveSessionState() {
   localStorage.setItem("apex-realms-session-state", JSON.stringify(window.sessionState));
   window.dispatchEvent(new CustomEvent("apex:state", { detail: window.sessionState }));

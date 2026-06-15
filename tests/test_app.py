@@ -32,6 +32,8 @@ class ApexRealmsTestCase(unittest.TestCase):
         admin_page = self.client.get("/admin")
         self.assertEqual(admin_page.status_code, 200)
         self.assertIn(b"ADMINISTRA", admin_page.data)
+        self.assertEqual(self.client.get("/campaign/new").status_code, 403)
+        self.assertEqual(self.client.post("/campaign/quick").status_code, 403)
 
         self.client.get("/logout")
         player_register = self.client.post("/register", data={

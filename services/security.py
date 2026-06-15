@@ -55,7 +55,7 @@ def roles_required(*roles):
 
 
 admin_required = roles_required("admin")
-master_required = roles_required("master", "admin")
+master_required = roles_required("master")
 
 
 def campaign_access(campaign_id, owner_only=False):

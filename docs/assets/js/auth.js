@@ -1,5 +1,5 @@
 // Static authentication flow for GitHub Pages.
-// The Flask backend has the real /login and /register routes; this keeps the public demo usable.
+// The Flask backend has the real /login and /register routes for production hosting.
 const authForms = document.querySelectorAll("[data-auth-form]");
 const demoLoginButtons = document.querySelectorAll("[data-demo-login]");
 const avatarInput = document.querySelector('input[name="avatar"]');
@@ -21,8 +21,11 @@ function setAuthStatus(form, message, type = "info") {
 }
 
 function redirectAfterAuth() {
+  const user = window.ApexStaticAuth?.getUser();
+  const next = new URLSearchParams(window.location.search).get("next");
+  const target = next && window.ApexStaticAuth?.canAccessRoute(user, next) ? next : "dashboard.html";
   setTimeout(() => {
-    window.location.href = "dashboard.html";
+    window.location.href = target;
   }, 520);
 }
 
@@ -82,9 +85,10 @@ authForms.forEach(form => form.addEventListener("submit", event => {
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const selectedRole = String(formData.get("role") || "player");
   const demoAccount = demoNamesByEmail[email] || {};
+  const accountRole = mode === "login" && demoAccount.role ? demoAccount.role : selectedRole;
 
-  if (mode === "register" && selectedRole === "admin" && String(formData.get("admin_code") || "").trim() !== "APEX-ADMIN-2026") {
-    setAuthStatus(form, "Código de administrador inválido. Use APEX-ADMIN-2026 na demo.", "error");
+  if (mode === "register" && accountRole === "admin" && String(formData.get("admin_code") || "").trim() !== "APEX-ADMIN-2026") {
+    setAuthStatus(form, "Código de administrador inválido. Use APEX-ADMIN-2026.", "error");
     return;
   }
 
@@ -94,7 +98,7 @@ authForms.forEach(form => form.addEventListener("submit", event => {
       name: String(formData.get("name") || demoAccount.name || "Aventureiro Apex").trim(),
       nickname: String(formData.get("nickname") || demoAccount.nickname || "Aventureiro").trim(),
       email,
-      role: selectedRole || demoAccount.role || "player",
+      role: accountRole || "player",
       avatar
     });
   });

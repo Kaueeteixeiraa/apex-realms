@@ -1,8 +1,8 @@
 {% extends "base.html" %}{% block title %}Campanhas · Apex Realms{% endblock %}
 {% block content %}
 <section class="page-shell">
-  <div class="welcome"><div><span class="eyebrow"><span></span> CENTRAL DE CAMPANHAS</span><h1>Boa noite, {{ current_user.nickname }}.</h1><p>{{ role_label(current_user.role) }} · Qual mundo vamos explorar hoje?</p></div>{% if current_user.role in ['master','admin'] %}<a class="btn btn-primary" href="{{ url_for('campaign_new') }}">＋ Nova campanha</a>{% else %}<a class="btn btn-ghost" href="#join-code">Entrar com convite</a>{% endif %}</div>
-  {% if current_user.role in ['master','admin'] %}
+  <div class="welcome"><div><span class="eyebrow"><span></span> CENTRAL DE CAMPANHAS</span><h1>Boa noite, {{ current_user.nickname }}.</h1><p>{{ role_label(current_user.role) }} · Qual mundo vamos explorar hoje?</p></div>{% if current_user.role == 'master' %}<a class="btn btn-primary" href="{{ url_for('campaign_new') }}">＋ Nova campanha</a>{% else %}<a class="btn btn-ghost" href="#join-code">Entrar com convite</a>{% endif %}</div>
+  {% if current_user.role == 'master' %}
   <form class="quick-strip" method="post" action="{{ url_for('quick_campaign') }}"><div><i>⚡</i><div><b>Sessão rápida</b><span>Abra uma sala livre e comece a jogar agora</span></div></div><button class="btn btn-ghost">Iniciar agora</button></form>
   {% else %}
   <div class="quick-strip player-strip"><div><i>◇</i><div><b>Modo jogador</b><span>Acesse campanhas por código de convite e controle seus personagens.</span></div></div><a class="btn btn-ghost" href="{{ url_for('landing') }}">Conhecer recursos</a></div>
