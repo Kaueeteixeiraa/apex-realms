@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="landing-hero">
+  <div class="landing-noise"></div>
+  <div class="landing-copy">
+    <div class="eyebrow"><span></span> A MESA VIRTUAL DA APEX TECHNOLOGIES</div>
+    <h1>Histórias épicas<br><em>começam aqui.</em></h1>
+    <p>Mapas, personagens, dados e toda a sua campanha em um espaço feito para jogar, não para configurar.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary btn-xl" href="{{ url_for('register') }}">Criar uma campanha</a>
+      <a class="btn btn-ghost btn-xl" href="{{ url_for('login') }}">Entrar na mesa demo</a>
+    </div>
+    <div class="trust-row"><span>SEM INSTALAÇÃO</span><span>QUALQUER SISTEMA</span><span>PRONTO PARA JOGAR</span></div>
+  </div>
+  <div class="product-window">
+    <div class="product-bar"><span></span><span></span><span></span><b>Ecos de Vhal'Tor</b></div>
+    <div class="product-layout">
+      <aside><small>PERSONAGENS</small><div class="mock-person"><i>K</i><span><b>Kael Ardent</b><em>32 / 38 PV</em></span></div><div class="mock-person"><i>L</i><span><b>Lyra Voss</b><em>21 / 24 PV</em></span></div></aside>
+      <div class="mock-map"><div class="mock-grid"></div><i class="mock-token t1">K</i><i class="mock-token t2">S</i><div class="map-caption">RUÍNAS DO OBSERVATÓRIO</div></div>
+      <aside class="mock-chat"><small>CHAT DA MESA</small><p><b>Caio</b> Kael examina as inscrições.</p><p class="mock-roll"><b>Kael</b> rolou 1d20+5: <strong>24</strong></p></aside>
+    </div>
+  </div>
+</section>
+<section class="landing-flow">
+  <div class="section-head"><span>DA IDEIA À SESSÃO</span><h2>Menos preparação.<br>Mais aventura.</h2></div>
+  <div class="flow-grid">
+    <article><strong>01</strong><h3>Crie seu universo</h3><p>Organize campanha, lore, mapas e personagens em um só lugar.</p></article>
+    <article><strong>02</strong><h3>Convide o grupo</h3><p>Compartilhe um código e reúna todos sem complicação.</p></article>
+    <article><strong>03</strong><h3>Jogue sua história</h3><p>Controle a cena, mova tokens e role dados em tempo real.</p></article>
+  </div>
+</section>
+<section class="feature-section" id="features"><div class="section-head"><span>FERRAMENTAS DE MESTRE</span><h2>Controle quando precisar.<br>Imersão o tempo todo.</h2></div><div class="feature-grid">
+{% for icon, title, text in [('⌖','Mapas e cenas','Faça upload dos seus mapas, ajuste o grid e troque a cena ativa.'),('◈','Personagens completos','Crie heróis, NPCs e monstros com vida, classe, raça e token.'),('✦','Dados no chat','Role qualquer dado ou fórmula e compartilhe o resultado.'),('⚔','Combate organizado','Iniciativa, condições e vida sem quebrar o ritmo.') ] %}<article class="feature-card"><i>{{ icon }}</i><h3>{{ title }}</h3><p>{{ text }}</p></article>{% endfor %}
+</div></section>
+<footer><span class="brand"><span class="brand-mark">A</span> APEX REALMS</span><p>Apex Technologies · 2026</p></footer>
+{% endblock %}

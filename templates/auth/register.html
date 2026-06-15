@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block title %}Cadastro · Apex Realms{% endblock %}
+{% block content %}
+<section class="auth-page"><div class="auth-art"><div class="mini-orb">A</div><h2>Crie. Jogue. Lembre.</h2><p>Seu próximo grande universo está a poucos passos.</p></div>
+<form class="panel auth-form" method="post"><div class="eyebrow"><span></span> NOVO AVENTUREIRO</div><h1>Crie sua conta</h1>
+<div class="form-row"><label>Nome<input name="name" required></label><label>Apelido<input name="nickname" required></label></div>
+<label>E-mail<input type="email" name="email" required></label><label>Senha<input type="password" name="password" minlength="6" required></label>
+<label>Perfil<select name="role"><option value="master">Mestre</option><option value="player">Jogador</option></select></label>
+<label>Preferências<input name="preferences" placeholder="Fantasia, terror, investigação..."></label>
+<button class="btn btn-primary btn-xl" type="submit">Criar conta →</button></form></section>
+{% endblock %}
+

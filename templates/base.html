@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Apex Realms{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="{{ url_for('landing') }}"><span class="brand-mark">A</span><span>APEX <b>REALMS</b></span></a>
+    <nav>
+      {% if current_user %}
+        <a href="{{ url_for('dashboard') }}">Campanhas</a>
+        <span class="user-chip"><i>{{ current_user.nickname[0] }}</i>{{ current_user.nickname }}</span>
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('logout') }}">Sair</a>
+      {% else %}
+        <a href="#features">Recursos</a>
+        <a href="{{ url_for('login') }}">Entrar</a>
+        <a class="btn btn-primary btn-sm" href="{{ url_for('register') }}">Começar agora</a>
+      {% endif %}
+    </nav>
+  </header>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+  {% endwith %}
+  <main>{% block content %}{% endblock %}</main>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
+

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ campaign.name }} · Sala</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></head>
+<body class="game-body vtt" data-campaign="{{ campaign.id }}" data-owner="{{ 'true' if is_owner else 'false' }}" data-grid-size="{{ active_map.grid_size if active_map else 50 }}" data-map-id="{{ active_map.id if active_map else '' }}">
+<header class="vtt-topbar">
+  <a class="vtt-logo" href="{{ url_for('dashboard') }}"><span class="brand-mark">A</span></a>
+  <div class="vtt-campaign"><small>{{ campaign.system }}</small><b>{{ campaign.name }}</b></div>
+  <div class="vtt-scene-title"><span class="status-dot"></span><div><small>CENA ATIVA</small><b id="active-scene-name">{{ active_map.name if active_map else 'Nenhum mapa ativo' }}</b></div></div>
+  <div class="combat-status {{ 'active' if combat and combat.active else '' }}"><small>COMBATE</small><b>Rodada {{ combat.round if combat else 1 }}</b></div>
+  <div class="vtt-top-actions">{% if is_owner %}<button class="vtt-btn" id="combat-toggle">{{ 'Encerrar combate' if combat and combat.active else 'Iniciar combate' }}</button><button class="vtt-btn primary" id="upload-map-top">Upload de mapa</button>{% endif %}<button class="vtt-icon" id="fullscreen-btn" title="Tela cheia">⛶</button><a class="vtt-icon" href="{{ url_for('campaign_detail',campaign_id=campaign.id) }}" title="Campanha">▦</a></div>
+</header>
+<div class="vtt-shell">
+  <aside class="vtt-left">
+    <div class="vtt-left-tabs"><button class="active" data-left-tab="tokens">Tokens</button><button data-left-tab="scenes">Cenas</button></div>
+    <section class="left-pane active" id="left-tokens">
+      <div class="vtt-section-head"><span>PERSONAGENS EM CENA</span>{% if is_owner %}<button id="add-character">＋</button>{% endif %}</div>
+      <div class="vtt-token-list">
+      {% for t in tokens %}<button class="vtt-token-row" data-focus-token="{{ t.id }}">
+        <i style="--token-color:{{ t.color }}{% if t.image_url %};background-image:url('{{ t.image_url }}'){% endif %}">{{ t.name[0] }}</i>
+        <span><b>{{ t.name }}</b><small>{{ t.class_name or t.token_type }}</small><em><u style="width:{{ (t.hp/t.max_hp*100)|int }}%"></u></em></span><strong>{{ t.hp }}</strong>
+      </button>{% else %}<div class="vtt-empty">Nenhum token na mesa.</div>{% endfor %}
+      </div>
+      {% if is_owner %}<button class="vtt-add-button" id="add-character-bottom">＋ Criar personagem</button>{% endif %}
+    </section>
+    <section class="left-pane" id="left-scenes">
+      <div class="vtt-section-head"><span>MAPAS DA CAMPANHA</span>{% if is_owner %}<button id="upload-map-side">＋</button>{% endif %}</div>
+      <div class="scene-list">{% for m in maps %}<button class="scene-item {% if m.active %}active{% endif %}" data-map-id="{{ m.id }}"><div style="background-image:url('{{ m.image_url }}')"></div><span><b>{{ m.name }}</b><small>Grid {{ m.grid_size }}px{% if m.active %} · ATIVO{% endif %}</small></span></button>{% else %}<div class="vtt-empty">Faça upload do primeiro mapa.</div>{% endfor %}</div>
+      {% if is_owner %}<button class="vtt-add-button" id="upload-map-bottom">＋ Upload de mapa</button>{% endif %}
+    </section>
+  </aside>
+  <main class="vtt-stage" id="vtt-stage">
+    <div class="vtt-toolbar">
+      <button class="active" data-vtt-tool="select" title="Selecionar e mover">⌁<span>Selecionar</span></button>
+      <button data-vtt-tool="pan" title="Mover mapa">✥<span>Mover</span></button>
+      <button data-vtt-tool="measure" title="Medir distância">⌇<span>Medir</span></button>
+      <button data-vtt-tool="ping" title="Marcar ponto">◎<span>Ping</span></button>
+      <i></i><button id="grid-toggle" class="{{ 'active' if active_map and active_map.grid_enabled else '' }}" title="Mostrar grid">#<span>Grid</span></button>
+      <button id="snap-toggle" class="active" title="Encaixar tokens">⊞<span>Snap</span></button>
+      {% if is_owner %}<button id="fog-toggle" class="{{ 'active' if active_map and active_map.fog_enabled else '' }}" title="Névoa">◐<span>Névoa</span></button>{% endif %}
+    </div>
+    <div class="vtt-viewport" id="vtt-viewport">
+      <div class="vtt-board" id="vtt-board">
+        <div class="vtt-map" {% if active_map %}style="background-image:url('{{ active_map.image_url }}')"{% endif %}></div>
+        <div class="vtt-grid {{ '' if active_map and active_map.grid_enabled else 'hidden' }}" id="vtt-grid" style="background-size:{{ active_map.grid_size if active_map else 50 }}px {{ active_map.grid_size if active_map else 50 }}px"></div>
+        <div class="vtt-fog {{ '' if active_map and active_map.fog_enabled else 'hidden' }}" id="vtt-fog"></div>
+        <div id="vtt-effects"></div>
+        {% for t in tokens %}<button class="vtt-map-token {% if t.hidden %}token-hidden{% endif %}" data-token-id="{{ t.id }}" data-name="{{ t.name }}" data-class="{{ t.class_name }}" data-hp="{{ t.hp }}" data-max-hp="{{ t.max_hp }}" data-temp-hp="{{ t.temp_hp }}" data-defense="{{ t.defense }}" data-conditions="{{ t.conditions }}" data-notes="{{ t.notes }}" data-color="{{ t.color }}" data-size="{{ t.size }}" data-hidden="{{ t.hidden }}" data-x="{{ t.x }}" data-y="{{ t.y }}" style="left:{{ t.x }}%;top:{{ t.y }}%;--token-color:{{ t.color }};--token-size:{{ t.size }}{% if t.image_url %};background-image:url('{{ t.image_url }}'){% endif %}"><span>{{ t.name[0] }}</span><small>{{ t.name }}</small><em><i style="width:{{ (t.hp/t.max_hp*100)|int }}%"></i></em></button>{% endfor %}
+        {% if not active_map %}<div class="vtt-no-map"><b>Comece adicionando um mapa</b><span>Faça upload de uma imagem e ela vira sua cena ativa.</span>{% if is_owner %}<button class="vtt-btn primary" id="upload-map-empty">Upload de mapa</button>{% endif %}</div>{% endif %}
+      </div>
+    </div>
+    <div class="vtt-zoom"><button id="zoom-out">−</button><span id="zoom-value">100%</span><button id="zoom-in">＋</button><button id="center-map">⌖</button></div>
+    <div class="vtt-hint" id="vtt-hint">Arraste ou use as setas para mover · Espaço + arrastar move o mapa · Scroll aplica zoom</div>
+  </main>
+  <aside class="vtt-right">
+    <div class="right-tabs"><button class="active" data-tab="inspector">Inspetor</button><button data-tab="combat">Combate</button><button data-tab="chat">Chat</button><button data-tab="initiative">Turnos</button></div>
+    <section class="tab-content active inspector-pane" id="tab-inspector">
+      <div class="inspector-empty" id="inspector-empty"><span>◎</span><b>Selecione um token</b><p>Clique em um personagem para editar vida, condições e propriedades.</p></div>
+      <form id="token-inspector" hidden>
+        <div class="inspector-title"><i id="inspect-avatar">A</i><div><small>TOKEN SELECIONADO</small><b id="inspect-title">Personagem</b></div></div>
+        <label>Nome<input id="inspect-name"></label><label>Classe / tipo<input id="inspect-class"></label>
+        <div class="inspector-health"><label>Vida atual<input type="number" id="inspect-hp"></label><label>Vida máxima<input type="number" id="inspect-max-hp"></label></div>
+        <div class="inspector-health"><label>PV temporários<input type="number" id="inspect-temp-hp"></label><label>Defesa<input type="number" id="inspect-defense"></label></div>
+        <label>Condições<input id="inspect-conditions" placeholder="Caído, invisível..."></label>
+        <div class="inspector-health"><label>Tamanho<select id="inspect-size"><option value="1">1 quadrado</option><option value="2">2 quadrados</option><option value="3">3 quadrados</option><option value="4">4 quadrados</option></select></label><label>Cor<input type="color" id="inspect-color"></label></div>
+        <label>Notas<textarea id="inspect-notes"></textarea></label>
+        <button class="vtt-btn wide" type="button" id="open-sheet">Abrir ficha completa</button>
+        {% if is_owner %}<label class="check"><input type="checkbox" id="inspect-hidden"> Ocultar dos jogadores</label><button class="vtt-btn primary wide" type="submit">Salvar alterações</button><div class="inspector-actions"><button type="button" id="add-initiative">Adicionar aos turnos</button><button type="button" id="delete-token">Remover token</button></div>{% endif %}
+      </form>
+      {% if is_owner and active_map %}<div class="scene-settings"><div class="vtt-section-head"><span>CONFIGURAÇÃO DA CENA</span></div><label>Tamanho do grid <input type="range" id="grid-size" min="20" max="120" value="{{ active_map.grid_size }}"><b id="grid-size-value">{{ active_map.grid_size }}px</b></label><button class="vtt-btn wide" id="save-scene-settings">Salvar cena</button><button class="vtt-danger wide" id="delete-scene">Remover cena ativa</button></div>{% endif %}
+    </section>
+    <section class="tab-content combat-pane" id="tab-combat"><div class="combat-panel-head"><span>CONTROLE DE COMBATE</span><b>Rodada {{ combat.round if combat else 1 }}</b></div>{% if is_owner %}<button class="vtt-btn wide" id="roll-all-initiative">Rolar iniciativa de todos</button>{% endif %}<div id="combat-selected-empty" class="vtt-empty">Selecione um token para aplicar ações.</div><div id="combat-actions" hidden><h3 id="combat-target">Alvo</h3><div class="combat-value"><button data-combat-minus>−</button><input id="combat-amount" type="number" value="5" min="0"><button data-combat-plus>＋</button></div><div class="combat-buttons">{% if is_owner %}<button data-combat-action="damage">Aplicar dano</button><button data-combat-action="heal">Curar PV</button><button data-combat-action="temp">PV temporários</button>{% endif %}</div>{% if is_owner %}<span class="label">ATAQUE RÁPIDO</span><div class="quick-attack"><select id="attack-target"><option value="">Escolha o alvo</option>{% for t in tokens %}<option value="{{ t.id }}">{{ t.name }} · DEF {{ t.defense }}</option>{% endfor %}</select><input id="attack-bonus" type="number" value="5" title="Bônus de ataque"><input id="attack-damage" value="1d8+3" title="Dano"><button id="make-attack">Atacar</button></div>{% endif %}<span class="label">CONDIÇÕES RÁPIDAS</span><div class="condition-buttons">{% for c in ['Caído','Atordoado','Envenenado','Invisível','Agarrado','Amedrontado'] %}<button data-condition="{{ c }}">{{ c }}</button>{% endfor %}</div></div></section>
+    <section class="tab-content" id="tab-chat"><div class="messages" id="messages">{% for m in messages %}<div class="message {{ m.kind }}"><span>{{ m.author }}</span><p>{{ m.content }}</p><small>{{ m.created_at[11:16] }}</small></div>{% endfor %}</div><div class="dice-bar">{% for d in [4,6,8,10,12,20,100] %}<button data-roll="1d{{ d }}">d{{ d }}</button>{% endfor %}</div><form class="chat-form" id="chat-form"><input id="chat-input" placeholder="Mensagem ou 1d20+5"><button>↑</button></form></section>
+    <section class="tab-content" id="tab-initiative"><div class="initiative-head"><span>ORDEM DE TURNO</span>{% if is_owner %}<button id="next-turn">Avançar →</button>{% endif %}</div>{% for i in initiative %}<div class="initiative-row {% if i.active %}active{% endif %}" data-init-token="{{ i.token_id }}"><strong>{{ i.score }}</strong><i style="--token-color:{{ i.color }}">{{ i.name[0] }}</i><div><b>{{ i.name }}</b><span>{{ i.hp }}/{{ i.max_hp }} PV{% if i.conditions %} · {{ i.conditions }}{% endif %}</span></div>{% if is_owner %}<button class="remove-init" data-remove-init="{{ i.token_id }}">×</button>{% endif %}</div>{% else %}<div class="vtt-empty">Nenhum personagem na iniciativa.</div>{% endfor %}</section>
+  </aside>
+</div>
+<dialog class="modal" id="map-upload-modal"><form id="map-upload-form"><button type="button" class="modal-close">×</button><span class="label">NOVA CENA</span><h2>Upload de mapa</h2><label>Nome da cena<input name="name" required placeholder="Templo abandonado"></label><label>Imagem do mapa<input type="file" name="image" accept="image/*" required></label><label>Tamanho do grid<input type="number" name="grid_size" value="50" min="20" max="200"></label><button class="btn btn-primary wide">Enviar e ativar</button></form></dialog>
+<dialog class="modal" id="game-character-modal"><form method="post" enctype="multipart/form-data" action="{{ url_for('character_new',campaign_id=campaign.id) }}"><button type="button" class="modal-close">×</button><span class="label">NOVO TOKEN</span><h2>Criar personagem</h2><div class="form-row"><label>Nome<input name="name" required></label><label>Tipo<select name="token_type"><option value="player">Jogador</option><option value="npc">NPC</option><option value="monster">Monstro</option></select></label></div><div class="form-row"><label>Classe<input name="class_name"></label><label>Cor<input type="color" name="color" value="#765cff"></label></div><div class="form-row"><label>Vida atual<input type="number" name="hp" value="10"></label><label>Vida máxima<input type="number" name="max_hp" value="10"></label></div><label>Imagem do token<input type="file" name="image" accept="image/*"></label><label class="check"><input type="checkbox" name="initiative" value="1"> Adicionar à iniciativa</label><button class="btn btn-primary wide">Criar na mesa</button></form></dialog>
+<dialog class="modal sheet-modal" id="sheet-modal"><form id="sheet-form"><button type="button" class="modal-close">×</button><span class="label">FICHA DE PERSONAGEM</span><h2 id="sheet-title">Personagem</h2><div class="sheet-stats"><label>Raça<input id="sheet-race"></label><label>Classe<input id="sheet-class"></label><label>Nível<input type="number" id="sheet-level"></label><label>Defesa<input type="number" id="sheet-defense"></label><label>Deslocamento<input type="number" id="sheet-speed"></label></div><div class="attribute-grid">{% for key,label in [('for','FOR'),('des','DES'),('con','CON'),('int','INT'),('sab','SAB'),('car','CAR')] %}<label>{{ label }}<input type="number" data-attribute="{{ key }}" value="10"></label>{% endfor %}</div><div class="sheet-tabs"><button type="button" class="active" data-sheet-tab="skills">Perícias</button><button type="button" data-sheet-tab="inventory">Inventário</button><button type="button" data-sheet-tab="abilities">Habilidades</button><button type="button" data-sheet-tab="spells">Magias</button><button type="button" data-sheet-tab="story">História</button><button type="button" data-sheet-tab="custom">Livre</button></div>{% for id in ['skills','inventory','abilities','spells','story','custom'] %}<textarea class="sheet-pane {{ 'active' if id=='skills' else '' }}" id="sheet-{{ id }}" placeholder="Escreva aqui..."></textarea>{% endfor %}<button class="btn btn-primary wide">Salvar ficha</button></form></dialog>
+<script src="{{ url_for('static', filename='js/game.js') }}"></script></body></html>

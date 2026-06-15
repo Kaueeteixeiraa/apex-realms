@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mesa Demo · Apex Realms</title><link rel="stylesheet" href="pages.css"></head>
+<body class="demo">
+  <header class="demo-top"><a class="brand" href="index.html"><i>A</i></a><div><small>D&D 5E</small><b>Ecos de Vhal'Tor</b></div><div class="scene"><small>CENA ATIVA</small><b>Ruínas do Observatório</b></div><button id="combat">Iniciar combate</button><button id="fog">Névoa</button><button id="grid">Grid</button></header>
+  <div class="demo-layout">
+    <aside class="demo-side"><h3>PERSONAGENS</h3><button class="person" data-focus="kael"><i>K</i><span><b>Kael Ardent</b><small>32 / 38 PV</small></span></button><button class="person" data-focus="lyra"><i>L</i><span><b>Lyra Voss</b><small>21 / 24 PV</small></span></button><button class="person" data-focus="sentinela"><i>S</i><span><b>Sentinela Vazia</b><small>48 / 60 PV</small></span></button><p class="demo-note">Arraste os tokens. Use o scroll para zoom.</p></aside>
+    <main class="demo-stage" id="stage"><div class="demo-board" id="board"><div class="demo-map"></div><div class="demo-grid" id="grid-layer"></div><div class="demo-fog hidden" id="fog-layer"></div><button class="demo-token" id="kael" style="left:34%;top:62%">K<small>Kael</small></button><button class="demo-token enemy" id="sentinela" style="left:68%;top:35%">S<small>Sentinela</small></button><button class="demo-token npc" id="lyra" style="left:49%;top:49%">L<small>Lyra</small></button></div><div class="zoom"><button id="minus">−</button><span id="zoom">100%</span><button id="plus">＋</button></div></main>
+    <aside class="demo-right"><div class="demo-tabs"><button class="active" data-tab="chat">Chat</button><button data-tab="turns">Turnos</button></div><section id="chat" class="demo-pane active"><div class="demo-messages" id="messages"><p><b>Apex Realms</b>A sessão começou.</p><p><b>Caio</b>Kael examina as inscrições.</p></div><div class="dice"></div><form id="chat-form"><input id="chat-input" placeholder="Mensagem ou 1d20+5"><button>↑</button></form></section><section id="turns" class="demo-pane"><h3>ORDEM DE TURNO</h3><div class="turn active"><strong>19</strong> Kael Ardent</div><div class="turn"><strong>14</strong> Sentinela Vazia</div><div class="turn"><strong>11</strong> Lyra Voss</div><button class="button small" id="next">Avançar turno</button></section></aside>
+  </div>
+  <script src="demo.js"></script>
+</body>
+</html>
