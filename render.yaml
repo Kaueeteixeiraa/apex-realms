@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: apex-realms
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app
+    disk:
+      name: apex-realms-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_REGISTRATION_CODE
+        generateValue: true
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: DATABASE_PATH
+        value: /var/data/apex_realms.db
+      - key: UPLOAD_FOLDER
+        value: /var/data/uploads

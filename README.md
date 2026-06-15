@@ -34,6 +34,19 @@ Abra `http://127.0.0.1:5000`.
 
 O banco e os dados de demonstração são criados automaticamente na primeira execução.
 
+## Publicação
+
+O GitHub Pages publica apenas os arquivos estáticos da pasta `docs/`. Para cadastro, login, dashboard real e painel admin, publique o backend Flask em um host Python.
+
+Este repositório já inclui:
+
+- `wsgi.py` como ponto de entrada WSGI
+- `Procfile` com `gunicorn wsgi:app`
+- `render.yaml` com blueprint básico para Render
+- suporte a `PORT`, `HOST`, `DATABASE_PATH`, `UPLOAD_FOLDER`, `SECRET_KEY` e `ADMIN_REGISTRATION_CODE`
+
+Em produção, use variáveis de ambiente seguras e armazenamento persistente para banco e uploads.
+
 ## Contas de demonstração
 
 | Perfil | E-mail | Senha |

@@ -27,15 +27,15 @@
   <main class="app-main">
     <header class="app-topbar">
       <div><small>SEGUNDA-FEIRA, 15 DE JUNHO</small><h1>Visão geral</h1></div>
-      <div class="top-actions"><button class="quiet-button" type="button" data-modal="join-room">Entrar com código</button><a class="btn btn-primary" href="criar-campanha.html">＋ Nova campanha</a></div>
+      <div class="top-actions"><button class="quiet-button" type="button" data-modal="join-room">Entrar por convite</button><a class="btn btn-primary" href="criar-campanha.html">＋ Nova campanha</a></div>
     </header>
 
     <section class="overview-hero">
       <div>
         <span class="status-live"><i></i> SESSÃO EM ANDAMENTO</span>
         <h2>Ecos de Vhal'Tor</h2>
-        <p>Os heróis chegaram às Ruínas do Portal Astral. A Sentinela Vazia guarda a última runa.</p>
-        <div class="session-details"><span><small>SISTEMA</small><b>D&D 5e</b></span><span><small>JOGADORES</small><b>3 / 6 conectados</b></span><span><small>DURAÇÃO</small><b>2h 14m</b></span></div>
+        <p>O grupo alcançou as ruínas. A runa final desperta.</p>
+        <div class="session-details"><span><small>SISTEMA</small><b>D&D 5e</b></span><span><small>JOGADORES</small><b>3 / 6 online</b></span><span><small>DURAÇÃO</small><b>2h 14m</b></span></div>
         <a class="btn btn-primary btn-large" href="demo.html">Retomar sessão <span>→</span></a>
       </div>
       <div class="overview-map"><div class="map-grid"></div><i class="portrait kael"></i><i class="portrait lyra"></i><i class="portrait sentinel"></i><span><small>CENA ATIVA</small><b>Ruínas do Portal Astral</b></span></div>
@@ -58,13 +58,13 @@
         </div>
       </div>
       <div class="app-panel dashboard-summary-panel">
-        <div class="app-section-title compact"><div><small>RESUMO</small><h2>Seu reino hoje</h2></div></div>
+        <div class="app-section-title compact"><div><small>RESUMO</small><h2>Resumo do mestre</h2></div></div>
         <div class="dashboard-summary">
           <span><i>◈</i><b id="dashboard-campaign-count">2</b><small>Campanhas</small></span>
           <span><i>◇</i><b>2</b><small>Salas</small></span>
           <span><i>◫</i><b>2</b><small>Fichas</small></span>
         </div>
-        <p>Sua sessão ativa está pronta para continuar. O gerenciamento permanece separado da mesa.</p>
+        <p>Sua sessão ativa está pronta para continuar, com campanhas, salas e fichas organizadas fora da mesa.</p>
       </div>
     </section>
   </main>
@@ -73,8 +73,8 @@
     <form class="app-modal dashboard-join-modal" id="join-room-form" autocomplete="off">
       <button type="button" class="modal-close" aria-label="Fechar modal">×</button>
       <span class="modal-icon">◇</span>
-      <small>ENTRAR EM UMA SALA</small>
-      <h2>Informe o código da sala</h2>
+      <small>CONVITE DA CAMPANHA</small>
+      <h2>Entrar por convite</h2>
       <p>Use o código compartilhado pelo mestre para abrir a sala de demonstração.</p>
       <label for="room-code">Código da sala<input id="room-code" name="room-code" placeholder="Ex.: APEX2026" minlength="6" maxlength="12" pattern="[A-Za-z0-9-]{6,12}" required></label>
       <small class="join-room-hint">Use de 6 a 12 letras, números ou hífen.</small>

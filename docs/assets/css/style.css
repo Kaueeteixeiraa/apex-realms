@@ -210,3 +210,95 @@
 .campaign-builder-page [hidden]{display:none!important}.campaign-builder-page .app-nav{gap:7px}.campaign-builder-page .app-nav>small{font-size:14px!important}.campaign-builder-page .app-nav a{height:48px;font-size:15px!important}.campaign-builder-page .app-nav a.active{border-color:#493b59;background:#191620;box-shadow:inset 3px 0 var(--violet)}.campaign-builder-page .app-nav a.active i{color:var(--cyan)}.campaign-builder-help{margin-top:auto;margin-bottom:10px;padding:12px;display:flex;align-items:center;gap:10px;border:1px solid #44394f;border-radius:7px;background:#14121a}.campaign-builder-help>i{width:38px;height:38px;display:grid;place-items:center;flex:none;border:1px solid #67517c;border-radius:6px;color:var(--violet-2);font-style:normal}.campaign-builder-help span{display:grid}.campaign-builder-help b{font-size:15px}.campaign-builder-help small{font-size:14px!important;color:#8f8797}.campaign-builder-page .sidebar-profile b,.campaign-builder-page .sidebar-profile small{font-size:14px!important}.campaign-builder-page .app-topbar{height:100px}.campaign-builder-page .app-topbar h1{font-size:28px}.campaign-builder-page .app-topbar small{font-size:14px!important}.campaign-builder-page .autosave-status{font-size:14px!important}.campaign-builder-page .campaign-builder-layout{grid-template-columns:minmax(0,1fr) 350px;gap:16px;margin-top:20px}.campaign-builder-page .campaign-builder-content{gap:12px}.campaign-builder-page .builder-section{padding:22px}.campaign-builder-page .builder-section>header{align-items:center;padding-bottom:16px}.campaign-builder-page .builder-section>header small{font-size:14px!important;color:var(--gold)}.campaign-builder-page .builder-section h2{font-size:21px}.campaign-builder-page .builder-section p{font-size:15px!important;line-height:1.55}.campaign-builder-page .campaign-form-grid{gap:15px;margin-top:18px}.campaign-builder-page .campaign-form-grid label,.campaign-notes-field{display:grid;gap:7px;color:#b0a8b7;font-size:15px!important;font-weight:700}.campaign-builder-page .campaign-form-grid label>small{font-size:14px!important;color:#817988;font-weight:500}.campaign-builder-page .campaign-form-grid input,.campaign-builder-page .campaign-form-grid select,.campaign-builder-page .campaign-form-grid textarea,.campaign-notes-field textarea{min-height:48px;padding:11px 12px;border:1px solid #403747;border-radius:6px;background:#0e0d13;color:#fff;font-size:15px!important;outline:none}.campaign-builder-page .campaign-form-grid input:focus,.campaign-builder-page .campaign-form-grid select:focus,.campaign-builder-page .campaign-form-grid textarea:focus,.campaign-notes-field textarea:focus{border-color:#80649a;box-shadow:0 0 0 3px #9b78ff12}.campaign-builder-page .campaign-form-grid textarea{height:120px;resize:vertical}.campaign-notes-field{margin-top:18px}.campaign-notes-field textarea{height:130px;resize:vertical}.campaign-builder-page .campaign-upload{grid-template-columns:minmax(0,1fr) 280px;gap:16px;margin-top:18px}.campaign-builder-page .campaign-upload-preview{height:240px;background-size:cover;background-position:center}.campaign-builder-page .campaign-upload-preview span{font-size:14px!important}.campaign-builder-page .campaign-upload-preview b{font-size:21px}.campaign-upload-actions{display:grid;align-content:center;gap:9px}.campaign-upload-actions .upload-button,.campaign-upload-actions .quiet-button{width:100%;font-size:15px!important}.campaign-upload-actions small{font-size:14px!important;color:#89818f}.campaign-builder-page .private-code-card{margin-top:18px;padding:14px}.campaign-builder-page .private-code-card span{gap:3px}.campaign-builder-page .private-code-card small,.campaign-builder-page .private-code-card em{font-size:14px!important}.campaign-builder-page .private-code-card em{color:#8c8493;font-style:normal}.campaign-builder-page .private-code-card b{font-size:21px}.campaign-builder-page .public-access-note{font-size:15px!important;line-height:1.55}.campaign-builder-page .campaign-builder-summary{top:16px;padding:18px;gap:10px}.campaign-builder-page .campaign-builder-summary>small{font-size:14px!important}.campaign-summary-cover{height:130px;border:1px solid #50425d;border-radius:7px;background-size:cover;background-position:center}.campaign-builder-page .campaign-builder-summary h2{font-size:21px}.campaign-builder-page .campaign-builder-summary p{min-height:68px;margin:0;font-size:15px!important;line-height:1.5}.campaign-builder-page .campaign-builder-summary dl{margin:0}.campaign-builder-page .campaign-builder-summary dl span{padding:10px}.campaign-builder-page .campaign-builder-summary dt,.campaign-builder-page .campaign-builder-summary dd{font-size:14px!important}.campaign-builder-page .campaign-builder-summary .btn,.campaign-builder-page .campaign-builder-summary .quiet-button{width:100%;font-size:15px!important}.campaign-submit-status{min-height:22px;color:var(--green);font-size:14px!important}.saved-campaign-card .room-cover{background-size:cover;background-position:center}.saved-campaign-card .room-cover span{color:var(--gold)}.saved-campaign-card .room-body h3,.saved-campaign-card .room-body p{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical}.saved-campaign-card .room-body h3{-webkit-line-clamp:1}.saved-campaign-card .room-body p{-webkit-line-clamp:2}
 
 @media(max-width:1200px){.campaign-builder-page .campaign-builder-layout{grid-template-columns:1fr}.campaign-builder-page .campaign-builder-summary{position:static}.campaign-builder-page .campaign-upload{grid-template-columns:1fr}.campaign-summary-cover{height:200px}}@media(max-width:760px){.campaign-builder-page{overflow-x:hidden}.campaign-builder-page .app-sidebar{padding:12px}.campaign-builder-page .app-main{padding:0 12px 35px}.campaign-builder-page .app-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}.campaign-builder-page .app-nav>small{display:block;grid-column:1/-1}.campaign-builder-page .app-nav a i{display:block}.campaign-builder-help{margin-top:8px}.campaign-builder-page .app-topbar{height:auto;min-height:0;padding:24px 3px}.campaign-builder-page .builder-section{padding:18px}.campaign-builder-page .builder-section>header{align-items:flex-start}.campaign-builder-page .campaign-form-grid,.campaign-builder-page .campaign-upload{grid-template-columns:1fr}.campaign-builder-page .private-code-card{display:grid}.campaign-builder-page .private-code-card .quiet-button{width:100%}.campaign-summary-cover{height:160px}}
+
+/* Final UI QA pass: tighter typography, cleaner cards, and usable mobile navigation. */
+.product-page{font-size:14px}
+.product-page p,.product-page label,.product-page input,.product-page select,.product-page textarea,.product-page button,.product-page a{font-size:14px!important}
+.product-page small,.product-page em,.product-page dt{font-size:12px!important}
+.product-page .app-nav small,.product-page .app-topbar small,.product-page .app-section-title small,.product-page .status-live,.product-page mark{font-size:11px!important}
+.product-page .btn,.product-page .quiet-button{min-height:40px;padding:9px 14px;border-radius:7px}
+.product-page .app-nav a{height:42px}
+.product-page .app-topbar h1{font-size:29px}
+.product-page .app-section-title h2{font-size:20px}
+.product-page .room-body p{color:#a49caf}
+
+.dashboard-page .app-main{max-width:1320px}
+.dashboard-page .app-topbar{height:96px}
+.dashboard-page .app-topbar h1{font-size:29px;letter-spacing:-.6px}
+.dashboard-page .app-topbar small,.dashboard-page .app-section-title small{font-size:11px!important}
+.dashboard-page .top-actions .quiet-button,.dashboard-page .top-actions .btn{min-width:170px}
+.dashboard-page .overview-hero{padding:26px;gap:26px;border-color:#3d3549;background:radial-gradient(circle at 14% 42%,#54337c2d,transparent 38%),linear-gradient(135deg,#17121e,#0e0d13)}
+.dashboard-page .overview-hero h2{font-size:24px;letter-spacing:-.4px}
+.dashboard-page .overview-hero p{font-size:14px!important;line-height:1.6;overflow-wrap:anywhere}
+.dashboard-page .status-live{font-size:11px!important}
+.dashboard-page .session-details{gap:8px;margin:18px 0}
+.dashboard-page .session-details span{padding:10px 11px}
+.dashboard-page .session-details small,.dashboard-page .overview-map small{font-size:10px!important}
+.dashboard-page .session-details b,.dashboard-page .overview-map b{font-size:13px!important}
+.dashboard-page .overview-map{height:225px}
+.dashboard-page .room-cover span,.dashboard-page .room-cover b,.dashboard-page .room-body>small,.dashboard-page .room-players span,.dashboard-page .room-players a{font-size:11px!important}
+.dashboard-page .room-body h3{font-size:18px!important}
+.dashboard-page .room-body p{min-height:0;font-size:13px!important;line-height:1.5}
+.dashboard-page .room-card{box-shadow:0 18px 50px #0003}
+.dashboard-page .room-cover{height:118px}
+.dashboard-page .sheet-list-item small,.dashboard-page .sheet-list-item em,.dashboard-summary small{font-size:11px!important}
+.dashboard-page .sheet-list-item b{font-size:14px!important}
+.dashboard-page .sheet-list-item strong{font-size:20px}
+.dashboard-summary-panel>p{font-size:13px!important;line-height:1.55}
+.dashboard-join-modal p,.dashboard-join-modal label{font-size:13px!important}
+.dashboard-join-modal h2{font-size:21px}
+
+@media(max-width:900px){
+  .dashboard-page{background:#08080d}
+  .dashboard-page .app-sidebar{position:sticky;top:0;z-index:80;padding:12px 12px 10px;border-right:0;border-bottom:1px solid var(--line);background:#09090eea;backdrop-filter:blur(18px)}
+  .dashboard-page .app-logo{height:42px;padding:0 2px 8px;margin-bottom:8px;border-bottom:1px solid #23202b}
+  .dashboard-page .app-logo .realm-mark{width:32px;height:32px}
+  .dashboard-page .app-logo span{font-size:12px}
+  .dashboard-page .app-logo em{font-size:8px}
+  .dashboard-page .app-nav{display:flex;gap:7px;padding:0 0 8px;overflow-x:auto;scroll-snap-type:x proximity}
+  .dashboard-page .app-nav::-webkit-scrollbar{height:0}
+  .dashboard-page .app-nav>small{display:none!important}
+  .dashboard-page .app-nav a{flex:0 0 auto;height:36px;padding:0 12px;border-radius:18px;font-size:12px!important;scroll-snap-align:start}
+  .dashboard-page .app-nav a i{display:none!important}
+  .dashboard-sidebar-session{margin:0;padding:9px 10px;min-height:50px}
+  .dashboard-sidebar-session>i{width:30px;height:30px}
+  .dashboard-sidebar-session b{font-size:13px}
+  .dashboard-sidebar-session small{font-size:11px!important}
+  .dashboard-page .app-main{grid-column:auto;width:100%;max-width:100vw;min-width:0;overflow:hidden;padding:0 12px 32px}
+  .dashboard-page .app-topbar{padding:18px 2px 16px;gap:14px}
+  .dashboard-page .app-topbar h1{font-size:27px}
+  .dashboard-page .app-topbar small{font-size:11px!important}
+  .dashboard-page .top-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .dashboard-page .top-actions .quiet-button,.dashboard-page .top-actions .btn{min-width:0;width:100%;font-size:12px!important}
+  .dashboard-page .overview-hero{width:100%;max-width:100%;min-width:0;margin-top:42px;padding:16px;border-radius:10px;overflow:hidden}
+  .dashboard-page .overview-hero h2{font-size:22px;line-height:1.15}
+  .dashboard-page .overview-hero p{max-width:100%;font-size:13px!important}
+  .dashboard-page .session-details{grid-template-columns:1fr;gap:7px}
+  .dashboard-page .session-details span{padding:8px 10px}
+  .dashboard-page .overview-map{height:175px}
+  .dashboard-page .overview-map>span{left:10px;right:10px;text-align:left}
+  .dashboard-page .app-section{padding-top:24px}
+  .dashboard-page .app-section-title{display:grid;gap:6px;align-items:start}
+  .dashboard-page .app-section-title h2{font-size:19px}
+  .dashboard-room-grid{gap:11px}
+  .dashboard-page .room-card{border-radius:10px}
+  .dashboard-page .room-cover{height:105px}
+  .dashboard-page .room-cover span,.dashboard-page .room-cover b{font-size:10px!important}
+  .dashboard-page .room-body{padding:14px}
+  .dashboard-page .dashboard-columns{gap:11px;margin-top:24px}
+  .dashboard-page .app-panel{padding:15px}
+  .dashboard-page .sheet-list-item{min-height:72px;padding:10px}
+  .dashboard-summary{gap:7px}
+  .dashboard-summary>span{padding:11px}
+  .dashboard-join-modal{padding:22px}
+}
+
+@media(max-width:430px){
+  html,body,.dashboard-page{width:100%;max-width:100%;overflow-x:hidden}
+  .dashboard-page .app-sidebar,.dashboard-page .app-main,.dashboard-page .app-topbar,.dashboard-page .app-section,.dashboard-page .dashboard-columns{width:100%;max-width:100%;min-width:0}
+  .dashboard-page .top-actions{grid-template-columns:1fr}
+  .dashboard-page .overview-hero,.dashboard-page .room-card,.dashboard-page .app-panel{width:calc(100vw - 24px);max-width:calc(100vw - 24px)}
+  .dashboard-page .overview-hero p{max-width:310px}
+  .dashboard-page .overview-hero{margin-top:88px}
+  .dashboard-page .overview-map{width:100%;height:155px}
+}

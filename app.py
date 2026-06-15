@@ -1,4 +1,5 @@
 import json
+import os
 import random
 import re
 import secrets
@@ -629,4 +630,8 @@ app = create_app()
 
 if __name__ == "__main__":
     init_database(app)
-    app.run(debug=True, port=5000)
+    app.run(
+        debug=os.environ.get("FLASK_DEBUG", "1") == "1",
+        host=os.environ.get("HOST", "127.0.0.1"),
+        port=int(os.environ.get("PORT", 5000)),
+    )
