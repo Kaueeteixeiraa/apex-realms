@@ -38,41 +38,30 @@
         </div>
       </div>
 
-      <div class="hero-preview reveal delay-1">
-        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
-        <div class="session-window">
-          <div class="window-top">
-            <div class="mini-brand"><svg class="realm-mark" viewBox="0 0 64 64"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="#a47cff" stroke-width="4"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="#55dfff" stroke-width="2"/></svg></div>
-            <div class="window-campaign"><small>ECOS DE VHAL'TOR · D&D 5E</small><b>Ruínas do Portal Astral</b></div>
-            <span class="live"><i></i> SESSÃO AO VIVO</span>
-            <span class="window-meta">CENA 08 · 3 JOGADORES</span>
-          </div>
-          <div class="window-body">
-            <aside class="preview-party">
-              <span class="micro-label">GRUPO</span>
-              <div class="preview-char"><i class="portrait kael"></i><span><b>Kael Ardent</b><small>Patrulheiro · Nv. 5</small><em><u style="width:84%"></u></em></span></div>
-              <div class="preview-char"><i class="portrait lyra"></i><span><b>Lyra Voss</b><small>Arcanista · Nv. 4</small><em><u style="width:70%"></u></em></span></div>
-              <div class="preview-char hostile"><i class="portrait sentinel"></i><span><b>Sentinela</b><small>Constructo · Elite</small><em><u style="width:55%"></u></em></span></div>
-              <div class="preview-objective"><small>OBJETIVO ATIVO</small><b>Reative o portal</b><span>2 de 4 runas</span></div>
-            </aside>
-            <div class="preview-map">
-              <div class="map-grid"></div><div class="map-vignette"></div>
-              <button class="map-avatar hero-token portrait kael" aria-label="Kael"></button>
-              <button class="map-avatar mage-token portrait lyra" aria-label="Lyra"></button>
-              <button class="map-avatar enemy-token portrait sentinel" aria-label="Sentinela"></button>
-              <div class="preview-tools"><span>⌖</span><span>✦</span><span>╱</span><span>#</span></div>
-              <div class="critical-pop"><span>ACERTO CRÍTICO</span><b>24</b><small>1d20 + 5</small></div>
-            </div>
-            <aside class="preview-feed">
-              <span class="micro-label">SESSÃO</span>
-              <div class="initiative"><small>ORDEM DE TURNO</small><b><i class="portrait kael"></i> Kael Ardent <strong>19</strong></b><span><i class="portrait sentinel"></i> Sentinela <strong>14</strong></span><span><i class="portrait lyra"></i> Lyra Voss <strong>11</strong></span></div>
-              <div class="mini-chat"><b>Mestre</b><p>O portal desperta sob seus pés.</p></div>
-              <div class="mini-roll"><small>ÚLTIMA ROLAGEM</small><span><b>1d20 + 5</b><strong>24</strong></span></div>
-            </aside>
-          </div>
+      <div class="hero-preview hero-brand-portal reveal delay-1" aria-label="Símbolo arcano animado do Apex Realms">
+        <div class="portal-aura"></div>
+        <div class="portal-stars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="portal-ring portal-ring-outer" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="portal-ring portal-ring-middle" aria-hidden="true"><span>ᚨ</span><span>ᚱ</span><span>ᛖ</span><span>ᛚ</span><span>ᛗ</span><span>ᛋ</span></div>
+        <div class="portal-ring portal-ring-inner" aria-hidden="true"></div>
+        <div class="portal-core">
+          <svg viewBox="0 0 220 220" aria-hidden="true">
+            <defs>
+              <linearGradient id="portal-gradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f2bf72"/><stop offset=".48" stop-color="#a47cff"/><stop offset="1" stop-color="#55dfff"/></linearGradient>
+              <radialGradient id="core-gradient"><stop stop-color="#fff"/><stop offset=".22" stop-color="#c6adff"/><stop offset=".65" stop-color="#7146b9"/><stop offset="1" stop-color="#120c20"/></radialGradient>
+            </defs>
+            <circle cx="110" cy="110" r="99" fill="none" stroke="url(#portal-gradient)" stroke-width="2"/>
+            <path d="M110 22 186 66v88l-76 44-76-44V66zM34 66l76 44 76-44M110 110v88M34 154l76-44 76 44" fill="none" stroke="url(#portal-gradient)" stroke-linejoin="round" stroke-width="3"/>
+            <path d="m110 47 54 31v64l-54 31-54-31V78zM56 78l54 32 54-32M110 110v63" fill="none" stroke="#d8c6ff" stroke-opacity=".48" stroke-width="1.5"/>
+            <circle cx="110" cy="110" r="34" fill="url(#core-gradient)" stroke="#d8c6ff" stroke-width="2"/>
+            <circle cx="110" cy="110" r="13" fill="#fff"/>
+          </svg>
+          <div class="portal-wordmark"><small>ATRAVESSE O PORTAL</small><b>APEX</b><em>REALMS</em></div>
         </div>
-        <div class="float-card float-card-left"><i>✦</i><span><small>PORTAL ARCANO</small><b>Instável</b></span></div>
-        <div class="float-card float-card-right"><i>⚔</i><span><small>COMBATE</small><b>Rodada 3</b></span></div>
+        <div class="portal-rune rune-one" aria-hidden="true">✦</div>
+        <div class="portal-rune rune-two" aria-hidden="true">◇</div>
+        <div class="portal-rune rune-three" aria-hidden="true">ᚱ</div>
+        <span class="portal-caption"><i></i> MUNDOS INFINITOS ESPERAM</span>
       </div>
       <div class="scroll-cue"><span></span> EXPLORE O REINO</div>
     </section>
