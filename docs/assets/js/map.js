@@ -74,6 +74,18 @@ document.querySelectorAll("[data-tab]").forEach(button => button.addEventListene
   document.querySelector(`#${button.dataset.tab}`)?.classList.add("active");
 }));
 
+document.querySelectorAll("[data-drawer]").forEach(button => button.addEventListener("click", event => {
+  if (event.target.closest("a")) return;
+  const target = document.querySelector(`#${button.dataset.drawer}`);
+  const willOpen = target?.classList.contains("collapsed");
+  document.querySelectorAll(".table-drawer").forEach(drawer => drawer.classList.add("collapsed"));
+  if (willOpen) target.classList.remove("collapsed");
+}));
+
+document.querySelectorAll("[data-close-drawer]").forEach(button => button.addEventListener("click", () => {
+  document.querySelector(`#${button.dataset.closeDrawer}`)?.classList.add("collapsed");
+}));
+
 document.querySelector("#grid")?.addEventListener("click", event => {
   event.currentTarget.classList.toggle("active");
   gridLayer.classList.toggle("hidden");
@@ -184,5 +196,11 @@ document.querySelector("#next")?.addEventListener("click", () => {
   const label = document.createElement("em");
   label.textContent = "ATUAL";
   next.append(label);
+  const turnFloat = document.querySelector(".turn-float");
+  if (turnFloat) {
+    turnFloat.querySelector("i").className = next.querySelector("i").className;
+    turnFloat.querySelector("b").textContent = next.querySelector("b").textContent;
+    turnFloat.querySelector("em").textContent = next.querySelector("small").textContent;
+  }
   if (current === turns.length - 1) document.querySelector("#round-number").textContent = Number(document.querySelector("#round-number").textContent) + 1;
 });
