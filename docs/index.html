@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="pages.css">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="landing">
   <div class="page-noise"></div>
@@ -20,8 +20,8 @@
       <svg class="realm-mark" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="brand-gradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f2bf72"/><stop offset=".5" stop-color="#a47cff"/><stop offset="1" stop-color="#55dfff"/></linearGradient></defs><path d="M32 4a28 28 0 1 0 28 28" fill="none" stroke="url(#brand-gradient)" stroke-width="3"/><path d="M46 10a28 28 0 0 1 8 8M54 22a28 28 0 0 1 2 7" fill="none" stroke="#f2bf72" stroke-linecap="round" stroke-width="3"/><path d="m32 13 15 10v18L32 51 17 41V23zM17 23l15 8 15-8M32 31v20M17 41l15-10 15 10" fill="none" stroke="url(#brand-gradient)" stroke-linejoin="round" stroke-width="2"/><circle cx="32" cy="31" r="4" fill="#fff"/></svg>
       <span><b>APEX</b><em>REALMS</em></span>
     </a>
-    <nav aria-label="Navegação principal"><a href="#why">Diferenciais</a><a href="#experience">Experiência</a><a href="#features">Recursos</a></nav>
-    <a class="btn btn-primary btn-small" href="demo.html">Entrar na sessão <span>↗</span></a>
+    <nav aria-label="Navegação principal"><a href="#platform">Plataforma</a><a href="#why">Diferenciais</a><a href="#features">Recursos</a></nav>
+    <a class="btn btn-primary btn-small" href="dashboard.html">Abrir plataforma <span>↗</span></a>
   </header>
 
   <main>
@@ -79,6 +79,21 @@
 
     <section class="system-strip"><span>FEITO PARA QUALQUER SISTEMA</span><b>D&D 5E</b><b>TORMENTA 20</b><b>ORDEM PARANORMAL</b><b>PATHFINDER</b><b>SISTEMAS PRÓPRIOS</b></section>
 
+    <section class="section platform-section" id="platform">
+      <div class="section-heading reveal"><div class="eyebrow centered"><span></span> UMA PLATAFORMA COMPLETA <span></span></div><h2>Da criação da sala<br><em>ao último dado.</em></h2><p>Apex Realms conecta preparação, personagens e sessão em um único fluxo. O mestre controla o mundo; os jogadores vivem dentro dele.</p></div>
+      <div class="platform-flow reveal">
+        <a href="salas.html"><span>01</span><i>◇</i><small>PREPARE</small><h3>Crie a sala</h3><p>Escolha o sistema, defina permissões e compartilhe o código.</p><b>Abrir salas →</b></a>
+        <a href="fichas.html"><span>02</span><i>◫</i><small>REÚNA O GRUPO</small><h3>Monte as fichas</h3><p>D&D 5e funcional com atributos, perícias, ataques e magias.</p><b>Explorar ficha →</b></a>
+        <a href="biblioteca.html"><span>03</span><i>▤</i><small>CONSTRUA A AVENTURA</small><h3>Prepare encontros</h3><p>Monstros, NPCs, mapas e recursos organizados para o mestre.</p><b>Abrir biblioteca →</b></a>
+        <a href="demo.html"><span>04</span><i>✦</i><small>JOGUE</small><h3>Conduza a sessão</h3><p>Mapa, cartas, iniciativa, chat e rolagens em tempo real.</p><b>Entrar na mesa →</b></a>
+      </div>
+      <div class="platform-showcase reveal">
+        <aside><div class="showcase-user"><i class="portrait kael"></i><span><small>MESTRE DA SALA</small><b>Kaue Teixeira</b></span><em>ONLINE</em></div><nav><span class="active">⌂ Visão geral</span><span>◇ Minhas salas <b>3</b></span><span>◫ Minhas fichas</span><span>▤ Biblioteca</span><span>⚙ Permissões</span></nav></aside>
+        <div class="showcase-main"><header><span><small>SALA ATIVA · D&D 5E</small><b>Ecos de Vhal'Tor</b></span><em><i></i> EM SESSÃO</em></header><div class="showcase-map"><div class="map-grid"></div><i class="portrait kael"></i><i class="portrait lyra"></i><i class="portrait sentinel"></i><span><small>OBJETIVO</small><b>Reative o Portal Astral</b><em>2 / 4 runas</em></span></div></div>
+        <aside class="showcase-right"><small>PERMISSÕES DA SALA</small><label><span><b>Mover tokens</b><em>Próprio personagem</em></span><i class="fake-toggle active"></i></label><label><span><b>Editar ficha</b><em>Com aprovação</em></span><i class="fake-toggle active"></i></label><label><span><b>Ver HP de monstros</b><em>Informação oculta</em></span><i class="fake-toggle"></i></label><label><span><b>Rolar dados</b><em>Livremente</em></span><i class="fake-toggle active"></i></label><a href="configuracoes.html">Configurar sala →</a></aside>
+      </div>
+    </section>
+
     <section class="section why" id="why">
       <div class="section-heading reveal"><div class="eyebrow centered"><span></span> POR QUE APEX REALMS? <span></span></div><h2>O palco da história.<br><em>Não uma distração.</em></h2><p>Uma plataforma feita para desaparecer quando a narrativa começa e aparecer exatamente quando o grupo precisa.</p></div>
       <div class="why-grid">
@@ -115,10 +130,10 @@
       </div>
     </section>
 
-    <section class="final-cta reveal"><svg class="cta-mark" viewBox="0 0 64 64"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="currentColor" stroke-width="3"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="currentColor" stroke-width="2"/></svg><div class="eyebrow centered"><span></span> O PORTAL ESTÁ ABERTO <span></span></div><h2>A próxima lenda<br>começa na mesa.</h2><p>Entre nas Ruínas do Portal Astral e veja o Apex Realms em ação.</p><a class="btn btn-primary btn-large" href="demo.html">Iniciar demonstração <span>→</span></a></section>
+    <section class="final-cta reveal"><svg class="cta-mark" viewBox="0 0 64 64"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="currentColor" stroke-width="3"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="currentColor" stroke-width="2"/></svg><div class="eyebrow centered"><span></span> O PORTAL ESTÁ ABERTO <span></span></div><h2>Crie a sala.<br>Comece a lenda.</h2><p>Explore o protótipo completo do Apex Realms, da criação da campanha à mesa virtual.</p><div class="hero-actions"><a class="btn btn-primary btn-large" href="dashboard.html">Abrir plataforma <span>→</span></a><a class="btn btn-ghost btn-large" href="demo.html">Entrar direto na mesa</a></div></section>
   </main>
 
   <footer class="site-footer"><a class="brand" href="index.html"><svg class="realm-mark" viewBox="0 0 64 64"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="#a47cff" stroke-width="4"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="#55dfff" stroke-width="2"/></svg><span><b>APEX</b><em>REALMS</em></span></a><p>Uma experiência Apex Technologies · 2026</p><div><a href="#why">Diferenciais</a><a href="#features">Recursos</a><a href="demo.html">Demonstração</a></div></footer>
-  <script src="site.js"></script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html>

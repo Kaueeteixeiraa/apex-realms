@@ -1,72 +1,59 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Sessão ao vivo | Apex Realms</title>
-  <meta name="description" content="Experimente uma sessão interativa no Apex Realms.">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mesa virtual | Apex Realms</title>
+  <meta name="description" content="Uma sessão funcional de D&D 5e no Apex Realms.">
   <meta name="theme-color" content="#08080d">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="pages.css">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="demo">
   <header class="vtt-topbar">
-    <a class="vtt-brand" href="index.html" aria-label="Voltar para Apex Realms"><svg class="realm-mark" viewBox="0 0 64 64"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="#a47cff" stroke-width="4"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="#55dfff" stroke-width="2"/></svg><span><b>APEX</b><em>REALMS</em></span></a>
-    <div class="scene-context"><small>D&D 5E · CAMPANHA</small><b>Ecos de Vhal'Tor</b></div>
-    <div class="scene-title"><span class="pulse"></span><div><small>CENA 08 · AO VIVO</small><b>Ruínas do Portal Astral</b></div></div>
-    <div class="session-facts"><span><small>JOGADORES</small><b>3 conectados</b></span><span><small>SISTEMA</small><b>D&D 5E</b></span><span><small>HORÁRIO</small><b>21:47</b></span></div>
-    <div class="vtt-actions"><button class="action-button" id="combat"><i>⚔</i><span>Iniciar combate</span></button><button class="icon-button active" id="grid" title="Alternar grid">#</button><button class="icon-button" id="fog" title="Alternar névoa">◐</button><a class="icon-button" href="index.html" title="Sair">↗</a></div>
+    <a class="vtt-brand" href="dashboard.html" aria-label="Voltar ao dashboard"><svg class="realm-mark" viewBox="0 0 64 64"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="#a47cff" stroke-width="4"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="#55dfff" stroke-width="2"/></svg><span><b>APEX</b><em>REALMS</em></span></a>
+    <div class="scene-context"><small>SALA · D&D 5E</small><b>Ecos de Vhal'Tor</b></div>
+    <div class="scene-title"><span class="pulse"></span><div><small>SESSÃO 08 · AO VIVO</small><b>Ruínas do Portal Astral</b></div></div>
+    <div class="session-facts"><span><small>JOGADORES</small><b>3 / 6 conectados</b></span><span><small>CENA</small><b>Portal Astral</b></span><span><small>STATUS</small><b>Em combate</b></span></div>
+    <div class="vtt-actions"><button class="action-button active" id="combat"><i>⚔</i><span>Rodada 3</span></button><button class="icon-button active" id="grid" title="Alternar grid">#</button><button class="icon-button" id="fog" title="Alternar névoa">◐</button><a class="icon-button" href="dashboard.html" title="Sair da mesa">↗</a></div>
   </header>
 
-  <div class="vtt-layout">
+  <div class="vtt-layout vtt-layout-pro">
     <aside class="party-panel">
-      <div class="panel-title"><span>GRUPO E ENCONTRO</span><button>＋</button></div>
+      <div class="panel-title"><span>JOGADORES E PERSONAGENS</span><button>＋</button></div>
+      <div class="connection-strip"><i></i><span><b>3 jogadores conectados</b><small>Latência da sala: 42ms</small></span></div>
       <div class="party-list">
-        <button class="party-card active" data-focus="kael" style="--token:#55dfff"><i class="portrait kael"></i><span><small>JOGADOR · CONCENTRADO</small><b>Kael Ardent</b><em>Patrulheiro · Nível 5</em><label><u><strong style="width:84%"></strong></u><mark>32 / 38 PV</mark></label><label class="mana"><u><strong style="width:66%"></strong></u><mark>8 / 12 Foco</mark></label></span></button>
-        <button class="party-card" data-focus="lyra" style="--token:#a983ff"><i class="portrait lyra"></i><span><small>JOGADORA · INSPIRADA</small><b>Lyra Voss</b><em>Arcanista · Nível 4</em><label><u><strong style="width:70%"></strong></u><mark>21 / 30 PV</mark></label><label class="mana"><u><strong style="width:81%"></strong></u><mark>34 / 42 Mana</mark></label></span></button>
-        <button class="party-card hostile" data-focus="sentinela" style="--token:#ff657f"><i class="portrait sentinel"></i><span><small>HOSTIL · ATORDOADO</small><b>Sentinela Vazia</b><em>Constructo · Elite</em><label><u><strong style="width:55%"></strong></u><mark>48 / 86 PV</mark></label><label class="armor"><u><strong style="width:40%"></strong></u><mark>Armadura quebrada</mark></label></span></button>
+        <button class="party-card active" data-focus="kael" style="--token:#55dfff"><i class="portrait kael"></i><span><small>CAIO · CONCENTRANDO</small><b>Kael Ardent</b><em>Patrulheiro · Nível 5 · CA 17</em><label><u><strong style="width:84%"></strong></u><mark>32 / 38 PV</mark></label><label class="mana"><u><strong style="width:66%"></strong></u><mark>8 / 12 Foco</mark></label></span></button>
+        <button class="party-card" data-focus="lyra" style="--token:#a983ff"><i class="portrait lyra"></i><span><small>MARINA · INSPIRADA</small><b>Lyra Voss</b><em>Arcanista · Nível 4 · CA 14</em><label><u><strong style="width:70%"></strong></u><mark>21 / 30 PV</mark></label><label class="mana"><u><strong style="width:81%"></strong></u><mark>34 / 42 Mana</mark></label></span></button>
+        <button class="party-card hostile" data-focus="sentinela" style="--token:#ff657f"><i class="portrait sentinel"></i><span><small>HOSTIL · ATORDOADO</small><b>Sentinela Vazia</b><em>Constructo · Elite · CA 18</em><label><u><strong style="width:55%"></strong></u><mark>Ferido</mark></label><label class="armor"><u><strong style="width:40%"></strong></u><mark>Armadura quebrada</mark></label></span></button>
       </div>
       <div class="objective-card"><div><small>OBJETIVO DA CENA</small><b>Reative o Portal Astral</b></div><strong>2 / 4</strong><span><i></i><i></i><i></i><i></i></span><p>As runas leste e sul ainda estão adormecidas.</p></div>
-      <div class="quick-tools"><span>FERRAMENTAS DO MESTRE</span><div><button class="active" data-tool="select">⌖<small>Selecionar</small></button><button data-tool="pan">✥<small>Mover</small></button><button data-tool="measure">╱<small>Medir</small></button><button data-tool="ping">◎<small>Ping</small></button></div></div>
-      <div class="session-note"><span>SESSÃO 08</span><b>O chamado sob as ruínas</b><small>2h 14m em andamento · autosave há 8s</small></div>
+      <div class="scene-layers"><span>CAMADAS DA CENA</span><label><i class="layer-eye"></i>Mapa base<input type="checkbox" checked></label><label><i class="layer-eye"></i>Iluminação<input type="checkbox" checked></label><label><i class="layer-eye"></i>Objetos e obstáculos<input type="checkbox" checked></label><label><i class="layer-eye"></i>Camada secreta<input type="checkbox"></label></div>
+      <div class="session-note"><span>CONTROLE DO MESTRE</span><b>Modo de edição ativo</b><small>Jogadores movem apenas seus próprios tokens.</small></div>
     </aside>
 
     <main class="map-stage" id="stage">
-      <div class="map-board" id="board"><div class="map-image"></div><div class="map-grid-layer" id="grid-layer"></div><div class="map-fog hidden" id="fog-layer"></div><div id="effects"></div>
-        <button class="map-token portrait kael" id="kael" style="left:38%;top:66%;--token:#55dfff"><small>Kael Ardent</small><em><i style="width:84%"></i></em></button>
-        <button class="map-token portrait lyra" id="lyra" style="left:51%;top:68%;--token:#a983ff"><small>Lyra Voss</small><em><i style="width:70%"></i></em></button>
-        <button class="map-token portrait sentinel" id="sentinela" style="left:64%;top:38%;--token:#ff657f"><small>Sentinela Vazia</small><em><i style="width:55%"></i></em><mark>Atordoado</mark></button>
+      <div class="map-board" id="board"><div class="map-image"></div><div class="map-grid-layer" id="grid-layer"></div><div class="map-lighting"></div><div class="map-fog hidden" id="fog-layer"></div><div id="effects"></div>
+        <article class="map-token token-card portrait kael" id="kael" data-card style="left:37%;top:68%;--token:#55dfff"><span class="token-summary"><i class="portrait kael"></i><b>Kael</b><em>32/38</em></span><div class="token-details"><small>JOGADOR · PATRULHEIRO 5</small><h3>Kael Ardent</h3><div><span><b>32 / 38</b><small>PV</small></span><span><b>17</b><small>CA</small></span><span><b>+4</b><small>INI</small></span><span><b>9m</b><small>DESL.</small></span></div><p>Concentrando · Marca do Caçador</p><footer><button type="button" data-token-action="initiative">Iniciativa</button><button type="button" data-token-action="attack">Atacar</button><button type="button" data-token-action="damage">Dano</button><button type="button" data-token-action="heal">Curar</button></footer></div></article>
+        <article class="map-token token-card portrait lyra" id="lyra" data-card style="left:50%;top:69%;--token:#a983ff"><span class="token-summary"><i class="portrait lyra"></i><b>Lyra</b><em>21/30</em></span><div class="token-details"><small>JOGADORA · ARCANISTA 4</small><h3>Lyra Voss</h3><div><span><b>21 / 30</b><small>PV</small></span><span><b>14</b><small>CA</small></span><span><b>+3</b><small>INI</small></span><span><b>9m</b><small>DESL.</small></span></div><p>Inspirada · Escudo arcano</p><footer><button type="button" data-token-action="initiative">Iniciativa</button><button type="button" data-token-action="attack">Atacar</button><button type="button" data-token-action="damage">Dano</button><button type="button" data-token-action="heal">Curar</button></footer></div></article>
+        <article class="map-token token-card portrait sentinel enemy-card" id="sentinela" data-card style="left:64%;top:39%;--token:#ff657f"><span class="token-summary"><i class="portrait sentinel"></i><b>Sentinela</b><em>Ferido</em></span><div class="token-details"><small>MONSTRO · CONSTRUCTO ELITE</small><h3>Sentinela Vazia</h3><div><span><b>48 / 86</b><small>PV</small></span><span><b>18</b><small>CA</small></span><span><b>+1</b><small>INI</small></span><span><b>7,5m</b><small>DESL.</small></span></div><p>Atordoado · Armadura quebrada</p><footer><button type="button" data-token-action="initiative">Iniciativa</button><button type="button" data-token-action="attack">Atacar</button><button type="button" data-token-action="damage">Dano</button><button type="button" data-token-action="reveal">Revelar</button></footer></div></article>
       </div>
-      <div class="floating-tools"><button class="active" data-tool="select" title="Selecionar">⌖</button><button data-tool="pan" title="Mover mapa">✥</button><button data-tool="measure" title="Medir">╱</button><button data-tool="ping" title="Marcar ponto">◎</button><i></i><button class="active" id="snap" title="Snap no grid">⊞</button></div>
+      <div class="floating-tools"><button class="active" data-tool="select" title="Selecionar">⌖</button><button data-tool="pan" title="Mover mapa">✥</button><button data-tool="measure" title="Medir distância">╱</button><button data-tool="ping" title="Marcador">◎</button><i></i><button class="active" id="snap" title="Encaixar no grid">⊞</button></div>
       <div class="scene-alert"><i>✦</i><span><small>EVENTO DA CENA</small><b>O portal pulsa com energia instável</b></span><button>×</button></div>
-      <div class="map-meta"><small>MAPA ATIVO · 40 × 24</small><b>Ruínas do Portal Astral</b><span>Grid 5 pés · Iluminação baixa</span></div>
+      <div class="map-meta"><small>MAPA ATIVO · 40 × 24</small><b>Ruínas do Portal Astral</b><span>Grid 1,5m · Iluminação baixa</span></div>
       <div class="zoom-controls"><button id="minus">−</button><span id="zoom">100%</span><button id="plus">＋</button><button id="center" title="Centralizar">⌖</button></div>
+      <div class="master-toolbar"><span><small>FERRAMENTAS DO MESTRE</small><b>Cena 08</b></span><button data-tool="select" class="active">⌖<small>Selecionar</small></button><button data-tool="pan">✥<small>Mover</small></button><button data-tool="measure">╱<small>Medir</small></button><button data-tool="ping">◎<small>Marcar</small></button><button id="layers">▱<small>Camadas</small></button><button id="upload-map">⇧<small>Novo mapa</small></button><i></i><button class="danger-tool">◉<small>Revelar área</small></button></div>
     </main>
 
     <aside class="session-panel">
-      <div class="right-tabs"><button class="active" data-tab="session">Sessão</button><button data-tab="sheet">Ficha</button></div>
-      <section id="session" class="right-pane active">
-        <div class="initiative-panel"><div class="subheading"><span>INICIATIVA · RODADA <b id="round-number">3</b></span><button id="next">Próximo turno →</button></div><div class="initiative-list"><button class="initiative-row active"><strong>19</strong><i class="portrait kael"></i><span><b>Kael Ardent</b><small>Turno atual · Concentrado</small></span><em>ATUAL</em></button><button class="initiative-row"><strong>14</strong><i class="portrait sentinel"></i><span><b>Sentinela Vazia</b><small>Atordoado · 48 PV</small></span></button><button class="initiative-row"><strong>11</strong><i class="portrait lyra"></i><span><b>Lyra Voss</b><small>Inspirada · 21 PV</small></span></button></div></div>
-        <div class="feed-heading"><span>CHAT E EVENTOS</span><button>⋯</button></div>
-        <div class="message-list" id="messages">
-          <div class="event-message"><i>✦</i><p><b>Evento da cena</b>As runas do portal responderam ao cristal de Lyra.</p><small>21:43</small></div>
-          <div class="chat-message"><i class="portrait kael"></i><div><span><b>Caio · Kael</b><small>21:45</small></span><p>Eu avanço até a borda e procuro uma forma de estabilizar a energia.</p></div></div>
-          <div class="roll-message"><span><small>TESTE DE ARCANISMO · LYRA</small><b>1d20 + 5</b></span><strong>24</strong><em>Sucesso crítico</em></div>
-          <div class="chat-message master-message"><i>M</i><div><span><b>Mestre</b><small>21:46</small></span><p>A luz violeta revela uma quarta inscrição sob os escombros.</p></div></div>
-        </div>
-        <div class="dice-tray"><span>DADOS RÁPIDOS</span><div class="dice"></div></div>
-        <form id="chat-form"><button type="button">＋</button><input id="chat-input" aria-label="Mensagem ou fórmula de dados" placeholder="Mensagem, comando ou 1d20+5"><button aria-label="Enviar">↑</button></form>
-      </section>
-      <section id="sheet" class="right-pane character-sheet">
-        <div class="sheet-hero"><i class="portrait kael" id="inspect-avatar"></i><span><small>PERSONAGEM SELECIONADO</small><h3 id="inspect-name">Kael Ardent</h3><p id="inspect-class">Patrulheiro · Nível 5</p></span></div>
-        <div class="resource-pair"><div><small>VIDA</small><b id="inspect-hp">32 / 38</b><span><i style="width:84%"></i></span></div><div><small>DEFESA</small><b>17</b><span><i style="width:70%"></i></span></div></div>
-        <div class="attribute-grid"><span><small>FOR</small><b>16</b><em>+3</em></span><span><small>DES</small><b>18</b><em>+4</em></span><span><small>CON</small><b>15</b><em>+2</em></span><span><small>INT</small><b>12</b><em>+1</em></span><span><small>SAB</small><b>17</b><em>+3</em></span><span><small>CAR</small><b>10</b><em>+0</em></span></div>
-        <div class="condition-box"><small>STATUS ATUAIS</small><span><i></i> Concentrado</span><span><i></i> Visão no escuro</span></div>
-        <button class="btn btn-primary">Abrir ficha completa</button>
-      </section>
+      <div class="initiative-panel"><div class="subheading"><span>COMBATE · RODADA <b id="round-number">3</b></span><button id="next">Próximo turno →</button></div><div class="initiative-list"><button class="initiative-row active"><strong>19</strong><i class="portrait kael"></i><span><b>Kael Ardent</b><small>Turno atual · Concentrando</small></span><em>ATUAL</em></button><button class="initiative-row"><strong>14</strong><i class="portrait sentinel"></i><span><b>Sentinela Vazia</b><small>Atordoado · Ferido</small></span></button><button class="initiative-row"><strong>11</strong><i class="portrait lyra"></i><span><b>Lyra Voss</b><small>Inspirada · 21 PV</small></span></button></div></div>
+      <div class="right-tabs"><button class="active" data-tab="chat">Chat</button><button data-tab="rolls">Rolagens</button><button data-tab="system">Sistema</button><button data-tab="notes">Notas</button></div>
+      <section id="chat" class="right-pane active"><div class="message-list" id="messages"><div class="chat-message master-message"><i>M</i><div><span><b>Mestre</b><small>21:45</small></span><p>A luz violeta revela uma quarta inscrição sob os escombros.</p></div></div><div class="chat-message"><i class="portrait kael"></i><div><span><b>Caio · Kael</b><small>21:46</small></span><p>Eu avanço até a borda e procuro estabilizar a energia.</p></div></div><div class="chat-message"><i class="portrait lyra"></i><div><span><b>Marina · Lyra</b><small>21:47</small></span><p>Vou usar Arcanismo nas runas da plataforma.</p></div></div></div><form id="chat-form"><button type="button">＋</button><input id="chat-input" aria-label="Mensagem ou fórmula de dados" placeholder="Mensagem ou 1d20+5"><button aria-label="Enviar">↑</button></form></section>
+      <section id="rolls" class="right-pane"><div class="roll-feed" id="roll-feed"><div class="roll-message"><span><small>ATLETISMO · KAEL</small><b>1d20 + 6</b></span><strong>18</strong><em>Sucesso</em></div><div class="roll-message critical-roll"><span><small>ARCANISMO · LYRA</small><b>1d20 + 5</b></span><strong>24</strong><em>Sucesso crítico</em></div><div class="roll-message damage-roll"><span><small>ARCO LONGO · KAEL</small><b>1d8 + 4</b></span><strong>11</strong><em>Dano perfurante</em></div></div><div class="dice-tray pro-dice"><span>DADOS RÁPIDOS</span><div class="dice"></div><form id="custom-roll"><input placeholder="Ex.: 2d6+4"><button>Rolar</button></form></div></section>
+      <section id="system" class="right-pane"><div class="system-feed"><span><i>✦</i><p><b>Evento da cena</b>O portal respondeu ao cristal de Lyra.</p><small>21:43</small></span><span><i>⚔</i><p><b>Combate</b>Rodada 3 iniciada. Kael é o primeiro.</p><small>21:44</small></span><span><i>♥</i><p><b>Vida alterada</b>Sentinela Vazia sofreu 11 de dano.</p><small>21:46</small></span><span><i>◐</i><p><b>Névoa revelada</b>Uma nova área foi revelada aos jogadores.</p><small>21:47</small></span></div></section>
+      <section id="notes" class="right-pane note-pane"><div class="note-tabs"><button class="active">Compartilhadas</button><button>Secretas do mestre</button></div><textarea>Objetivo: ativar as quatro runas do portal.\n\nPistas encontradas:\n- O cristal de Lyra reage às inscrições.\n- A Sentinela reconheceu o medalhão de Kael.\n- Existe uma passagem sob a plataforma central.</textarea><button class="btn btn-primary">Salvar anotações</button></section>
     </aside>
   </div>
-  <script src="demo.js"></script>
+  <script src="assets/js/app.js"></script><script src="assets/js/dnd5e.js"></script><script src="assets/js/map.js"></script>
 </body>
 </html>
