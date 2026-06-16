@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR" class="login-lock-page">
+<html lang="pt-BR" class="login-home-lock">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,15 +9,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=login-mascot-v1">
+  <link rel="stylesheet" href="assets/css/style.css?v=login-home-v1">
 </head>
-<body class="auth-static-page login-mascot-page">
+<body class="auth-static-page login-home-page">
   <div class="page-noise"></div>
   <div class="particles" id="particles" aria-hidden="true"></div>
 
-  <header class="auth-topbar">
+  <header class="auth-topbar login-home-topbar">
     <a class="brand" href="index.html" aria-label="Apex Realms">
-      <svg class="realm-mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="#a47cff" stroke-width="4"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="#55dfff" stroke-width="2"/></svg>
+      <svg class="realm-mark" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="login-brand-gradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f2bf72"/><stop offset=".5" stop-color="#a47cff"/><stop offset="1" stop-color="#55dfff"/></linearGradient></defs><path d="M32 4a28 28 0 1 0 28 28" fill="none" stroke="url(#login-brand-gradient)" stroke-width="3"/><path d="M46 10a28 28 0 0 1 8 8M54 22a28 28 0 0 1 2 7" fill="none" stroke="#f2bf72" stroke-linecap="round" stroke-width="3"/><path d="m32 13 15 10v18L32 51 17 41V23zM17 23l15 8 15-8M32 31v20M17 41l15-10 15 10" fill="none" stroke="url(#login-brand-gradient)" stroke-linejoin="round" stroke-width="2"/><circle cx="32" cy="31" r="4" fill="#fff"/></svg>
       <span><b>APEX</b><em>REALMS</em></span>
     </a>
     <nav aria-label="Acesso rapido">
@@ -27,36 +27,53 @@
     </nav>
   </header>
 
-  <main class="login-mascot-shell">
-    <img class="login-guardian-art" src="assets/img/register-dark-beast.png" alt="" aria-hidden="true">
-    <div class="login-portal-glow" aria-hidden="true"></div>
-
-    <section class="login-mascot-layout reveal" aria-label="Login Apex Realms">
-      <div class="login-story-panel">
-        <span class="login-kicker">GUARDIÃO APEX</span>
-        <h1>O portal da sua mesa está aberto.</h1>
-        <p>Entre para continuar campanhas, abrir fichas e voltar ao ponto exato onde a aventura ficou esperando.</p>
-
-        <div class="login-mascot-helper">
-          <img src="assets/img/mascot-chibi-login.png" alt="" aria-hidden="true">
-          <div>
-            <small>MODO FOFINHO ATIVO</small>
-            <strong>Seu mascote guarda seus dados, suas fichas e seus próximos críticos.</strong>
-          </div>
-        </div>
-
-        <div class="login-mini-features" aria-label="Recursos ao entrar">
-          <span><b>Campanhas</b><small>Continue suas mesas</small></span>
-          <span><b>Fichas</b><small>Personagens salvos</small></span>
-          <span><b>Dados</b><small>Rolagens prontas</small></span>
+  <main class="login-home-shell">
+    <section class="login-home-layout reveal" aria-label="Login Apex Realms">
+      <div class="login-home-copy">
+        <div class="eyebrow"><span></span> ACESSO AO PORTAL</div>
+        <h1>Volte ao seu reino.</h1>
+        <p>Entre para retomar campanhas, abrir fichas e voltar para a mesa sem atravessar menus confusos.</p>
+        <div class="login-home-stats" aria-label="Recursos liberados ao entrar">
+          <span><b>Mesas</b><small>Campanhas e salas reunidas</small></span>
+          <span><b>Fichas</b><small>Personagens sempre acessiveis</small></span>
+          <span><b>Dados</b><small>Rolagens prontas para a sessao</small></span>
         </div>
       </div>
 
-      <aside class="login-card-panel">
-        <img class="login-card-mascot" src="assets/img/mascot-chibi-login.png" alt="" aria-hidden="true">
-        <small>ACESSO DA MESA</small>
-        <h1>Entrar no Apex</h1>
-        <p>Informe seu e-mail e senha. O guardião cuida do portal.</p>
+      <div class="login-home-portal" aria-hidden="true">
+        <div class="login-home-aura"></div>
+        <div class="login-home-stars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="login-home-ring login-ring-outer"><i></i><i></i><i></i><i></i></div>
+        <div class="login-home-ring login-ring-middle"><span>D20</span><span>D12</span><span>D8</span><span>D6</span><span>D10</span><span>D4</span></div>
+        <div class="login-home-ring login-ring-inner"></div>
+        <div class="login-home-core">
+          <svg viewBox="0 0 220 220" aria-hidden="true">
+            <defs>
+              <linearGradient id="login-portal-gradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f2bf72"/><stop offset=".5" stop-color="#a47cff"/><stop offset="1" stop-color="#55dfff"/></linearGradient>
+              <radialGradient id="login-core-gradient"><stop stop-color="#fff"/><stop offset=".24" stop-color="#c6adff"/><stop offset=".66" stop-color="#7146b9"/><stop offset="1" stop-color="#120c20"/></radialGradient>
+            </defs>
+            <circle cx="110" cy="110" r="99" fill="none" stroke="url(#login-portal-gradient)" stroke-width="2"/>
+            <path d="M110 22 186 66v88l-76 44-76-44V66zM34 66l76 44 76-44M110 110v88M34 154l76-44 76 44" fill="none" stroke="url(#login-portal-gradient)" stroke-linejoin="round" stroke-width="3"/>
+            <path d="m110 47 54 31v64l-54 31-54-31V78zM56 78l54 32 54-32M110 110v63" fill="none" stroke="#d8c6ff" stroke-opacity=".5" stroke-width="1.5"/>
+            <circle cx="110" cy="110" r="36" fill="url(#login-core-gradient)" stroke="#d8c6ff" stroke-width="2"/>
+            <circle cx="110" cy="110" r="13" fill="#fff"/>
+          </svg>
+          <div class="login-home-wordmark"><small>ATRAVESSE O PORTAL</small><b>APEX</b><em>REALMS</em></div>
+        </div>
+        <span class="login-home-die die-a">20</span>
+        <span class="login-home-die die-b">12</span>
+        <span class="login-home-die die-c">8</span>
+        <span class="login-home-rune rune-a">✦</span>
+        <span class="login-home-rune rune-b">◇</span>
+      </div>
+
+      <aside class="login-home-card">
+        <div class="login-home-seal" aria-hidden="true">
+          <span></span><b>AR</b>
+        </div>
+        <small>ENTRADA DA MESA</small>
+        <h1>Entrar</h1>
+        <p>Use sua conta Apex Realms para acessar suas campanhas, personagens e salas ativas.</p>
 
         <form class="auth-form" data-auth-form data-auth-mode="login" autocomplete="on">
           <label>E-mail
@@ -69,7 +86,7 @@
           <p class="auth-status" data-auth-status aria-live="polite"></p>
         </form>
 
-        <p class="auth-switch">Ainda não tem conta? <a href="cadastro.html">Criar conta</a></p>
+        <p class="auth-switch">Ainda nao tem conta? <a href="cadastro.html">Criar conta no Apex Realms</a></p>
       </aside>
     </section>
   </main>
