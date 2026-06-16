@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=register-ux-v5">
+  <link rel="stylesheet" href="assets/css/style.css?v=register-rpg-v1">
 </head>
-<body class="auth-static-page register-ux-page">
+<body class="auth-static-page register-gate-page">
   <div class="page-noise"></div>
   <div class="particles" id="particles" aria-hidden="true"></div>
 
@@ -27,41 +27,58 @@
     </nav>
   </header>
 
-  <main class="register-ux-shell">
-    <section class="register-ux-panel reveal">
-      <div class="register-ux-copy">
-        <span class="register-kicker">APEX REALMS</span>
-        <h1>Crie sua conta e entre na mesa certa.</h1>
-        <p>Um acesso simples para jogadores e mestres organizarem campanhas, fichas e salas sem confusao antes da sessao começar.</p>
-
-        <div class="register-ux-steps" aria-label="Como funciona o cadastro">
-          <article>
-            <i>1</i>
-            <b>Escolha seu perfil</b>
-            <span>Jogador ou mestre, cada conta abre uma experiencia adequada.</span>
-          </article>
-          <article>
-            <i>2</i>
-            <b>Acesse suas mesas</b>
-            <span>Campanhas, fichas e salas ficam reunidas no dashboard.</span>
-          </article>
-          <article>
-            <i>3</i>
-            <b>Comece organizado</b>
-            <span>Menos tela confusa, mais foco na aventura.</span>
-          </article>
+  <main class="register-gate-shell">
+    <section class="register-gate-layout reveal" aria-label="Cadastro Apex Realms">
+      <div class="register-game-scene" aria-hidden="true">
+        <div class="arcane-sky">
+          <span></span>
+          <span></span>
+          <span></span>
         </div>
 
-        <div class="register-ux-note">
-          <strong>Feito para uso real</strong>
-          <span>O cadastro leva direto para a plataforma. Perfil, personagem e detalhes visuais podem ser ajustados depois.</span>
+        <div class="campaign-table">
+          <div class="map-board">
+            <i class="map-grid"></i>
+            <i class="portal-core"></i>
+            <i class="route-line"></i>
+            <span class="map-token token-master">M</span>
+            <span class="map-token token-player">D20</span>
+            <span class="map-token token-danger">!</span>
+            <b class="ruin ruin-one"></b>
+            <b class="ruin ruin-two"></b>
+            <b class="ruin ruin-three"></b>
+          </div>
+
+          <div class="quest-slip">
+            <small>PROXIMA MESA</small>
+            <strong>Ruinas do Portal Astral</strong>
+            <span>3 jogadores aguardando convite</span>
+          </div>
+
+          <div class="dice-cluster">
+            <i>D20</i>
+            <b>8</b>
+            <em>12</em>
+          </div>
+
+          <div class="sheet-card">
+            <small>FICHA</small>
+            <strong>Kael Ardent</strong>
+            <span><i style="width:74%"></i></span>
+            <span><i style="width:58%"></i></span>
+          </div>
+        </div>
+
+        <div class="register-scene-copy">
+          <span>Uma plataforma para campanhas vivas</span>
+          <strong>Crie, organize e entre na aventura com tudo no lugar.</strong>
         </div>
       </div>
 
-      <div class="register-form-panel">
-        <small>CADASTRO</small>
-        <h2>Criar conta</h2>
-        <p>Preencha os dados abaixo para acessar o Apex Realms.</p>
+      <aside class="register-gate-card">
+        <small>NOVO ACESSO</small>
+        <h1>Criar conta Apex</h1>
+        <p>Escolha seu papel e entre na plataforma para gerenciar campanhas, fichas e mesas online.</p>
 
         <form class="auth-form" data-auth-form data-auth-mode="register" autocomplete="on">
           <div class="auth-form-grid">
@@ -84,15 +101,16 @@
               <option value="master">Mestre</option>
             </select>
           </label>
-          <div class="register-role-hint">
-            <b>Jogador</b> entra em campanhas e gerencia fichas. <b>Mestre</b> cria campanhas, salas e organiza recursos.
+          <div class="register-choice-row">
+            <span><b>Jogador</b> fichas, mesas e personagens.</span>
+            <span><b>Mestre</b> campanhas, salas e recursos.</span>
           </div>
           <button class="btn btn-primary btn-large" type="submit">Criar conta e acessar <span>&rarr;</span></button>
           <p class="auth-status" data-auth-status aria-live="polite"></p>
         </form>
 
         <p class="auth-switch">Ja tem conta? <a href="login.html">Entrar no Apex Realms</a></p>
-      </div>
+      </aside>
     </section>
   </main>
 
