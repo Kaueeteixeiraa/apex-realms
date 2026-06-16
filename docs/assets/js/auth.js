@@ -1,8 +1,5 @@
-// Static authentication flow for GitHub Pages.
-// The Flask backend has the real /login and /register routes for production hosting.
+// Access flow for Apex Realms.
 const authForms = document.querySelectorAll("[data-auth-form]");
-const avatarInput = document.querySelector('input[name="avatar"]');
-const avatarPreview = document.querySelector("[data-avatar-preview]");
 const roleSelect = document.querySelector('select[name="role"]');
 const adminCodeField = document.querySelector("[data-admin-code-field]");
 
@@ -29,33 +26,10 @@ function signInStaticUser(user) {
   redirectAfterAuth();
 }
 
-function readAvatarFile(file, callback) {
-  if (!file) {
-    callback("");
-    return;
-  }
-  if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
-    callback("");
-    return;
-  }
-  const reader = new FileReader();
-  reader.addEventListener("load", () => callback(reader.result));
-  reader.readAsDataURL(file);
-}
-
 function syncAdminField() {
   if (!roleSelect || !adminCodeField) return;
   adminCodeField.classList.toggle("visible", roleSelect.value === "admin");
 }
-
-avatarInput?.addEventListener("change", () => {
-  const [file] = avatarInput.files;
-  readAvatarFile(file, dataUrl => {
-    if (!dataUrl || !avatarPreview) return;
-    avatarPreview.classList.add("custom-avatar");
-    avatarPreview.style.backgroundImage = `url("${dataUrl}")`;
-  });
-});
 
 roleSelect?.addEventListener("change", syncAdminField);
 syncAdminField();
@@ -91,15 +65,13 @@ authForms.forEach(form => form.addEventListener("submit", event => {
     return;
   }
   setAuthStatus(form, "Conta criada. Abrindo dashboard...", "success");
-  readAvatarFile(formData.get("avatar"), avatar => {
-    const account = window.ApexStaticAuth?.upsertAccount({
-      name: String(formData.get("name") || "Aventureiro Apex").trim(),
-      nickname: String(formData.get("nickname") || "Aventureiro").trim(),
-      email,
-      password,
-      role: publicRole,
-      avatar
-    });
-    signInStaticUser(account);
+  const account = window.ApexStaticAuth?.upsertAccount({
+    name: String(formData.get("name") || "Aventureiro Apex").trim(),
+    nickname: String(formData.get("nickname") || "Aventureiro").trim(),
+    email,
+    password,
+    role: publicRole,
+    avatar: ""
   });
+  signInStaticUser(account);
 }));

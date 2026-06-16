@@ -30,24 +30,24 @@
   <main class="auth-shell auth-shell-register">
     <section class="auth-copy reveal">
       <div class="eyebrow"><span></span> NOVO ACESSO</div>
-      <h1>Crie sua conta Apex.</h1>
-      <p>Cadastre um perfil para acessar a plataforma com as permissoes corretas de jogador ou mestre.</p>
+      <h1>Entre no Apex Realms.</h1>
+      <p>Crie seu acesso para organizar campanhas, entrar em mesas, gerenciar fichas e viver sessoes de RPG online com mais clareza.</p>
       <div class="auth-checklist">
-        <span><i>OK</i> Perfil de jogador ou mestre</span>
-        <span><i>OK</i> Foto de perfil opcional</span>
-        <span><i>OK</i> Dashboard personalizado pelo papel escolhido</span>
-        <span><i>OK</i> Pronto para migrar ao backend real</span>
+        <span><i>OK</i> Campanhas organizadas para mestres e jogadores</span>
+        <span><i>OK</i> Fichas, salas e biblioteca reunidas em um so lugar</span>
+        <span><i>OK</i> Permissoes claras para cada papel na mesa</span>
+        <span><i>OK</i> Experiencia focada em jogar, narrar e acompanhar a aventura</span>
       </div>
       <div class="auth-note">
-        <b>Conta administrativa</b>
-        <span>Perfis administrativos sao gerenciados fora do cadastro publico.</span>
+        <b>Uma plataforma para mesas reais</b>
+        <span>O Apex Realms foi pensado para mestres criarem mundos e jogadores acompanharem suas jornadas com fichas, campanhas e salas sempre acessiveis.</span>
       </div>
     </section>
 
     <section class="auth-card reveal delay-1">
       <small>CADASTRO</small>
       <h2>Criar conta</h2>
-      <p>No GitHub Pages, os dados ficam salvos neste navegador. No backend Flask, contas e permissoes usam o banco do servidor.</p>
+      <p>Informe seus dados para acessar o Apex Realms como jogador ou mestre. A foto de perfil podera ser configurada depois, dentro da plataforma.</p>
 
       <form class="auth-form" data-auth-form data-auth-mode="register" autocomplete="on">
         <div class="auth-form-grid">
@@ -70,10 +70,7 @@
             <option value="master">Mestre</option>
           </select>
         </label>
-        <label class="avatar-upload">Foto de perfil
-          <span><i class="portrait kael" data-avatar-preview></i><input name="avatar" type="file" accept="image/png,image/jpeg,image/webp"><em>PNG, JPG ou WEBP. A imagem fica somente no navegador.</em></span>
-        </label>
-        <button class="btn btn-primary btn-large" type="submit">Criar e entrar <span>&rarr;</span></button>
+        <button class="btn btn-primary btn-large" type="submit">Criar conta e acessar <span>&rarr;</span></button>
         <p class="auth-status" data-auth-status aria-live="polite"></p>
       </form>
 
@@ -82,6 +79,6 @@
   </main>
 
   <script src="assets/js/app.js?v=29b3f08"></script>
-  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/auth.js?v=register-cleanup"></script>
 </body>
 </html>
