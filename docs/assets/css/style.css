@@ -538,8 +538,11 @@
 
 /* Login v3: mesmo encaixe visual do cadastro em 100% de zoom. */
 @media(min-width:1101px){
-  .login-home-lock{height:100%;min-height:100%;overflow:hidden}
-  .login-home-page{height:100vh;min-height:100vh;overflow:hidden}
+  html.login-home-lock,.login-home-lock{height:100%;max-height:100%;overflow:hidden!important;overscroll-behavior:none}
+  body.login-home-page,.login-home-page{height:100vh;max-height:100vh;min-height:100vh;overflow:hidden!important;overscroll-behavior:none}
+  html.login-home-lock,body.login-home-page{scrollbar-width:none;-ms-overflow-style:none}
+  html.login-home-lock::-webkit-scrollbar,body.login-home-page::-webkit-scrollbar{width:0;height:0;display:none}
+  .login-home-page .particles{position:fixed;inset:0;height:100vh;max-height:100vh;overflow:hidden}
   .login-home-page .login-home-topbar{height:60px;min-height:60px;padding:8px clamp(24px,4vw,56px)}
   .login-home-page .brand .realm-mark{width:36px;height:36px}
   .login-home-page .brand>span:last-child{font-size:11px}
