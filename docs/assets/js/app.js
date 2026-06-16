@@ -98,6 +98,22 @@ const APEX_MASTER_ROUTES = new Set([
   "monstros.html"
 ]);
 
+function canonicalStaticRoute(route) {
+  const cleanRoute = String(route || "")
+    .split("#")[0]
+    .split("?")[0]
+    .split("/")
+    .filter(Boolean)
+    .pop()
+    ?.trim()
+    .toLowerCase() || "index.html";
+
+  if (cleanRoute === "." || cleanRoute === "..") return "index.html";
+  if (cleanRoute.endsWith(".html")) return cleanRoute;
+  if (!cleanRoute.includes(".")) return `${cleanRoute}.html`;
+  return cleanRoute;
+}
+
 function roleLabel(role) {
   return APEX_ROLE_LABELS[role] || "Visitante";
 }
@@ -107,9 +123,9 @@ function normalizeStaticRoute(value) {
   try {
     const url = new URL(value, window.location.href);
     if (url.origin !== window.location.origin) return "";
-    return (url.pathname.split("/").pop() || "index.html").toLowerCase();
+    return canonicalStaticRoute(url.pathname);
   } catch {
-    return value.split("#")[0].split("?")[0].split("/").pop().toLowerCase();
+    return canonicalStaticRoute(value);
   }
 }
 
