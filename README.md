@@ -1,25 +1,50 @@
 # Apex Realms
 
-Plataforma de mesa virtual de RPG online da Apex Technologies. Este MVP reúne autenticação, campanhas, convites, biblioteca e uma sala interativa com mapas, tokens, chat, dados e iniciativa.
+Plataforma de mesa virtual de RPG online da Apex Technologies. O projeto reune landing page, login, cadastro, dashboard, campanhas, fichas, biblioteca, painel do mestre e uma mesa preparada para evoluir para uso real com jogadores e mestres.
+
+## Estado atual
+
+- A versao estatica fica na pasta `docs/` e roda em GitHub Pages ou Vercel.
+- A versao Flask fica em `app.py`, `templates/`, `static/` e `models/schema.sql`.
+- O ambiente publicado estatico usa `localStorage` para simular contas, sessoes, campanhas e fichas.
+- O backend Flask cria apenas a conta administrativa inicial e nao semeia campanhas, mestre, jogador ou aventura fake.
+- Para uso real multiusuario, o backend precisa de banco persistente, armazenamento de uploads e variaveis seguras.
 
 ## Recursos implementados
 
-- Cadastro, login, senha com hash e perfis de jogador, mestre e administrador
-- Painel administrativo para acompanhar usuários, campanhas e alterar papéis
-- Dashboard com campanhas mestradas e jogadas
-- Criação de campanha e entrada por código de convite
-- Página da campanha com resumo, jogadores e biblioteca
-- Upload e ativação de mapas com grid configurável
-- Criação de personagens, NPCs e monstros com imagem, raça, classe, nível e vida
-- Sala de jogo com mapa ativo, grid, névoa de guerra, zoom, medição, marcações e tokens arrastáveis
-- Controle de token baseado em permissões
-- Chat persistente e rolagens com fórmulas como `2d6+3`
-- Iniciativa e avanço de turnos pelo mestre
-- Biblioteca com upload de handouts, itens e documentos
-- SQLite com schema relacional pronto para posterior migração
-- Interface escura, responsiva e inspirada na Apex Technologies
+- Cadastro e login no backend Flask, com senha em hash.
+- Perfis de jogador, mestre e administrador.
+- Painel administrativo para acompanhar usuarios e campanhas.
+- Dashboard limpo, sem dados demonstrativos.
+- Criacao de campanha, entrada por codigo e exclusao de campanha.
+- Pagina de fichas separada da mesa.
+- Biblioteca, painel do mestre, configuracoes e salas em estado inicial limpo.
+- Sala de jogo zerada ate existir uma campanha real.
+- Seed do banco com reset de lancamento unico para remover dados antigos de demonstracao.
 
-## Instalação
+## Publicacao estatica
+
+O GitHub Pages publica os arquivos da pasta `docs/`.
+
+O Vercel tambem esta preparado para servir `docs/` diretamente. O arquivo `vercel.json` define:
+
+```json
+{
+  "outputDirectory": "docs",
+  "cleanUrls": true
+}
+```
+
+Depois de importar este repositorio no Vercel, ele deve publicar a versao estatica do Apex Realms sem precisar de build.
+
+Links atuais no GitHub Pages:
+
+- Site: `https://kaueeteixeiraa.github.io/apex-realms/`
+- Login: `https://kaueeteixeiraa.github.io/apex-realms/login.html`
+- Cadastro: `https://kaueeteixeiraa.github.io/apex-realms/cadastro.html`
+- Dashboard: `https://kaueeteixeiraa.github.io/apex-realms/dashboard.html`
+
+## Backend Flask
 
 Requer Python 3.10 ou superior.
 
@@ -32,68 +57,56 @@ python app.py
 
 Abra `http://127.0.0.1:5000`.
 
-O banco e os dados iniciais são criados automaticamente na primeira execução.
+O repositorio inclui:
 
-## Publicação
+- `wsgi.py` como ponto de entrada WSGI.
+- `Procfile` com `gunicorn wsgi:app`.
+- `render.yaml` com blueprint basico para Render.
+- suporte a `PORT`, `HOST`, `DATABASE_PATH`, `UPLOAD_FOLDER`, `SECRET_KEY` e `ADMIN_REGISTRATION_CODE`.
 
-O GitHub Pages publica apenas os arquivos estáticos da pasta `docs/`. Para cadastro, login, dashboard real e painel admin, publique o backend Flask em um host Python.
+## Conta inicial
 
-No Pages, o ambiente publicado tem entradas visíveis para acessar os perfis:
+O seed do backend cria apenas a conta administrativa inicial. As telas publicas nao exibem contas de teste.
 
-- Login: `https://kaueeteixeiraa.github.io/apex-realms/login.html`
-- Cadastro: `https://kaueeteixeiraa.github.io/apex-realms/cadastro.html`
-- Dashboard: `https://kaueeteixeiraa.github.io/apex-realms/dashboard.html`
-
-Este repositório já inclui:
-
-- `wsgi.py` como ponto de entrada WSGI
-- `Procfile` com `gunicorn wsgi:app`
-- `render.yaml` com blueprint básico para Render
-- suporte a `PORT`, `HOST`, `DATABASE_PATH`, `UPLOAD_FOLDER`, `SECRET_KEY` e `ADMIN_REGISTRATION_CODE`
-
-Em produção, use variáveis de ambiente seguras e armazenamento persistente para banco e uploads.
-
-## Contas iniciais
-
-| Perfil | E-mail | Senha |
+| Perfil | E-mail | Senha inicial |
 | --- | --- | --- |
-| Mestre | `mestre@apexrealms.com` | `apex123` |
-| Jogador | `jogador@apexrealms.com` | `apex123` |
 | Administrador | `admin@apexrealms.com` | `apex123` |
 
-Código de convite da campanha inicial: `APEX2026`.
-
-Para criar administradores pelo formulário de cadastro local, use o código interno padrão `APEX-ADMIN-2026`.
-Em produção, defina outro valor com a variável de ambiente `ADMIN_REGISTRATION_CODE`.
+Antes de colocar o backend em producao, troque a senha inicial, defina `SECRET_KEY` e use banco persistente.
 
 ## Estrutura
 
 ```text
 apex-realms/
-├── app.py                  # Aplicação, rotas e APIs do MVP
-├── config.py               # Configuração e limites de upload
+├── app.py                  # Aplicacao Flask, rotas e APIs do MVP
+├── config.py               # Configuracao e limites de upload
 ├── database.py             # Acesso centralizado ao SQLite
+├── docs/                   # Site estatico para Pages/Vercel
 ├── models/schema.sql       # Schema relacional
-├── services/security.py    # Login e permissões
-├── templates/              # Páginas Jinja
-├── static/css/             # Design system e layouts
-├── static/js/              # Interações globais e sala de jogo
-├── uploads/                # Arquivos enviados
-└── database/               # Banco local
+├── services/security.py    # Login e permissoes
+├── static/                 # CSS/JS/imagens do backend Flask
+├── templates/              # Paginas Jinja do backend Flask
+├── uploads/                # Arquivos enviados localmente
+├── vercel.json             # Configuracao estatica do Vercel
+└── wsgi.py                 # Entrada WSGI
 ```
 
-## Segurança e evolução
+## Producao real
 
-As senhas usam hash do Werkzeug, campanhas e tokens validam permissões no servidor, administradores usam código interno de cadastro, e o limite global de upload é de 8 MB. Para produção, defina `SECRET_KEY`, altere `ADMIN_REGISTRATION_CODE`, use PostgreSQL, implemente CSRF, armazenamento externo de arquivos e substitua o chat HTTP por WebSocket.
+Para jogadores e mestres usando dados compartilhados em producao:
 
-O código concentra as rotas em `app.py` para manter este MVP fácil de executar. A camada de banco e permissões já está separada, facilitando mover cada domínio para Blueprints em `routes/` conforme o produto crescer.
+- migrar SQLite para PostgreSQL;
+- usar armazenamento externo para uploads;
+- configurar `SECRET_KEY` forte;
+- proteger formularios com CSRF;
+- mover autenticacao e permissoes para sessao persistente;
+- substituir partes simuladas do Pages por chamadas ao backend;
+- adicionar logs, backups e monitoramento.
 
 ## Testes
 
-Execute a suíte completa:
+Execute a suite completa quando o ambiente Python estiver instalado:
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
-
-Ela valida autenticação, papéis de jogador/mestre/admin, painel administrativo, permissões, upload e grid, fichas, chat, dados, iniciativa, rodadas, dano, cura, PV temporários e ataques contra Defesa.
