@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="login-lock-page">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=auth-mystic-v2">
+  <link rel="stylesheet" href="assets/css/style.css?v=login-mascot-v1">
 </head>
-<body class="auth-static-page">
+<body class="auth-static-page login-mascot-page">
   <div class="page-noise"></div>
   <div class="particles" id="particles" aria-hidden="true"></div>
 
@@ -27,55 +27,50 @@
     </nav>
   </header>
 
-  <main class="auth-shell">
-    <section class="auth-copy auth-mystic auth-mystic-login reveal">
-      <div class="mystic-panel mystic-panel-login">
-        <div class="mystic-visual mystic-table-visual" aria-hidden="true">
-          <span class="mystic-star star-one"></span>
-          <span class="mystic-star star-two"></span>
-          <span class="mystic-star star-three"></span>
-          <span class="mystic-orbit orbit-one"></span>
-          <span class="mystic-orbit orbit-two"></span>
-          <span class="mystic-map-grid"></span>
-          <i class="mystic-token token-master">M</i>
-          <i class="mystic-token token-player">J</i>
-          <i class="mystic-token token-dice">20</i>
-          <div class="mystic-gate mystic-gate-small">
-            <span></span>
-            <b>APEX</b>
-            <em>REALMS</em>
+  <main class="login-mascot-shell">
+    <img class="login-guardian-art" src="assets/img/register-dark-beast.png" alt="" aria-hidden="true">
+    <div class="login-portal-glow" aria-hidden="true"></div>
+
+    <section class="login-mascot-layout reveal" aria-label="Login Apex Realms">
+      <div class="login-story-panel">
+        <span class="login-kicker">GUARDIÃO APEX</span>
+        <h1>O portal da sua mesa está aberto.</h1>
+        <p>Entre para continuar campanhas, abrir fichas e voltar ao ponto exato onde a aventura ficou esperando.</p>
+
+        <div class="login-mascot-helper">
+          <img src="assets/img/mascot-chibi-login.png" alt="" aria-hidden="true">
+          <div>
+            <small>MODO FOFINHO ATIVO</small>
+            <strong>Seu mascote guarda seus dados, suas fichas e seus próximos críticos.</strong>
           </div>
         </div>
-        <div class="mystic-copy">
-          <span>APEX REALMS</span>
-          <strong>Retorne ao circulo da mesa.</strong>
-          <p>Entre para continuar suas campanhas, abrir fichas e voltar para a sessao exatamente onde a aventura chamou.</p>
-        </div>
-        <div class="mystic-pills">
-          <span>Mapa</span>
-          <span>Iniciativa</span>
-          <span>Fichas</span>
+
+        <div class="login-mini-features" aria-label="Recursos ao entrar">
+          <span><b>Campanhas</b><small>Continue suas mesas</small></span>
+          <span><b>Fichas</b><small>Personagens salvos</small></span>
+          <span><b>Dados</b><small>Rolagens prontas</small></span>
         </div>
       </div>
-    </section>
 
-    <section class="auth-card reveal delay-1">
-      <small>ACESSO</small>
-      <h2>Entrar</h2>
-      <p>Informe seu e-mail e senha para abrir a plataforma.</p>
+      <aside class="login-card-panel">
+        <img class="login-card-mascot" src="assets/img/mascot-chibi-login.png" alt="" aria-hidden="true">
+        <small>ACESSO DA MESA</small>
+        <h1>Entrar no Apex</h1>
+        <p>Informe seu e-mail e senha. O guardião cuida do portal.</p>
 
-      <form class="auth-form" data-auth-form data-auth-mode="login" autocomplete="on">
-        <label>E-mail
-          <input name="email" type="email" autocomplete="email" required>
-        </label>
-        <label>Senha
-          <input name="password" type="password" minlength="4" autocomplete="current-password" required>
-        </label>
-        <button class="btn btn-primary btn-large" type="submit">Entrar na plataforma <span>&rarr;</span></button>
-        <p class="auth-status" data-auth-status aria-live="polite"></p>
-      </form>
+        <form class="auth-form" data-auth-form data-auth-mode="login" autocomplete="on">
+          <label>E-mail
+            <input name="email" type="email" autocomplete="email" required>
+          </label>
+          <label>Senha
+            <input name="password" type="password" minlength="4" autocomplete="current-password" required>
+          </label>
+          <button class="btn btn-primary btn-large" type="submit">Entrar na plataforma <span>&rarr;</span></button>
+          <p class="auth-status" data-auth-status aria-live="polite"></p>
+        </form>
 
-      <p class="auth-switch">Ainda nao tem conta? <a href="cadastro.html">Criar conta</a></p>
+        <p class="auth-switch">Ainda não tem conta? <a href="cadastro.html">Criar conta</a></p>
+      </aside>
     </section>
   </main>
 
