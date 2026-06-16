@@ -2,7 +2,7 @@ const abilityModifier = score => Math.floor((Number(score) - 10) / 2);
 const proficiencyBonus = level => Math.ceil(Number(level) / 4) + 1;
 const formatModifier = value => `${value >= 0 ? "+" : ""}${value}`;
 const randomDie = sides => Math.floor(Math.random() * sides) + 1;
-const sheetKey = "apex-realms-dnd5e-kael";
+const sheetKey = "apex-realms-dnd5e-current";
 let rollMode = "normal";
 
 function rollD20(modifier = 0) {
@@ -52,7 +52,7 @@ function renderSheetCalculations() {
   document.querySelector("#armor-class-label")?.replaceChildren(document.createTextNode(document.querySelector("#field-ac")?.value || 17));
   const progress = document.querySelector("#hp-progress");
   if (progress) progress.style.width = `${Math.min(100, Math.max(0, currentHp / maxHp * 100))}%`;
-  const name = document.querySelector("#field-name")?.value || "Kael Ardent";
+  const name = document.querySelector("#field-name")?.value || "Novo personagem";
   const race = document.querySelector("#field-race")?.value || "Humano";
   const characterClass = document.querySelector("#field-class")?.value || "Patrulheiro";
   const background = document.querySelector("#field-background")?.value || "Forasteiro";

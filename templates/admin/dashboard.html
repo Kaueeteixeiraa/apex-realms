@@ -37,10 +37,13 @@
       <div class="section-line"><h2>Campanhas recentes</h2></div>
       <div class="admin-campaign-list">
         {% for campaign in campaigns %}
-        <a href="{{ url_for('campaign_detail', campaign_id=campaign.id) }}">
-          <span><b>{{ campaign.name }}</b><small>{{ campaign.system }} · {{ campaign.player_count }} jogadores</small></span>
-          <em>{{ campaign.owner_name }}</em>
-        </a>
+        <article class="admin-campaign-row">
+          <a href="{{ url_for('campaign_detail', campaign_id=campaign.id) }}">
+            <span><b>{{ campaign.name }}</b><small>{{ campaign.system }} · {{ campaign.player_count }} jogadores</small></span>
+            <em>{{ campaign.owner_name }}</em>
+          </a>
+          <form method="post" action="{{ url_for('campaign_delete', campaign_id=campaign.id) }}" onsubmit="return confirm('Excluir esta campanha? Esta acao nao pode ser desfeita.');"><button class="btn btn-ghost btn-sm" type="submit">Excluir</button></form>
+        </article>
         {% else %}
         <p class="muted">Nenhuma campanha cadastrada ainda.</p>
         {% endfor %}

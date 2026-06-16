@@ -14,7 +14,10 @@
       <a href="{{ url_for('campaign_detail', campaign_id=c.id) }}" class="campaign-cover cover-{{ loop.index }}"><span class="system-tag">{{ c.system }}</span><div class="cover-symbol">✦</div></a>
       <div class="campaign-body"><div class="role-tag {{ c.access_role }}">{{ 'Administrando' if c.access_role == 'admin' else ('Mestrando' if c.access_role == 'master' else 'Jogando') }}</div><h3>{{ c.name }}</h3><p>{{ c.description }}</p>
       <div class="campaign-meta"><span>◷ {{ c.last_session[:10] }}</span><span>por {{ c.owner_name }}</span></div>
-      <a class="btn btn-primary wide" href="{{ url_for('game_room', campaign_id=c.id) }}">Entrar na sala →</a></div>
+      <a class="btn btn-primary wide" href="{{ url_for('game_room', campaign_id=c.id) }}">Entrar na sala →</a>
+      {% if c.access_role in ['master', 'admin'] %}
+      <form method="post" action="{{ url_for('campaign_delete', campaign_id=c.id) }}" onsubmit="return confirm('Excluir esta campanha? Esta acao nao pode ser desfeita.');"><button class="btn btn-ghost wide" type="submit">Excluir campanha</button></form>
+      {% endif %}</div>
     </article>
   {% else %}<div class="empty"><h3>Nenhuma campanha ainda</h3><p>Crie um mundo ou entre com um código de convite.</p></div>{% endfor %}
   </div>

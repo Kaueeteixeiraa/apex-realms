@@ -342,6 +342,16 @@ def create_app():
         flash("Código de convite não encontrado.", "error")
         return redirect(url_for("dashboard"))
 
+    @app.post("/campaign/<int:campaign_id>/delete")
+    @login_required
+    def campaign_delete(campaign_id):
+        campaign_access(campaign_id, owner_only=True)
+        for table in ("chat_messages", "initiative", "combat_state", "assets", "maps", "tokens", "memberships"):
+            execute(f"DELETE FROM {table} WHERE campaign_id = ?", (campaign_id,))
+        execute("DELETE FROM campaigns WHERE id = ?", (campaign_id,))
+        flash("Campanha excluida.", "success")
+        return redirect(url_for("admin_dashboard" if current_user()["role"] == "admin" else "dashboard"))
+
     @app.get("/game/<int:campaign_id>")
     @login_required
     def game_room(campaign_id):
@@ -569,7 +579,7 @@ def create_app():
     @app.cli.command("init-db")
     def init_db_command():
         init_database(app)
-        print("Banco criado e dados de exemplo adicionados.")
+        print("Banco inicializado sem dados de exemplo.")
 
     return app
 
@@ -588,42 +598,25 @@ def init_database(app):
             get_db().execute("ALTER TABLE maps ADD COLUMN fog_enabled INTEGER DEFAULT 0")
         get_db().commit()
         execute("UPDATE users SET role = 'player' WHERE role NOT IN ('player', 'master', 'admin')")
-        if not query("SELECT id FROM users LIMIT 1", one=True):
-            gm_id = execute(
-                "INSERT INTO users (name, nickname, email, password_hash, role, bio, preferences) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                ("Lina Monteiro", "Lina", "mestre@apexrealms.com", generate_password_hash("apex123"), "master", "Narradora de mundos impossíveis.", "Fantasia sombria, investigação"),
-            )
-            player_id = execute(
-                "INSERT INTO users (name, nickname, email, password_hash, role, bio, preferences) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                ("Caio Reis", "Caio", "jogador@apexrealms.com", generate_password_hash("apex123"), "player", "Sempre pronto para uma missão.", "D&D, Tormenta"),
-            )
-            campaign_id = execute(
-                """INSERT INTO campaigns (owner_id, name, description, system, cover, scene, invite_code, public_notes, last_summary)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (gm_id, "Ecos de Vhal'Tor", "Uma expedição além do véu procura a cidade que desapareceu há trezentos anos.", "D&D 5e", "", "Ruínas do Observatório", "APEX2026", "A torre reage à luz da lua. Não confiem no cartógrafo.", "O grupo atravessou o Pântano de Vidro e encontrou o observatório."),
-            )
-            execute("INSERT INTO memberships (campaign_id, user_id, character_name) VALUES (?, ?, ?)", (campaign_id, player_id, "Kael Ardent"))
-            token1 = execute("INSERT INTO tokens (campaign_id, owner_id, name, token_type, class_name, hp, max_hp, x, y, color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (campaign_id, player_id, "Kael Ardent", "player", "Patrulheiro", 32, 38, 34, 61, "#44d7ff"))
-            token2 = execute("INSERT INTO tokens (campaign_id, name, token_type, class_name, hp, max_hp, x, y, color, conditions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (campaign_id, "Sentinela Vazia", "monster", "Constructo", 48, 60, 68, 35, "#a66bff", "Atordoado"))
-            token3 = execute("INSERT INTO tokens (campaign_id, name, token_type, class_name, hp, max_hp, x, y, color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (campaign_id, "Lyra Voss", "npc", "Arcanista", 21, 24, 48, 48, "#ff5ca8"))
-            execute("INSERT INTO initiative (campaign_id, token_id, score, active) VALUES (?, ?, ?, 1)", (campaign_id, token1, 19))
-            execute("INSERT INTO initiative (campaign_id, token_id, score) VALUES (?, ?, ?)", (campaign_id, token2, 14))
-            execute("INSERT INTO initiative (campaign_id, token_id, score) VALUES (?, ?, ?)", (campaign_id, token3, 11))
-            for name, kind, favorite in [("Observatório em ruínas", "map", 1), ("Sentinela Vazia", "token", 1), ("Carta do Cartógrafo", "handout", 0), ("Cristal de Vhal", "item", 0)]:
-                execute("INSERT INTO assets (campaign_id, name, kind, favorite) VALUES (?, ?, ?, ?)", (campaign_id, name, kind, favorite))
-            execute("INSERT INTO chat_messages (campaign_id, author, kind, content) VALUES (?, ?, ?, ?)", (campaign_id, "Apex Realms", "system", "A sessão começou nas Ruínas do Observatório."))
-            execute("INSERT INTO chat_messages (campaign_id, user_id, author, kind, content) VALUES (?, ?, ?, ?, ?)", (campaign_id, player_id, "Caio", "message", "Kael examina as inscrições na porta."))
-        if not query("SELECT id FROM users WHERE email = ?", ("admin@apexrealms.com",), one=True):
+        admin = query("SELECT id FROM users WHERE email = ?", ("admin@apexrealms.com",), one=True)
+        if not admin:
             execute(
                 "INSERT INTO users (name, nickname, email, password_hash, role, bio, preferences) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 ("Admin Apex", "Admin", "admin@apexrealms.com", generate_password_hash("apex123"), "admin", "Administrador do sistema Apex Realms.", "Gestão, segurança e suporte"),
             )
-        demo_campaign = query("SELECT id FROM campaigns ORDER BY id LIMIT 1", one=True)
-        if demo_campaign and not query("SELECT id FROM maps WHERE campaign_id = ? LIMIT 1", (demo_campaign["id"],), one=True):
+        else:
             execute(
-                "INSERT INTO maps (campaign_id, name, image_url, grid_size, active) VALUES (?, ?, ?, ?, 1)",
-                (demo_campaign["id"], "Observatório em ruínas", "/static/img/demo-map.svg", 50),
+                "UPDATE users SET name = ?, nickname = ?, role = 'admin', bio = ?, preferences = ? WHERE id = ?",
+                ("Admin Apex", "Admin", "Administrador do sistema Apex Realms.", "Gestão, segurança e suporte", admin["id"]),
             )
+        reset_done = query("SELECT value FROM app_meta WHERE key = 'launch_reset_v1'", one=True)
+        if not reset_done:
+            admin = query("SELECT id FROM users WHERE email = ?", ("admin@apexrealms.com",), one=True)
+            for table in ("chat_messages", "initiative", "combat_state", "assets", "maps", "tokens", "memberships"):
+                execute(f"DELETE FROM {table}")
+            execute("DELETE FROM campaigns")
+            execute("DELETE FROM users WHERE id <> ?", (admin["id"],))
+            execute("INSERT OR REPLACE INTO app_meta (key, value) VALUES ('launch_reset_v1', 'done')")
 
 
 app = create_app()

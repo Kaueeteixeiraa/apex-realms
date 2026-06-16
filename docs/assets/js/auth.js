@@ -1,17 +1,10 @@
 // Static authentication flow for GitHub Pages.
 // The Flask backend has the real /login and /register routes for production hosting.
 const authForms = document.querySelectorAll("[data-auth-form]");
-const demoLoginButtons = document.querySelectorAll("[data-demo-login]");
 const avatarInput = document.querySelector('input[name="avatar"]');
 const avatarPreview = document.querySelector("[data-avatar-preview]");
 const roleSelect = document.querySelector('select[name="role"]');
 const adminCodeField = document.querySelector("[data-admin-code-field]");
-
-const demoNamesByEmail = {
-  "mestre@apexrealms.com": {name: "Kaue Teixeira", nickname: "Kaue", role: "master"},
-  "jogador@apexrealms.com": {name: "Lyra Voss", nickname: "Lyra", role: "player"},
-  "admin@apexrealms.com": {name: "Admin Apex", nickname: "Admin", role: "admin"}
-};
 
 function setAuthStatus(form, message, type = "info") {
   const status = form.querySelector("[data-auth-status]");
@@ -29,10 +22,10 @@ function redirectAfterAuth() {
   }, 520);
 }
 
-function signInDemoUser(user) {
+function signInStaticUser(user) {
   window.ApexStaticAuth?.saveUser(user);
   window.ApexStaticAuth?.applyUser();
-  showPrototypeToast?.(`Entrando como ${window.ApexStaticAuth?.roleLabel(user.role) || "usuário"}...`);
+  showPrototypeToast?.(`Entrando como ${window.ApexStaticAuth?.roleLabel(user.role) || "usuario"}...`);
   redirectAfterAuth();
 }
 
@@ -67,15 +60,6 @@ avatarInput?.addEventListener("change", () => {
 roleSelect?.addEventListener("change", syncAdminField);
 syncAdminField();
 
-demoLoginButtons.forEach(button => button.addEventListener("click", () => {
-  signInDemoUser({
-    name: button.dataset.name,
-    nickname: button.dataset.nickname,
-    email: button.dataset.email,
-    role: button.dataset.role
-  });
-}));
-
 authForms.forEach(form => form.addEventListener("submit", event => {
   event.preventDefault();
   if (!form.reportValidity()) return;
@@ -83,23 +67,39 @@ authForms.forEach(form => form.addEventListener("submit", event => {
   const formData = new FormData(form);
   const mode = form.dataset.authMode;
   const email = String(formData.get("email") || "").trim().toLowerCase();
+  const password = String(formData.get("password") || "");
   const selectedRole = String(formData.get("role") || "player");
-  const demoAccount = demoNamesByEmail[email] || {};
-  const accountRole = mode === "login" && demoAccount.role ? demoAccount.role : selectedRole;
+  const publicRole = selectedRole === "master" ? "master" : "player";
 
-  if (mode === "register" && accountRole === "admin" && String(formData.get("admin_code") || "").trim() !== "APEX-ADMIN-2026") {
-    setAuthStatus(form, "Código de administrador inválido. Use APEX-ADMIN-2026.", "error");
+  if (mode === "login") {
+    const account = window.ApexStaticAuth?.findAccount(email);
+    if (!account) {
+      setAuthStatus(form, "Conta nao encontrada. Crie uma conta para acessar a plataforma.", "error");
+      return;
+    }
+    if (account.password !== password) {
+      setAuthStatus(form, "Senha invalida.", "error");
+      return;
+    }
+    setAuthStatus(form, "Sessao validada. Abrindo dashboard...", "success");
+    signInStaticUser(account);
     return;
   }
 
-  setAuthStatus(form, "Sessão criada. Abrindo dashboard...", "success");
+  if (window.ApexStaticAuth?.findAccount(email)) {
+    setAuthStatus(form, "Este e-mail ja possui uma conta.", "error");
+    return;
+  }
+  setAuthStatus(form, "Conta criada. Abrindo dashboard...", "success");
   readAvatarFile(formData.get("avatar"), avatar => {
-    signInDemoUser({
-      name: String(formData.get("name") || demoAccount.name || "Aventureiro Apex").trim(),
-      nickname: String(formData.get("nickname") || demoAccount.nickname || "Aventureiro").trim(),
+    const account = window.ApexStaticAuth?.upsertAccount({
+      name: String(formData.get("name") || "Aventureiro Apex").trim(),
+      nickname: String(formData.get("nickname") || "Aventureiro").trim(),
       email,
-      role: accountRole || "player",
+      password,
+      role: publicRole,
       avatar
     });
+    signInStaticUser(account);
   });
 }));

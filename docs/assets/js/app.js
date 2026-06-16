@@ -71,11 +71,17 @@ document.querySelectorAll("[data-save]").forEach(button => button.addEventListen
 // Lightweight session helper used by the GitHub Pages build.
 // The hosted Flask app will replace this with real server-side authentication.
 const APEX_STATIC_USER_KEY = "apex-realms-static-user";
+const APEX_STATIC_ACCOUNTS_KEY = "apex-realms-static-accounts";
+const APEX_STATIC_RESET_KEY = "apex-realms-launch-reset-v1";
 const APEX_STATIC_DEFAULT_USER = {
-  name: "Kaue Teixeira",
-  nickname: "Kaue",
-  email: "mestre@apexrealms.com",
-  role: "master"
+  name: "Admin Apex",
+  nickname: "Admin",
+  email: "admin@apexrealms.com",
+  role: "admin"
+};
+const APEX_STATIC_ADMIN_ACCOUNT = {
+  ...APEX_STATIC_DEFAULT_USER,
+  password: "apex123"
 };
 const APEX_ROLE_LABELS = {
   player: "Jogador",
@@ -149,11 +155,82 @@ function getStaticUser() {
 }
 
 function saveStaticUser(user) {
-  localStorage.setItem(APEX_STATIC_USER_KEY, JSON.stringify({...APEX_STATIC_DEFAULT_USER, ...user}));
+  const sanitizedUser = {...APEX_STATIC_DEFAULT_USER, ...user};
+  delete sanitizedUser.password;
+  localStorage.setItem(APEX_STATIC_USER_KEY, JSON.stringify(sanitizedUser));
 }
 
 function clearStaticUser() {
   localStorage.removeItem(APEX_STATIC_USER_KEY);
+}
+
+function normalizeStaticEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function sanitizeStaticAccount(account) {
+  return {
+    name: String(account?.name || APEX_STATIC_DEFAULT_USER.name).trim(),
+    nickname: String(account?.nickname || APEX_STATIC_DEFAULT_USER.nickname).trim(),
+    email: normalizeStaticEmail(account?.email || APEX_STATIC_DEFAULT_USER.email),
+    role: account?.role || "player",
+    avatar: account?.avatar || "",
+    password: String(account?.password || "")
+  };
+}
+
+function getStaticAccounts() {
+  try {
+    const accounts = JSON.parse(localStorage.getItem(APEX_STATIC_ACCOUNTS_KEY) || "[]");
+    return Array.isArray(accounts) ? accounts.map(sanitizeStaticAccount).filter(account => account.email) : [];
+  } catch {
+    localStorage.removeItem(APEX_STATIC_ACCOUNTS_KEY);
+    return [];
+  }
+}
+
+function saveStaticAccounts(accounts) {
+  localStorage.setItem(APEX_STATIC_ACCOUNTS_KEY, JSON.stringify(accounts.map(sanitizeStaticAccount)));
+}
+
+function ensureStaticAdminAccount() {
+  const accounts = getStaticAccounts().filter(account => account.email !== APEX_STATIC_ADMIN_ACCOUNT.email);
+  saveStaticAccounts([APEX_STATIC_ADMIN_ACCOUNT, ...accounts]);
+}
+
+function findStaticAccount(email) {
+  ensureStaticAdminAccount();
+  return getStaticAccounts().find(account => account.email === normalizeStaticEmail(email)) || null;
+}
+
+function upsertStaticAccount(account) {
+  const normalizedAccount = sanitizeStaticAccount(account);
+  const accounts = getStaticAccounts().filter(item => item.email !== normalizedAccount.email);
+  saveStaticAccounts([normalizedAccount, ...accounts]);
+  return normalizedAccount;
+}
+
+function runStaticLaunchReset() {
+  if (localStorage.getItem(APEX_STATIC_RESET_KEY)) {
+    ensureStaticAdminAccount();
+    return;
+  }
+  [
+    APEX_STATIC_USER_KEY,
+    "apex-realms-campaigns",
+    "apex-realms-campaign-draft",
+    "apex-realms-last-campaign",
+    "apex-realms-session-state",
+    "apex-realms-room-permissions",
+    "apex-realms-monster-library",
+    "apex-realms-pending-monster",
+    "apex-realms-dnd5e-kael",
+    "apex-realms-character-photo",
+    "apex-realms-collapsed-sheet-sections",
+    "apex-realms-favorite-sheets"
+  ].forEach(key => localStorage.removeItem(key));
+  saveStaticAccounts([APEX_STATIC_ADMIN_ACCOUNT]);
+  localStorage.setItem(APEX_STATIC_RESET_KEY, new Date().toISOString());
 }
 
 function applyStaticUser() {
@@ -273,9 +350,12 @@ window.ApexStaticAuth = {
   applyUser: applyStaticUser,
   clearUser: clearStaticUser,
   canAccessRoute: canAccessStaticRoute,
+  findAccount: findStaticAccount,
   getUser: getStaticUser,
   roleLabel,
-  saveUser: saveStaticUser
+  saveUser: saveStaticUser,
+  upsertAccount: upsertStaticAccount
 };
 
+runStaticLaunchReset();
 applyStaticUser();

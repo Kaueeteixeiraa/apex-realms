@@ -98,8 +98,8 @@ document.querySelector("#chat-form")?.addEventListener("submit", event => {
   const value = input.value.trim();
   if (!value) return;
   const command = value.match(/^\/(?:roll|r)\s+(.+)$/i);
-  if (command) rollFormula(command[1], "COMANDO DE DADOS · KAEL");
-  else if (!rollFormula(value)) addChat("Você · Kael", value);
+  if (command) rollFormula(command[1], "COMANDO DE DADOS");
+  else if (!rollFormula(value)) addChat("Voce", value);
   input.value = "";
 });
 
@@ -282,13 +282,7 @@ document.querySelector("#map-lock")?.addEventListener("change", event => { sessi
 document.querySelector("#map-grid-toggle")?.addEventListener("change", event => { sessionState.mapState.gridVisible = event.target.checked; gridLayer.classList.toggle("hidden", !event.target.checked); persist(); });
 document.querySelector("#toggle-map-lock")?.addEventListener("click", () => { sessionState.mapState.lockedForPlayers = !sessionState.mapState.lockedForPlayers; document.querySelector("#map-lock").checked = sessionState.mapState.lockedForPlayers; showPrototypeToast(sessionState.mapState.lockedForPlayers ? "Mapa travado para jogadores." : "Mapa liberado para jogadores."); persist(); });
 
-const monsterLibrary = JSON.parse(localStorage.getItem("apex-realms-monster-library") || "null") || [
-  { id:"goblin", name:"Goblin", type:"Humanoide", ac:15, hp:7, speed:"9m", attacks:"Cimitarra +4 · 1d6+2" },
-  { id:"orc", name:"Orc", type:"Humanoide", ac:13, hp:15, speed:"9m", attacks:"Machado grande +5 · 1d12+3" },
-  { id:"lobo", name:"Lobo", type:"Fera", ac:13, hp:11, speed:"12m", attacks:"Mordida +4 · 2d4+2" },
-  { id:"esqueleto", name:"Esqueleto", type:"Morto-vivo", ac:13, hp:13, speed:"9m", attacks:"Espada curta +4 · 1d6+2" },
-  { id:"cultista", name:"Cultista", type:"Humanoide", ac:12, hp:9, speed:"9m", attacks:"Cimitarra +3 · 1d6+1" }
-];
+const monsterLibrary = JSON.parse(localStorage.getItem("apex-realms-monster-library") || "null") || [];
 function renderTableMonsters() {
   const query = document.querySelector("#table-monster-search")?.value.toLowerCase() || ""; const list = document.querySelector("#table-monster-list"); if (!list) return; list.innerHTML = "";
   monsterLibrary.filter(monster => monster.name.toLowerCase().includes(query)).forEach(monster => {

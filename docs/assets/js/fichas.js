@@ -79,7 +79,7 @@ document.querySelectorAll("[data-sheet-action]").forEach(button => button.addEve
   applyFilters();
 }));
 
-document.querySelectorAll("#new-sheet,#new-sheet-card").forEach(button => button.addEventListener("click", () => {
+document.querySelectorAll("#new-sheet,#new-sheet-card,#new-sheet-card-secondary").forEach(button => button.addEventListener("click", () => {
   document.querySelector("#sheet-create-modal").classList.add("open");
 }));
 

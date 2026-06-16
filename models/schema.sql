@@ -111,3 +111,8 @@ CREATE TABLE IF NOT EXISTS combat_state (
     round INTEGER DEFAULT 1,
     started_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS app_meta (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);

@@ -12,78 +12,74 @@
   <aside class="app-sidebar">
     <a class="app-logo" href="index.html"><svg class="realm-mark" viewBox="0 0 64 64"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="#a47cff" stroke-width="4"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="#55dfff" stroke-width="2"/></svg><span><b>APEX</b><em>REALMS</em></span></a>
     <nav class="app-nav">
-      <small>NAVEGAÇÃO</small>
-      <a class="active" href="dashboard.html"><i>⌂</i>Dashboard</a>
-      <a href="campanhas.html"><i>◈</i>Campanhas</a>
-      <a href="salas.html"><i>◇</i>Salas</a>
-      <a href="fichas.html"><i>◫</i>Minhas fichas</a>
-      <a href="biblioteca.html"><i>▤</i>Biblioteca</a>
-      <a href="configuracoes.html"><i>⚙</i>Configurações</a>
+      <small>NAVEGACAO</small>
+      <a class="active" href="dashboard.html"><i>H</i>Dashboard</a>
+      <a href="campanhas.html"><i>C</i>Campanhas</a>
+      <a href="salas.html"><i>S</i>Salas</a>
+      <a href="fichas.html"><i>F</i>Minhas fichas</a>
+      <a href="biblioteca.html"><i>B</i>Biblioteca</a>
+      <a href="configuracoes.html"><i>A</i>Configuracoes</a>
     </nav>
-    <a class="dashboard-sidebar-session" href="demo.html"><i>✦</i><span><b>Abrir mesa</b><small>Sessão em andamento</small></span></a>
+    <a class="dashboard-sidebar-session" href="salas.html"><i>+</i><span><b>Nenhuma mesa ativa</b><small>Crie ou entre em uma campanha</small></span></a>
     <div class="sidebar-profile enhanced-profile">
       <i class="portrait kael"></i>
-      <span><b data-user-name>Kaue Teixeira</b><small><span data-user-role>Mestre</span> · Conta ativa</small></span>
+      <span><b data-user-name>Visitante Apex</b><small><span data-user-role>Conta</span> ativa</small></span>
       <button type="button" data-logout>Sair</button>
     </div>
   </aside>
 
   <main class="app-main">
     <header class="app-topbar">
-      <div><small>SEGUNDA-FEIRA, 15 DE JUNHO</small><h1>Visão geral</h1></div>
-      <div class="top-actions"><a class="quiet-button auth-top-link" href="login.html">Entrar / trocar usuário</a><button class="quiet-button" type="button" data-modal="join-room">Entrar por convite</button><a class="btn btn-primary" href="criar-campanha.html">＋ Nova campanha</a></div>
+      <div><small>PLATAFORMA APEX REALMS</small><h1>Visao geral</h1></div>
+      <div class="top-actions"><a class="quiet-button auth-top-link" href="login.html">Entrar / trocar usuario</a><button class="quiet-button" type="button" data-modal="join-room">Entrar por convite</button><a class="btn btn-primary" href="criar-campanha.html">+ Nova campanha</a></div>
     </header>
 
-    <section class="overview-hero">
+    <section class="overview-hero dashboard-empty-hero">
       <div>
-        <span class="status-live"><i></i> SESSÃO EM ANDAMENTO</span>
-        <h2>Ecos de Vhal'Tor</h2>
-        <p>O grupo alcançou as ruínas. A runa final desperta.</p>
-        <div class="session-details"><span><small>SISTEMA</small><b>D&D 5e</b></span><span><small>JOGADORES</small><b>3 / 6 online</b></span><span><small>DURAÇÃO</small><b>2h 14m</b></span></div>
-        <a class="btn btn-primary btn-large" href="demo.html">Retomar sessão <span>→</span></a>
+        <span class="status-live status-idle"><i></i> PLATAFORMA PRONTA</span>
+        <h2>Comece uma nova aventura.</h2>
+        <p>O Apex Realms esta limpo para receber jogadores reais. Crie campanhas, convide o grupo e organize fichas sem dados demonstrativos na interface.</p>
+        <div class="session-details"><span><small>CAMPANHAS</small><b id="dashboard-campaign-count">0</b></span><span><small>SALAS ATIVAS</small><b>0</b></span><span><small>FICHAS</small><b>0</b></span></div>
+        <a class="btn btn-primary btn-large" href="criar-campanha.html">Criar primeira campanha <span>&rarr;</span></a>
       </div>
-      <div class="overview-map"><div class="map-grid"></div><i class="portrait kael"></i><i class="portrait lyra"></i><i class="portrait sentinel"></i><span><small>CENA ATIVA</small><b>Ruínas do Portal Astral</b></span></div>
+      <div class="overview-map dashboard-empty-map"><div class="map-grid"></div><span><small>MESA</small><b>Aguardando primeira cena</b></span></div>
     </section>
 
     <section class="app-section">
-      <div class="app-section-title"><div><small>SUAS CAMPANHAS</small><h2>Campanhas recentes</h2></div><a href="campanhas.html">Gerenciar campanhas →</a></div>
-      <div class="room-grid dashboard-room-grid" id="dashboard-campaign-grid">
-        <article class="room-card live-room"><div class="room-cover ruins-cover"><span>EM SESSÃO</span><b>D&D 5E</b></div><div class="room-body"><small>MESTRE · KAUE</small><h3>Ecos de Vhal'Tor</h3><p>Uma expedição ao coração do antigo império arcano.</p><div class="room-players"><div class="avatars"><i class="portrait kael"></i><i class="portrait lyra"></i><i class="portrait sentinel"></i></div><span>3 / 6 jogadores</span><a href="salas.html">Ver sala →</a></div></div></article>
-        <article class="room-card"><div class="room-cover frost-cover"><span>PAUSADA</span><b>TORMENTA 20</b></div><div class="room-body"><small>MESTRE · KAUE</small><h3>Coroa de Gelo</h3><p>O inverno eterno alcançou as muralhas de Valkaria.</p><div class="room-players"><div class="avatars"><i class="portrait lyra"></i><i class="portrait kael"></i></div><span>4 / 5 jogadores</span><a href="salas.html">Ver sala →</a></div></div></article>
-      </div>
+      <div class="app-section-title"><div><small>SUAS CAMPANHAS</small><h2>Campanhas recentes</h2></div><a href="campanhas.html">Gerenciar campanhas &rarr;</a></div>
+      <div class="room-grid dashboard-room-grid" id="dashboard-campaign-grid" aria-live="polite"></div>
     </section>
 
     <section class="dashboard-columns">
       <div class="app-panel">
-        <div class="app-section-title compact"><div><small>PERSONAGENS</small><h2>Minhas fichas</h2></div><a href="fichas.html">Ver todas →</a></div>
+        <div class="app-section-title compact"><div><small>PERSONAGENS</small><h2>Minhas fichas</h2></div><a href="fichas.html">Ver todas &rarr;</a></div>
         <div class="sheet-list">
-          <a href="ficha-dnd.html" class="sheet-list-item"><i class="portrait kael"></i><span><small>D&D 5E · NÍVEL 5</small><b>Kael Ardent</b><em>Patrulheiro humano</em></span><strong>32<small>/38 PV</small></strong></a>
-          <a href="fichas.html" class="sheet-list-item"><i class="portrait lyra"></i><span><small>D&D 5E · NÍVEL 4</small><b>Lyra Voss</b><em>Arcanista elfa</em></span><strong>21<small>/30 PV</small></strong></a>
+          <div class="empty-dashboard-card compact-empty"><b>Nenhuma ficha criada</b><span>Jogadores podem criar fichas antes de entrar em uma mesa.</span></div>
         </div>
       </div>
       <div class="app-panel dashboard-summary-panel">
-        <div class="app-section-title compact"><div><small>RESUMO</small><h2>Resumo do mestre</h2></div></div>
+        <div class="app-section-title compact"><div><small>RESUMO</small><h2>Ambiente inicial</h2></div></div>
         <div class="dashboard-summary">
-          <span><i>◈</i><b id="dashboard-campaign-count">2</b><small>Campanhas</small></span>
-          <span><i>◇</i><b>2</b><small>Salas</small></span>
-          <span><i>◫</i><b>2</b><small>Fichas</small></span>
+          <span><i>C</i><b id="dashboard-summary-campaigns">0</b><small>Campanhas</small></span>
+          <span><i>S</i><b>0</b><small>Salas</small></span>
+          <span><i>F</i><b>0</b><small>Fichas</small></span>
         </div>
-        <p>Sua sessão ativa está pronta para continuar, com campanhas, salas e fichas organizadas fora da mesa.</p>
+        <p>Sem dados de exemplo. A partir daqui, apenas contas, campanhas e fichas criadas pelos usuarios aparecem na plataforma.</p>
       </div>
     </section>
   </main>
 
   <div class="modal-backdrop" id="join-room">
     <form class="app-modal dashboard-join-modal" id="join-room-form" autocomplete="off">
-      <button type="button" class="modal-close" aria-label="Fechar modal">×</button>
-      <span class="modal-icon">◇</span>
+      <button type="button" class="modal-close" aria-label="Fechar modal">x</button>
+      <span class="modal-icon">#</span>
       <small>CONVITE DA CAMPANHA</small>
       <h2>Entrar por convite</h2>
-      <p>Use o código compartilhado pelo mestre para abrir a sala.</p>
-      <label for="room-code">Código da sala<input id="room-code" name="room-code" placeholder="Ex.: APEX2026" minlength="6" maxlength="12" pattern="[A-Za-z0-9-]{6,12}" required></label>
-      <small class="join-room-hint">Use de 6 a 12 letras, números ou hífen.</small>
+      <p>Use o codigo compartilhado pelo mestre para abrir a sala.</p>
+      <label for="room-code">Codigo da sala<input id="room-code" name="room-code" placeholder="Ex.: REALM-AB12CD" minlength="6" maxlength="12" pattern="[A-Za-z0-9-]{6,12}" required></label>
+      <small class="join-room-hint">Use de 6 a 12 letras, numeros ou hifen.</small>
       <p class="join-room-feedback" id="join-room-feedback" aria-live="polite"></p>
-      <button class="btn btn-primary btn-large">Entrar na sala →</button>
+      <button class="btn btn-primary btn-large">Entrar na sala &rarr;</button>
     </form>
   </div>
   <script src="assets/js/app.js"></script><script src="assets/js/dashboard.js"></script>

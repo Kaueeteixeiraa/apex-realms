@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Entrar | Apex Realms</title>
-  <meta name="description" content="Entre no Apex Realms como jogador, mestre ou administrador da plataforma.">
+  <meta name="description" content="Entre no Apex Realms com sua conta cadastrada.">
   <meta name="theme-color" content="#07070c">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,8 +20,8 @@
       <svg class="realm-mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="#a47cff" stroke-width="4"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="#55dfff" stroke-width="2"/></svg>
       <span><b>APEX</b><em>REALMS</em></span>
     </a>
-    <nav aria-label="Acesso rápido">
-      <a href="index.html">Início</a>
+    <nav aria-label="Acesso rapido">
+      <a href="index.html">Inicio</a>
       <a href="cadastro.html">Criar conta</a>
       <a class="btn btn-ghost btn-small" href="dashboard.html">Abrir plataforma</a>
     </nav>
@@ -31,48 +31,35 @@
     <section class="auth-copy reveal">
       <div class="eyebrow"><span></span> ACESSO DA PLATAFORMA</div>
       <h1>Entre no seu reino.</h1>
-      <p>Entre com uma conta de jogador, mestre ou administrador. Cada papel libera apenas as áreas permitidas.</p>
+      <p>Use sua conta cadastrada para acessar campanhas, fichas e salas liberadas pelo seu perfil.</p>
       <div class="auth-role-showcase">
-        <article><i>♛</i><b>Mestre</b><span>Campanhas, mapas, NPCs e combate.</span></article>
-        <article><i>◇</i><b>Jogador</b><span>Ficha, dados, chat e turnos.</span></article>
-        <article><i>⚙</i><b>Admin</b><span>Visão de usuários, salas e operação.</span></article>
+        <article><i>R</i><b>Mestre</b><span>Campanhas, mapas, NPCs e combate.</span></article>
+        <article><i>D20</i><b>Jogador</b><span>Fichas, dados, chat e turnos.</span></article>
+        <article><i>A</i><b>Admin</b><span>Operacao e gestao da plataforma.</span></article>
       </div>
       <div class="auth-note">
-        <b>Nota rápida</b>
-        <span>No ambiente publicado no Pages, a sessão fica salva no navegador. Quando o backend Flask estiver hospedado, o acesso real acontece em <code>/login</code>.</span>
+        <b>Acesso limpo</b>
+        <span>Nenhuma conta de teste fica exposta na tela. Novos jogadores criam conta antes de entrar em campanhas.</span>
       </div>
     </section>
 
     <section class="auth-card reveal delay-1">
       <small>ACESSO</small>
       <h2>Entrar</h2>
-      <p>Use uma das contas iniciais abaixo. A senha padrão é <strong>apex123</strong>.</p>
+      <p>Informe seu e-mail e senha para abrir a plataforma.</p>
 
       <form class="auth-form" data-auth-form data-auth-mode="login" autocomplete="on">
         <label>E-mail
-          <input name="email" type="email" value="mestre@apexrealms.com" required>
+          <input name="email" type="email" autocomplete="email" required>
         </label>
         <label>Senha
-          <input name="password" type="password" value="apex123" minlength="4" required>
+          <input name="password" type="password" minlength="4" autocomplete="current-password" required>
         </label>
-        <label>Perfil
-          <select name="role" required>
-            <option value="master">Mestre</option>
-            <option value="player">Jogador</option>
-            <option value="admin">Administrador</option>
-          </select>
-        </label>
-        <button class="btn btn-primary btn-large" type="submit">Entrar na plataforma <span>→</span></button>
+        <button class="btn btn-primary btn-large" type="submit">Entrar na plataforma <span>&rarr;</span></button>
         <p class="auth-status" data-auth-status aria-live="polite"></p>
       </form>
 
-      <div class="auth-demo-grid" aria-label="Contas de acesso">
-        <button type="button" data-demo-login data-role="master" data-name="Kaue Teixeira" data-nickname="Kaue" data-email="mestre@apexrealms.com"><b>♛ Mestre</b><span>mestre@apexrealms.com</span></button>
-        <button type="button" data-demo-login data-role="player" data-name="Lyra Voss" data-nickname="Lyra" data-email="jogador@apexrealms.com"><b>◇ Jogador</b><span>jogador@apexrealms.com</span></button>
-        <button type="button" data-demo-login data-role="admin" data-name="Admin Apex" data-nickname="Admin" data-email="admin@apexrealms.com"><b>⚙ Admin</b><span>admin@apexrealms.com</span></button>
-      </div>
-
-      <p class="auth-switch">Ainda não tem conta? <a href="cadastro.html">Criar conta</a></p>
+      <p class="auth-switch">Ainda nao tem conta? <a href="cadastro.html">Criar conta</a></p>
     </section>
   </main>
 

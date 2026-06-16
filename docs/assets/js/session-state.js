@@ -2,17 +2,10 @@
 const defaultSessionState = {
   mode: "master",
   mapState: { panX: 0, panY: 0, zoom: 1, snapToGrid: false, gridVisible: true, lockedForPlayers: true, scale: 1.5 },
-  activeMap: "ruinas",
-  maps: [
-    { id: "ruinas", name: "Ruínas do Portal Astral", src: "assets/ruins-map.jpg", active: true },
-    { id: "camara", name: "Câmara sob o Portal", src: "assets/ruins-map.jpg", active: false }
-  ],
-  tokens: [
-    { id: "kael", name: "Kael Ardent", kind: "player", x: 37, y: 68, hp: 32, maxHp: 38, ac: 17, initiative: 19, speed: "9m", owner: true },
-    { id: "lyra", name: "Lyra Voss", kind: "player", x: 50, y: 69, hp: 21, maxHp: 30, ac: 14, initiative: 11, speed: "9m" },
-    { id: "sentinela", name: "Sentinela Vazia", kind: "monster", x: 64, y: 39, hp: 48, maxHp: 86, ac: 18, initiative: 14, speed: "7,5m" }
-  ],
-  players: [{ id: "kael", name: "Kael Ardent" }, { id: "lyra", name: "Lyra Voss" }],
+  activeMap: null,
+  maps: [],
+  tokens: [],
+  players: [],
   monsters: [],
   chatMessages: [],
   diceRolls: [],
@@ -30,7 +23,12 @@ const defaultSessionState = {
   }
 };
 
-const savedSessionState = JSON.parse(localStorage.getItem("apex-realms-session-state") || "null");
+let savedSessionState = null;
+try {
+  savedSessionState = JSON.parse(localStorage.getItem("apex-realms-session-state") || "null");
+} catch {
+  localStorage.removeItem("apex-realms-session-state");
+}
 window.sessionState = Object.assign(structuredClone(defaultSessionState), savedSessionState || {});
 
 const activeAccount = window.ApexStaticAuth?.getUser?.();
