@@ -1,7 +1,5 @@
 // Access flow for Apex Realms.
 const authForms = document.querySelectorAll("[data-auth-form]");
-const roleSelect = document.querySelector('select[name="role"]');
-const adminCodeField = document.querySelector("[data-admin-code-field]");
 
 function setAuthStatus(form, message, type = "info") {
   const status = form.querySelector("[data-auth-status]");
@@ -25,14 +23,6 @@ function signInStaticUser(user) {
   showPrototypeToast?.(`Entrando como ${window.ApexStaticAuth?.roleLabel(user.role) || "usuario"}...`);
   redirectAfterAuth();
 }
-
-function syncAdminField() {
-  if (!roleSelect || !adminCodeField) return;
-  adminCodeField.classList.toggle("visible", roleSelect.value === "admin");
-}
-
-roleSelect?.addEventListener("change", syncAdminField);
-syncAdminField();
 
 authForms.forEach(form => form.addEventListener("submit", event => {
   event.preventDefault();
