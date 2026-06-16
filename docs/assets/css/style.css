@@ -535,3 +535,61 @@
   .register-home-portal{width:410px;transform:translateX(6%) scale(.76)}
   .register-home-card{max-width:390px}
 }
+
+/* Login v3: mesmo encaixe visual do cadastro em 100% de zoom. */
+@media(min-width:1101px){
+  .login-home-lock{height:auto;min-height:100%;overflow:auto}
+  .login-home-page{height:auto;min-height:100vh;overflow-x:hidden;overflow-y:auto}
+  .login-home-page .login-home-topbar{height:60px;min-height:60px;padding:8px clamp(24px,4vw,56px)}
+  .login-home-page .brand .realm-mark{width:36px;height:36px}
+  .login-home-page .brand>span:last-child{font-size:11px}
+  .login-home-page .brand em{font-size:7px}
+  .login-home-shell{height:auto;min-height:calc(100vh - 60px);padding:14px clamp(24px,4vw,56px) 18px;align-items:center}
+  .login-home-layout{height:auto;max-width:1240px;margin:0 auto;grid-template-columns:minmax(0,1fr) minmax(360px,410px);gap:clamp(22px,3vw,46px);align-items:center}
+  .login-home-copy{position:relative;z-index:4;grid-column:1;grid-row:1;max-width:360px}
+  .login-home-copy h1{margin:12px 0 10px;font-size:clamp(34px,3.4vw,48px);letter-spacing:-1.8px}
+  .login-home-copy p{max-width:340px;font-size:14px;line-height:1.55}
+  .login-home-stats{max-width:340px;margin-top:16px;gap:8px}
+  .login-home-stats span{padding:10px 12px;border-radius:12px}
+  .login-home-stats b{font-size:14px}
+  .login-home-stats small{font-size:11px}
+  .login-home-portal{grid-column:1;grid-row:1;justify-self:end;width:min(44vw,440px);height:440px;min-height:0;opacity:.78;transform:translateX(4%) scale(.82);transform-origin:center;pointer-events:none}
+  .login-home-portal .login-home-aura{width:430px;height:430px}
+  .login-home-portal .login-ring-outer{width:420px;height:420px}
+  .login-home-portal .login-ring-middle{width:330px;height:330px}
+  .login-home-portal .login-ring-middle span:nth-child(1){transform:rotate(0deg) translateY(-165px)}
+  .login-home-portal .login-ring-middle span:nth-child(2){transform:rotate(60deg) translateY(-165px) rotate(-60deg)}
+  .login-home-portal .login-ring-middle span:nth-child(3){transform:rotate(120deg) translateY(-165px) rotate(-120deg)}
+  .login-home-portal .login-ring-middle span:nth-child(4){transform:rotate(180deg) translateY(-165px) rotate(-180deg)}
+  .login-home-portal .login-ring-middle span:nth-child(5){transform:rotate(240deg) translateY(-165px) rotate(-240deg)}
+  .login-home-portal .login-ring-middle span:nth-child(6){transform:rotate(300deg) translateY(-165px) rotate(-300deg)}
+  .login-home-portal .login-ring-inner{width:240px;height:240px}
+  .login-home-portal .login-home-core{width:190px;height:190px}
+  .login-home-portal .login-home-wordmark b{font-size:23px;letter-spacing:8px}
+  .login-home-portal .login-home-wordmark em{font-size:7px}
+  .login-home-portal .login-home-die{width:48px;height:48px;font-size:13px}
+  .login-home-portal .login-home-die.die-b{width:40px;height:40px}
+  .login-home-portal .login-home-die.die-c{width:42px;height:42px}
+  .login-home-portal .login-home-rune{width:36px;height:36px}
+  .login-home-card{grid-column:2;grid-row:1;max-width:410px;padding:19px;border-radius:22px}
+  .login-home-card .login-home-seal{position:absolute;right:18px;top:16px;width:34px;height:34px;margin:0;border-radius:12px}
+  .login-home-card .login-home-seal span{width:24px;height:24px}
+  .login-home-card .login-home-seal b{font-size:12px}
+  .login-home-card h1{font-size:28px;margin:5px 0 5px}
+  .login-home-card>p{max-width:320px;margin-bottom:12px;font-size:13px;line-height:1.4}
+  .login-home-card .auth-form{gap:9px}
+  .login-home-card .auth-form label{gap:5px;font-size:13px}
+  .login-home-card .auth-form input{min-height:40px;padding:0 11px;font-size:14px}
+  .login-home-card .auth-form .btn{min-height:44px;font-size:14px}
+  .login-home-card .auth-status{min-height:0}
+  .login-home-card .auth-switch{margin-top:12px;font-size:12px}
+}
+
+@media(min-width:1101px) and (max-width:1300px){
+  .login-home-layout{grid-template-columns:minmax(0,1fr) minmax(350px,390px);gap:24px}
+  .login-home-copy{max-width:320px}
+  .login-home-copy h1{font-size:39px}
+  .login-home-copy p,.login-home-stats{max-width:320px}
+  .login-home-portal{width:410px;transform:translateX(6%) scale(.76)}
+  .login-home-card{max-width:390px}
+}
