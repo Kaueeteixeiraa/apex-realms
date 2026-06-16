@@ -538,13 +538,13 @@
 
 /* Login v3: mesmo encaixe visual do cadastro em 100% de zoom. */
 @media(min-width:1101px){
-  .login-home-lock{height:auto;min-height:100%;overflow:auto}
-  .login-home-page{height:auto;min-height:100vh;overflow-x:hidden;overflow-y:auto}
+  .login-home-lock{height:100%;min-height:100%;overflow:hidden}
+  .login-home-page{height:100vh;min-height:100vh;overflow:hidden}
   .login-home-page .login-home-topbar{height:60px;min-height:60px;padding:8px clamp(24px,4vw,56px)}
   .login-home-page .brand .realm-mark{width:36px;height:36px}
   .login-home-page .brand>span:last-child{font-size:11px}
   .login-home-page .brand em{font-size:7px}
-  .login-home-shell{height:auto;min-height:calc(100vh - 60px);padding:14px clamp(24px,4vw,56px) 18px;align-items:center}
+  .login-home-shell{height:calc(100vh - 60px);min-height:0;padding:14px clamp(24px,4vw,56px) 18px;align-items:center;overflow:hidden}
   .login-home-layout{height:auto;max-width:1240px;margin:0 auto;grid-template-columns:minmax(0,1fr) minmax(360px,410px);gap:clamp(22px,3vw,46px);align-items:center}
   .login-home-copy{position:relative;z-index:4;grid-column:1;grid-row:1;max-width:360px}
   .login-home-copy h1{margin:12px 0 10px;font-size:clamp(34px,3.4vw,48px);letter-spacing:-1.8px}
