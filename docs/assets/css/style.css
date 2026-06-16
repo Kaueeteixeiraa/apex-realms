@@ -475,3 +475,63 @@
 .register-home-card{position:relative;width:100%;max-width:455px;justify-self:end;padding:20px 23px;border:1px solid #8470a0;border-radius:28px;background:linear-gradient(145deg,#11111ef2,#08080ff0);box-shadow:0 42px 125px #000d,0 0 82px #9b5cff28;backdrop-filter:blur(20px);animation:loginHomeCard 7s ease-in-out infinite}.register-home-card:before{content:"";position:absolute;inset:-1px;border-radius:28px;padding:1px;background:linear-gradient(135deg,#55dfff,#9b5cff 58%,#f2bf72);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;opacity:.5;pointer-events:none}.register-home-card .login-home-seal{width:50px;height:50px;margin-bottom:8px}.register-home-card .login-home-seal span{width:34px;height:34px}.register-home-card>small{color:#f2bf72;font-size:11px;font-weight:900;letter-spacing:2px}.register-home-card h1{margin:5px 0 4px;color:#fff;font:800 31px/1 var(--serif);letter-spacing:-1px;text-transform:uppercase}.register-home-card>p{margin:0 0 12px;color:#b7b0bf;font-size:14px;line-height:1.4}.register-home-card .auth-form{gap:7px;margin-top:0}.register-home-card .auth-form-grid{gap:9px}.register-home-card .auth-form label{gap:4px;color:#dad4e3;font-size:13px}.register-home-card .auth-form input,.register-home-card .auth-form select{min-height:40px;border-radius:11px;border-color:#4f455e;background:#08080f;color:#fff;font-size:15px}.register-home-card .auth-form input:focus,.register-home-card .auth-form select:focus{border-color:#9b5cff;box-shadow:0 0 0 4px #9b5cff22}.register-home-card .register-choice-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.register-home-card .register-choice-row span{min-height:43px;padding:8px 10px;border:1px solid #51465f;border-radius:12px;background:#0c0b13;color:#a8a0af;font-size:12px;line-height:1.25}.register-home-card .register-choice-row b{display:block;color:#fff;font-size:14px}.register-home-card .auth-form .btn{min-height:48px;margin-top:0;border-radius:10px;background:linear-gradient(135deg,#684cff,#b45cff);font-size:15px;box-shadow:0 18px 55px #8b4cff4a}.register-home-card .auth-status{min-height:14px}.register-home-card .auth-switch{margin-top:8px;text-align:center;color:#c8c0d1;font-size:13px}
 @media(max-height:740px) and (min-width:1101px){.register-home-shell{padding-top:10px;padding-bottom:14px;align-items:start}.register-home-layout{grid-template-columns:minmax(230px,340px) minmax(300px,1fr) minmax(370px,432px);gap:16px}.register-home-portal{height:min(450px,calc(100vh - 134px));min-height:410px;transform:scale(.88);transform-origin:center}.register-home-copy h1{font-size:44px;margin:12px 0 9px}.register-home-copy p{font-size:14px;line-height:1.5}.register-home-stats{gap:7px;margin-top:14px}.register-home-stats span{padding:9px 12px}.register-home-stats small{font-size:11px}.register-home-card{max-width:432px;padding:14px 20px 13px;border-radius:24px}.register-home-card .login-home-seal{position:absolute;right:20px;top:16px;width:36px;height:36px;margin:0;border-radius:13px}.register-home-card .login-home-seal span{width:25px;height:25px}.register-home-card .login-home-seal b{font-size:12px}.register-home-card h1{font-size:27px}.register-home-card>p{margin-bottom:7px;font-size:13px}.register-home-card .auth-form{gap:5px}.register-home-card .auth-form label{font-size:12px}.register-home-card .auth-form input,.register-home-card .auth-form select{min-height:34px}.register-home-card .register-choice-row span{min-height:36px;padding:6px 9px;font-size:11px}.register-home-card .register-choice-row b{font-size:13px}.register-home-card .auth-form .btn{min-height:41px}.register-home-card .auth-status{min-height:10px}.register-home-card .auth-switch{margin-top:5px}}
 @media(max-width:1100px){.register-home-page{height:auto;overflow-x:hidden;overflow-y:auto}.register-home-lock{height:auto;overflow:auto}.register-home-shell{height:auto;min-height:calc(100vh - 68px);padding:38px 4vw 50px}.register-home-layout{height:auto;grid-template-columns:1fr;max-width:760px;justify-self:center}.register-home-copy{text-align:center}.register-home-copy p{margin-inline:auto}.register-home-stats{grid-template-columns:repeat(3,1fr)}.register-home-portal{height:430px;min-height:430px}.register-home-card{justify-self:center;width:100%;max-width:560px}}@media(max-width:720px){.register-home-page .auth-topbar{height:auto;min-height:auto}.register-home-shell{padding:28px 18px 52px}.register-home-layout{gap:24px}.register-home-copy h1{font-size:38px;letter-spacing:-1.2px}.register-home-copy p{font-size:15px}.register-home-stats{grid-template-columns:1fr}.register-home-portal{height:350px;min-height:350px;scale:.72;margin:-22px 0 -38px}.register-home-card{padding:22px;border-radius:22px}.register-home-card h1{font-size:30px}.register-home-card .auth-form-grid,.register-home-card .register-choice-row{grid-template-columns:1fr}.register-home-card .auth-form .btn{min-height:54px;font-size:15px}}@media(prefers-reduced-motion:reduce){.register-home-card{animation:none!important}}
+
+/* Cadastro v3: layout compacto para desktop em 100% de zoom. */
+@media(min-width:1101px){
+  .register-home-page .register-home-topbar{height:60px;min-height:60px;padding:8px clamp(24px,4vw,56px)}
+  .register-home-page .brand .realm-mark{width:36px;height:36px}
+  .register-home-page .brand>span:last-child{font-size:11px}
+  .register-home-page .brand em{font-size:7px}
+  .register-home-shell{min-height:calc(100vh - 60px);padding:14px clamp(24px,4vw,56px) 18px;align-items:center}
+  .register-home-layout{max-width:1240px;margin:0 auto;grid-template-columns:minmax(0,1fr) minmax(360px,410px);gap:clamp(22px,3vw,46px);align-items:center}
+  .register-home-copy{position:relative;z-index:4;grid-column:1;grid-row:1;max-width:360px}
+  .register-home-copy h1{margin:12px 0 10px;font-size:clamp(34px,3.4vw,48px);letter-spacing:-1.8px}
+  .register-home-copy p{max-width:340px;font-size:14px;line-height:1.55}
+  .register-home-stats{max-width:340px;margin-top:16px;gap:8px}
+  .register-home-stats span{padding:10px 12px;border-radius:12px}
+  .register-home-stats b{font-size:14px}
+  .register-home-stats small{font-size:11px}
+  .register-home-portal{grid-column:1;grid-row:1;justify-self:end;width:min(44vw,440px);height:440px;min-height:0;opacity:.78;transform:translateX(4%) scale(.82);transform-origin:center;pointer-events:none}
+  .register-home-portal .login-home-aura{width:430px;height:430px}
+  .register-home-portal .login-ring-outer{width:420px;height:420px}
+  .register-home-portal .login-ring-middle{width:330px;height:330px}
+  .register-home-portal .login-ring-middle span:nth-child(1){transform:rotate(0deg) translateY(-165px)}
+  .register-home-portal .login-ring-middle span:nth-child(2){transform:rotate(60deg) translateY(-165px) rotate(-60deg)}
+  .register-home-portal .login-ring-middle span:nth-child(3){transform:rotate(120deg) translateY(-165px) rotate(-120deg)}
+  .register-home-portal .login-ring-middle span:nth-child(4){transform:rotate(180deg) translateY(-165px) rotate(-180deg)}
+  .register-home-portal .login-ring-middle span:nth-child(5){transform:rotate(240deg) translateY(-165px) rotate(-240deg)}
+  .register-home-portal .login-ring-middle span:nth-child(6){transform:rotate(300deg) translateY(-165px) rotate(-300deg)}
+  .register-home-portal .login-ring-inner{width:240px;height:240px}
+  .register-home-portal .login-home-core{width:190px;height:190px}
+  .register-home-portal .login-home-wordmark b{font-size:23px;letter-spacing:8px}
+  .register-home-portal .login-home-wordmark em{font-size:7px}
+  .register-home-portal .login-home-die{width:48px;height:48px;font-size:13px}
+  .register-home-portal .login-home-die.die-b{width:40px;height:40px}
+  .register-home-portal .login-home-die.die-c{width:42px;height:42px}
+  .register-home-portal .login-home-rune{width:36px;height:36px}
+  .register-home-card{grid-column:2;grid-row:1;max-width:410px;padding:17px 19px 15px;border-radius:22px}
+  .register-home-card .login-home-seal{position:absolute;right:18px;top:16px;width:34px;height:34px;margin:0;border-radius:12px}
+  .register-home-card .login-home-seal span{width:24px;height:24px}
+  .register-home-card .login-home-seal b{font-size:12px}
+  .register-home-card h1{font-size:27px;margin:5px 0 4px}
+  .register-home-card>p{margin-bottom:8px;font-size:13px;line-height:1.35}
+  .register-home-card .auth-form{gap:5px}
+  .register-home-card .auth-form-grid{gap:8px}
+  .register-home-card .auth-form label{gap:4px;font-size:12px}
+  .register-home-card .auth-form input,.register-home-card .auth-form select{min-height:34px;padding:0 11px;font-size:14px}
+  .register-home-card .register-choice-row{gap:7px}
+  .register-home-card .register-choice-row span{min-height:36px;padding:6px 9px;font-size:11px}
+  .register-home-card .register-choice-row b{font-size:13px}
+  .register-home-card .auth-form .btn{min-height:42px;font-size:14px}
+  .register-home-card .auth-status{min-height:0}
+  .register-home-card .auth-switch{margin-top:7px;font-size:12px}
+}
+
+@media(min-width:1101px) and (max-width:1300px){
+  .register-home-layout{grid-template-columns:minmax(0,1fr) minmax(350px,390px);gap:24px}
+  .register-home-copy{max-width:320px}
+  .register-home-copy h1{font-size:39px}
+  .register-home-copy p,.register-home-stats{max-width:320px}
+  .register-home-portal{width:410px;transform:translateX(6%) scale(.76)}
+  .register-home-card{max-width:390px}
+}
