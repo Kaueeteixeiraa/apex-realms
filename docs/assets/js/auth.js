@@ -1,5 +1,7 @@
 // Access flow for Apex Realms.
 const authForms = document.querySelectorAll("[data-auth-form]");
+const authQuery = new URLSearchParams(window.location.search);
+const pendingInviteCode = window.ApexInvites?.normalizeCode?.(authQuery.get("invite")) || "";
 
 function setAuthStatus(form, message, type = "info") {
   const status = form.querySelector("[data-auth-status]");
@@ -8,11 +10,19 @@ function setAuthStatus(form, message, type = "info") {
   status.dataset.status = type;
 }
 
+function joinPendingInvite(user) {
+  if (!pendingInviteCode || !window.ApexInvites?.joinByCode) return null;
+  const result = window.ApexInvites.joinByCode(pendingInviteCode, user);
+  sessionStorage.setItem("apex-realms-notice", result.message || "Convite processado.");
+  return result;
+}
+
 function redirectAfterAuth() {
   const user = window.ApexStaticAuth?.getUser();
   const next = new URLSearchParams(window.location.search).get("next");
+  const inviteResult = joinPendingInvite(user);
   const homeRoute = window.ApexStaticAuth?.homeRoute?.(user) || (user?.role === "master" ? "master/dashboard.html" : "dashboard.html");
-  const target = next && window.ApexStaticAuth?.canAccessRoute(user, next) ? next : homeRoute;
+  const target = inviteResult ? (user?.role === "player" ? "dashboard.html" : homeRoute) : (next && window.ApexStaticAuth?.canAccessRoute(user, next) ? next : homeRoute);
   setTimeout(() => {
     window.location.href = target;
   }, 520);
@@ -66,3 +76,15 @@ authForms.forEach(form => form.addEventListener("submit", event => {
   });
   signInStaticUser(account);
 }));
+
+if (pendingInviteCode) {
+  document.querySelectorAll('a[href="login.html"],a[href="cadastro.html"]').forEach(link => {
+    const target = link.getAttribute("href");
+    link.setAttribute("href", `${target}?invite=${encodeURIComponent(pendingInviteCode)}`);
+  });
+  authForms.forEach(form => {
+    const roleSelect = form.querySelector("select[name='role']");
+    if (roleSelect) roleSelect.value = "player";
+    setAuthStatus(form, `Convite ${pendingInviteCode} detectado. Entre como jogador para vincular a campanha.`, "info");
+  });
+}

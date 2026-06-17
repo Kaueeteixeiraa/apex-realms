@@ -22,8 +22,19 @@ let campaignImage = null;
 let saveTimer = null;
 
 function createInviteCode() {
+  if (window.ApexInvites?.generateCode) return window.ApexInvites.generateCode(readCampaignsForInvite());
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  return `REALM-${Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("")}`;
+  const part = (length = 4) => Array.from({length}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  return `AR-${part()}-${part()}`;
+}
+
+function readCampaignsForInvite() {
+  try {
+    const campaigns = JSON.parse(localStorage.getItem(campaignsKey) || "[]");
+    return Array.isArray(campaigns) ? campaigns : [];
+  } catch {
+    return [];
+  }
 }
 
 function getCampaignDraft() {
@@ -35,6 +46,7 @@ function getCampaignDraft() {
     limit: Math.max(1, Math.floor(Number(campaignLimit.value) || 1)),
     visibility: campaignVisibility.value,
     code: isPrivate ? codeValue.textContent : null,
+    inviteCode: isPrivate ? codeValue.textContent : null,
     notes: campaignNotes.value.trim(),
     image: campaignImage
   };
@@ -93,7 +105,7 @@ function syncSummary() {
   document.querySelector("#summary-visibility").textContent = isPrivate ? "Privada" : "Pública";
   codeCard.hidden = !isPrivate;
   publicNote.hidden = isPrivate;
-  if (isPrivate && !codeValue.textContent.startsWith("REALM-")) codeValue.textContent = createInviteCode();
+  if (isPrivate && !codeValue.textContent.startsWith("AR-")) codeValue.textContent = createInviteCode();
   scheduleDraftSave();
 }
 
@@ -165,7 +177,8 @@ campaignForm.addEventListener("submit", event => {
     const campaigns = Array.isArray(parsedCampaigns) ? parsedCampaigns : [];
     const olderCampaigns = campaigns.slice(0, 5).map((item, index) => index === 0 ? item : { ...item, image: null });
     localStorage.removeItem(draftKey);
-    localStorage.setItem(campaignsKey, JSON.stringify([campaign, ...olderCampaigns]));
+    if (window.ApexInvites?.saveCampaigns) window.ApexInvites.saveCampaigns([campaign, ...olderCampaigns]);
+    else localStorage.setItem(campaignsKey, JSON.stringify([campaign, ...olderCampaigns]));
     localStorage.setItem("apex-realms-last-campaign", JSON.stringify(campaign));
     submitStatus.textContent = "Campanha criada. Abrindo o dashboard...";
     setTimeout(() => { window.location.href = "dashboard.html"; }, 500);

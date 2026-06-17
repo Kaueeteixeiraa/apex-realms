@@ -4,7 +4,7 @@ const managementCampaignsKey = "apex-realms-campaigns";
 
 function readManagementCampaigns() {
   try {
-    const campaigns = JSON.parse(localStorage.getItem(managementCampaignsKey) || "[]");
+    const campaigns = window.ApexInvites?.readCampaigns?.() || JSON.parse(localStorage.getItem(managementCampaignsKey) || "[]");
     return Array.isArray(campaigns) ? campaigns : [];
   } catch {
     localStorage.removeItem(managementCampaignsKey);
@@ -13,7 +13,8 @@ function readManagementCampaigns() {
 }
 
 function saveManagementCampaigns(campaigns) {
-  localStorage.setItem(managementCampaignsKey, JSON.stringify(campaigns));
+  if (window.ApexInvites?.saveCampaigns) window.ApexInvites.saveCampaigns(campaigns);
+  else localStorage.setItem(managementCampaignsKey, JSON.stringify(campaigns));
 }
 
 function renderManagementCampaigns() {
@@ -29,11 +30,12 @@ function renderManagementCampaigns() {
     const card = document.createElement("article");
     card.className = "campaign-card";
     card.dataset.campaignId = campaign.id;
-    card.innerHTML = `<div class="campaign-cover"><span class="paused-status">PREPARACAO</span><em></em><div><small>CAMPANHA</small><h2></h2><p></p></div></div><div class="campaign-card-body"><dl><span><dt>PROXIMA SESSAO</dt><dd>A definir</dd></span><span><dt>GRUPO</dt><dd></dd></span><span><dt>ACESSO</dt><dd></dd></span></dl><footer><a href="salas.html">Gerenciar sala</a><button type="button" class="campaign-delete-button" data-delete-campaign>Excluir campanha</button></footer></div>`;
+    card.innerHTML = `<div class="campaign-cover"><span class="paused-status">PREPARACAO</span><em></em><div><small>CAMPANHA</small><h2></h2><p></p></div></div><div class="campaign-card-body"><dl><span><dt>CONVITE</dt><dd></dd></span><span><dt>GRUPO</dt><dd></dd></span><span><dt>ACESSO</dt><dd></dd></span></dl><footer><a href="salas.html">Gerenciar sala</a><button type="button" class="campaign-delete-button" data-delete-campaign>Excluir campanha</button></footer></div>`;
     card.querySelector(".campaign-cover em").textContent = campaign.system || "Sistema proprio";
     card.querySelector(".campaign-cover h2").textContent = campaign.name || "Campanha sem nome";
     card.querySelector(".campaign-cover p").textContent = campaign.description || "Sem descricao cadastrada.";
-    card.querySelectorAll("dd")[1].textContent = `0 / ${campaign.limit || 1} jogadores`;
+    card.querySelectorAll("dd")[0].textContent = campaign.inviteCode || campaign.code || "AR-XXXX-XXXX";
+    card.querySelectorAll("dd")[1].textContent = `${Array.isArray(campaign.players) ? campaign.players.length : 0} / ${campaign.maxPlayers || campaign.limit || 1} jogadores`;
     card.querySelectorAll("dd")[2].textContent = campaign.visibility === "private" ? "Privada" : "Publica";
     if (campaign.image) card.querySelector(".campaign-cover").style.backgroundImage = `url("${campaign.image}")`;
     else card.querySelector(".campaign-cover").classList.add("void-cover");

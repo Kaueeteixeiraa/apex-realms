@@ -28,11 +28,18 @@ function masterToast(message) {
   if (typeof showPrototypeToast === "function") showPrototypeToast(message);
 }
 
-function createInviteCode(prefix = "AR") {
-  return `${prefix}-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+function createInviteCode(existingCodes = readStore(MASTER_CAMPAIGNS_KEY, [])) {
+  if (window.ApexInvites?.generateCode) return window.ApexInvites.generateCode(existingCodes);
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const part = (length = 4) => Array.from({length}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  return `AR-${part()}-${part()}`;
 }
 
 function normalizeCampaign(raw = {}) {
+  const createdAt = raw.createdAt || new Date().toISOString();
+  const normalizedInviteCode = window.ApexInvites?.normalizeCode?.(raw.inviteCode || raw.code) || "";
+  const inviteCode = normalizedInviteCode.startsWith("AR-") ? normalizedInviteCode : createInviteCode();
+  const maxPlayers = Number(raw.maxPlayers || raw.limit || 4);
   return {
     id: raw.id || `cmp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     name: raw.name || "Campanha sem nome",
@@ -40,25 +47,37 @@ function normalizeCampaign(raw = {}) {
     description: raw.description || "",
     banner: raw.banner || raw.image || "",
     initialLevel: Number(raw.initialLevel || raw.level || 1),
-    maxPlayers: Number(raw.maxPlayers || raw.limit || 4),
+    maxPlayers,
+    limit: maxPlayers,
     status: raw.status || "Preparacao",
-    inviteCode: raw.inviteCode || raw.code || createInviteCode("AR"),
+    inviteCode,
+    code: inviteCode,
     archived: Boolean(raw.archived),
-    private: true,
-    createdAt: raw.createdAt || new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    private: raw.private !== false,
+    visibility: raw.visibility || (raw.private === false ? "public" : "private"),
+    image: raw.image || raw.banner || "",
+    players: Array.isArray(raw.players) ? raw.players : [],
+    createdAt,
+    updatedAt: raw.updatedAt || createdAt
   };
 }
 
 function readCampaigns() {
-  return readStore(MASTER_CAMPAIGNS_KEY, []).map(normalizeCampaign);
+  const campaigns = window.ApexInvites?.readCampaigns?.() || readStore(MASTER_CAMPAIGNS_KEY, []);
+  return campaigns.map(normalizeCampaign);
 }
 
 function saveCampaigns(campaigns) {
-  writeStore(MASTER_CAMPAIGNS_KEY, campaigns.map(normalizeCampaign));
+  const normalizedCampaigns = campaigns.map(normalizeCampaign);
+  if (window.ApexInvites?.saveCampaigns) {
+    window.ApexInvites.saveCampaigns(normalizedCampaigns);
+    return;
+  }
+  writeStore(MASTER_CAMPAIGNS_KEY, normalizedCampaigns);
 }
 
 function campaignInviteLink(code) {
+  if (window.ApexInvites?.inviteLink) return window.ApexInvites.inviteLink(code);
   return `${window.location.origin}${window.location.pathname.replace(/\/master\/[^/]*$/, "/")}cadastro.html?invite=${encodeURIComponent(code)}`;
 }
 
@@ -154,7 +173,8 @@ function bindCampaignForm() {
       maxPlayers: data.get("maxPlayers"),
       status: data.get("status"),
       banner: form.dataset.bannerData || existing?.banner || "",
-      inviteCode: existing?.inviteCode || createInviteCode("AR")
+      inviteCode: existing?.inviteCode || existing?.code || createInviteCode(campaigns),
+      updatedAt: new Date().toISOString()
     });
     const nextCampaigns = existing ? campaigns.map(item => item.id === id ? campaign : item) : [campaign, ...campaigns];
     saveCampaigns(nextCampaigns);
@@ -243,7 +263,16 @@ function bindCampaignActions() {
       masterToast("Campanha carregada para edicao.");
     }
     if (action === "duplicate") {
-      saveCampaigns([{...campaign, id: undefined, name: `${campaign.name} (copia)`, inviteCode: createInviteCode("AR")}, ...campaigns]);
+      saveCampaigns([{
+        ...campaign,
+        id: undefined,
+        name: `${campaign.name} (copia)`,
+        inviteCode: createInviteCode(campaigns),
+        code: undefined,
+        players: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }, ...campaigns]);
       masterToast("Campanha duplicada com novo convite.");
     }
     if (action === "archive") {
@@ -427,14 +456,16 @@ function bindInvitesPage() {
   document.querySelector("[data-new-invite]")?.addEventListener("click", () => {
     const select = document.querySelector("[data-invite-campaign]");
     const id = select.value;
-    saveCampaigns(readCampaigns().map(item => item.id === id ? {...item, inviteCode: createInviteCode("AR")} : item));
+    const campaigns = readCampaigns();
+    saveCampaigns(campaigns.map(item => item.id === id ? {...item, inviteCode: createInviteCode(campaigns), code: undefined, updatedAt: new Date().toISOString()} : item));
     masterToast("Novo codigo gerado.");
     renderInvitesPage();
   });
   document.querySelector("[data-revoke-invite]")?.addEventListener("click", () => {
     const select = document.querySelector("[data-invite-campaign]");
     const id = select.value;
-    saveCampaigns(readCampaigns().map(item => item.id === id ? {...item, inviteCode: createInviteCode("REV")} : item));
+    const campaigns = readCampaigns();
+    saveCampaigns(campaigns.map(item => item.id === id ? {...item, inviteCode: createInviteCode(campaigns), code: undefined, updatedAt: new Date().toISOString()} : item));
     masterToast("Codigo revogado e substituido.");
     renderInvitesPage();
   });

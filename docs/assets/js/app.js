@@ -73,6 +73,9 @@ document.querySelectorAll("[data-save]").forEach(button => button.addEventListen
 const APEX_STATIC_USER_KEY = "apex-realms-static-user";
 const APEX_STATIC_ACCOUNTS_KEY = "apex-realms-static-accounts";
 const APEX_STATIC_RESET_KEY = "apex-realms-launch-reset-v1";
+const APEX_STATIC_CAMPAIGNS_KEY = "apex-realms-campaigns";
+const APEX_STATIC_PLAYER_CAMPAIGNS_KEY = "apex-realms-player-campaigns";
+const APEX_INVITE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const APEX_STATIC_DEFAULT_USER = {
   name: "Admin Apex",
   nickname: "Admin",
@@ -247,6 +250,152 @@ function upsertStaticAccount(account) {
   return normalizedAccount;
 }
 
+function readStaticJsonStore(key, fallback) {
+  try {
+    const data = JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+    return Array.isArray(fallback) ? (Array.isArray(data) ? data : fallback) : (data && typeof data === "object" ? data : fallback);
+  } catch {
+    localStorage.removeItem(key);
+    return fallback;
+  }
+}
+
+function compactInviteCode(value) {
+  return String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+function normalizeInviteCode(value) {
+  const compact = compactInviteCode(value);
+  if (!compact) return "";
+  const body = compact.startsWith("AR") ? compact.slice(2) : compact;
+  if (!body) return "AR-";
+  const safeBody = body.slice(0, 8);
+  return `AR-${safeBody.slice(0, 4)}${safeBody.length > 4 ? `-${safeBody.slice(4)}` : ""}`;
+}
+
+function generateInviteCode(existingCodes = []) {
+  const usedCodes = new Set(existingCodes.map(item => compactInviteCode(typeof item === "string" ? item : item?.inviteCode || item?.code)));
+  const part = (length = 4) => Array.from({length}, () => APEX_INVITE_CHARS[Math.floor(Math.random() * APEX_INVITE_CHARS.length)]).join("");
+  let code = "";
+  do {
+    code = `AR-${part()}-${part()}`;
+  } while (usedCodes.has(compactInviteCode(code)));
+  return code;
+}
+
+function withInviteCodes(campaigns) {
+  const usedCodes = new Set();
+  return campaigns.map(campaign => {
+    const rawInviteCode = normalizeInviteCode(campaign?.inviteCode || campaign?.code);
+    const currentCode = rawInviteCode.startsWith("AR-") && !usedCodes.has(compactInviteCode(rawInviteCode)) ? rawInviteCode : "";
+    const inviteCode = currentCode || generateInviteCode([...usedCodes]);
+    usedCodes.add(compactInviteCode(inviteCode));
+    return {...campaign, inviteCode, code: inviteCode};
+  });
+}
+
+function readStaticCampaignsWithInvites() {
+  const rawCampaigns = readStaticJsonStore(APEX_STATIC_CAMPAIGNS_KEY, []);
+  const campaigns = withInviteCodes(rawCampaigns);
+  if (JSON.stringify(rawCampaigns) !== JSON.stringify(campaigns)) {
+    localStorage.setItem(APEX_STATIC_CAMPAIGNS_KEY, JSON.stringify(campaigns));
+  }
+  return campaigns;
+}
+
+function saveStaticCampaignsWithInvites(campaigns) {
+  const normalizedCampaigns = withInviteCodes(Array.isArray(campaigns) ? campaigns : []);
+  localStorage.setItem(APEX_STATIC_CAMPAIGNS_KEY, JSON.stringify(normalizedCampaigns));
+  return normalizedCampaigns;
+}
+
+function findStaticCampaignByInviteCode(code) {
+  const compactCode = compactInviteCode(code);
+  if (!compactCode) return null;
+  return readStaticCampaignsWithInvites().find(campaign => !campaign.archived && compactInviteCode(campaign.inviteCode || campaign.code) === compactCode) || null;
+}
+
+function readPlayerCampaignRegistry() {
+  return readStaticJsonStore(APEX_STATIC_PLAYER_CAMPAIGNS_KEY, {});
+}
+
+function savePlayerCampaignRegistry(registry) {
+  localStorage.setItem(APEX_STATIC_PLAYER_CAMPAIGNS_KEY, JSON.stringify(registry && typeof registry === "object" ? registry : {}));
+}
+
+function playerRegistryKey(user = getStaticUser()) {
+  return normalizeStaticEmail(user?.email || "");
+}
+
+function readJoinedCampaignEntries(user = getStaticUser()) {
+  const key = playerRegistryKey(user);
+  if (!key) return [];
+  const registry = readPlayerCampaignRegistry();
+  return Array.isArray(registry[key]) ? registry[key] : [];
+}
+
+function saveJoinedCampaignEntries(user, entries) {
+  const key = playerRegistryKey(user);
+  if (!key) return;
+  const registry = readPlayerCampaignRegistry();
+  registry[key] = Array.isArray(entries) ? entries : [];
+  savePlayerCampaignRegistry(registry);
+}
+
+function readJoinedCampaigns(user = getStaticUser()) {
+  const entries = readJoinedCampaignEntries(user);
+  const campaigns = readStaticCampaignsWithInvites();
+  return entries
+    .map(entry => {
+      const campaign = campaigns.find(item => item.id === entry.campaignId || compactInviteCode(item.inviteCode || item.code) === compactInviteCode(entry.inviteCode));
+      return campaign ? {...campaign, joinedAt: entry.joinedAt, joinStatus: entry.status || "Ativo"} : null;
+    })
+    .filter(Boolean);
+}
+
+function joinCampaignByInviteCode(code, user = getStaticUser()) {
+  const normalizedCode = normalizeInviteCode(code);
+  if (!user) return {ok: false, reason: "auth", message: "Entre na sua conta para usar o convite."};
+  if (user.role !== "player") return {ok: false, reason: "role", message: "Use uma conta de jogador para entrar por convite."};
+  const campaign = findStaticCampaignByInviteCode(normalizedCode);
+  if (!campaign) return {ok: false, reason: "missing", message: "Convite nao encontrado ou expirado."};
+
+  const entries = readJoinedCampaignEntries(user);
+  const alreadyJoined = entries.some(entry => entry.campaignId === campaign.id || compactInviteCode(entry.inviteCode) === compactInviteCode(campaign.inviteCode));
+  if (!alreadyJoined) {
+    saveJoinedCampaignEntries(user, [{
+      campaignId: campaign.id,
+      campaignName: campaign.name || "Campanha sem nome",
+      inviteCode: campaign.inviteCode,
+      joinedAt: new Date().toISOString(),
+      status: "Ativo"
+    }, ...entries]);
+  }
+
+  const campaigns = readStaticCampaignsWithInvites();
+  const player = {
+    email: normalizeStaticEmail(user.email),
+    name: user.name || user.nickname || "Jogador Apex",
+    nickname: user.nickname || "",
+    joinedAt: new Date().toISOString(),
+    status: "Ativo"
+  };
+  saveStaticCampaignsWithInvites(campaigns.map(item => {
+    if (item.id !== campaign.id) return item;
+    const players = Array.isArray(item.players) ? item.players.filter(saved => normalizeStaticEmail(saved.email) !== player.email) : [];
+    return {...item, players: [player, ...players]};
+  }));
+
+  return {ok: true, campaign, alreadyJoined, message: alreadyJoined ? `Voce ja esta em ${campaign.name}.` : `Voce entrou em ${campaign.name}.`};
+}
+
+function inviteLinkForCode(code) {
+  const rootPath = window.location.pathname
+    .replace(/\/master\/[^/]*$/i, "/")
+    .replace(/\/[^/]*$/i, "/");
+  return `${window.location.origin}${rootPath}cadastro.html?invite=${encodeURIComponent(normalizeInviteCode(code))}`;
+}
+
 function runStaticLaunchReset() {
   if (localStorage.getItem(APEX_STATIC_RESET_KEY)) {
     ensureStaticAdminAccount();
@@ -254,7 +403,8 @@ function runStaticLaunchReset() {
   }
   [
     APEX_STATIC_USER_KEY,
-    "apex-realms-campaigns",
+    APEX_STATIC_CAMPAIGNS_KEY,
+    APEX_STATIC_PLAYER_CAMPAIGNS_KEY,
     "apex-realms-campaign-draft",
     "apex-realms-last-campaign",
     "apex-realms-session-state",
@@ -393,6 +543,18 @@ window.ApexStaticAuth = {
   roleLabel,
   saveUser: saveStaticUser,
   upsertAccount: upsertStaticAccount
+};
+
+window.ApexInvites = {
+  compactCode: compactInviteCode,
+  findCampaignByCode: findStaticCampaignByInviteCode,
+  generateCode: generateInviteCode,
+  inviteLink: inviteLinkForCode,
+  joinByCode: joinCampaignByInviteCode,
+  normalizeCode: normalizeInviteCode,
+  readCampaigns: readStaticCampaignsWithInvites,
+  readJoinedCampaigns,
+  saveCampaigns: saveStaticCampaignsWithInvites
 };
 
 runStaticLaunchReset();
