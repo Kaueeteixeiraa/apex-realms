@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Realms | Mesa do Mestre</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=master-stage-1">
+</head>
+<body class="master-area" data-master-page="table">
+  <aside class="master-sidebar">
+    <a class="master-brand" href="../index.html" aria-label="Apex Realms"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
+    <nav class="master-nav" aria-label="Navegacao do Mestre">
+      <small>Area do Mestre</small>
+      <a href="dashboard.html"><i>D</i>Dashboard</a>
+      <a href="campaigns.html"><i>C</i>Campanhas</a>
+      <a class="active" href="table.html"><i>M</i>Mesa</a>
+      <a href="library.html"><i>B</i>Biblioteca</a>
+      <a href="sheets.html"><i>F</i>Fichas</a>
+      <a href="players.html"><i>J</i>Jogadores</a>
+      <a href="invites.html"><i>I</i>Convites</a>
+      <a href="settings.html"><i>A</i>Configuracoes</a>
+      <small>Atalhos</small>
+      <a href="../dashboard.html"><i>P</i>Area do jogador</a>
+    </nav>
+    <div class="master-sidebar-card">
+      <small>Mesa privada</small>
+      <b>Mapa em primeiro plano</b>
+      <p>Ferramentas de controle ficam em volta do mapa para nao competir com a aventura.</p>
+    </div>
+    <div class="master-profile"><div class="master-avatar" data-user-initial>A</div><span><b data-user-name>Mestre Apex</b><small><span data-user-role>Mestre</span> ativo</small></span><button type="button" data-logout>Sair</button></div>
+  </aside>
+
+  <main class="master-main">
+    <section class="master-table-shell">
+      <header class="master-table-top">
+        <div>
+          <small class="master-eyebrow">Controle de sessao</small>
+          <h1>Ruinas do Portal Astral</h1>
+        </div>
+        <div class="master-actions">
+          <span class="master-pill">Sistema: D&D 5e</span>
+          <span class="master-pill">Cena: combate tatico</span>
+          <span class="master-pill">Jogadores: 0 conectados</span>
+          <button class="master-btn" type="button" data-session-toggle data-active="false">Iniciar sessao</button>
+        </div>
+      </header>
+
+      <div class="master-table-layout">
+        <aside class="master-toolbox">
+          <div class="master-panel-header">
+            <div>
+              <small class="master-panel-kicker">Ferramentas</small>
+              <h2>Mesa</h2>
+            </div>
+          </div>
+          <div class="master-button-row">
+            <button class="master-ghost" type="button" data-zoom="-0.1">- Zoom</button>
+            <span class="master-pill" data-master-zoom-label>100%</span>
+            <button class="master-ghost" type="button" data-zoom="0.1">+ Zoom</button>
+          </div>
+          <button class="master-ghost" type="button" data-toggle-grid>Mostrar/ocultar grid</button>
+          <label class="master-upload">Enviar mapa<input data-map-upload type="file" accept="image/*"></label>
+          <div class="master-callout">
+            <b>Banco de cena</b>
+            <span>Mapas enviados pela biblioteca poderao aparecer aqui quando o backend for conectado.</span>
+          </div>
+          <div class="master-mini-list">
+            <button class="master-ghost" type="button" data-master-toast="Cena salva como rascunho.">Salvar cena</button>
+            <button class="master-ghost" type="button" data-master-toast="Tokens reposicionados.">Organizar tokens</button>
+            <button class="master-ghost" type="button" data-master-toast="Fog of war preparado para uma etapa futura.">Preparar neblina</button>
+          </div>
+        </aside>
+
+        <section class="master-map-stage" aria-label="Mapa da mesa">
+          <div class="master-map-board" data-master-map-board data-grid="on">
+            <div class="master-map-grid"></div>
+            <span class="master-token token-player">PJ</span>
+            <span class="master-token token-npc">NPC</span>
+            <span class="master-token token-monster">M</span>
+          </div>
+        </section>
+
+        <aside class="master-rightbar">
+          <div>
+            <small class="master-panel-kicker">Iniciativa</small>
+            <h2>Ordem da rodada</h2>
+            <div class="master-list">
+              <article class="master-list-item"><header><div><h3>Kael</h3><div class="master-list-meta"><span class="master-status">Pronto</span><span class="master-pill">18</span></div></div></header><p>Turno aguardando confirmacao de jogador.</p></article>
+              <article class="master-list-item"><header><div><h3>Guardiao Sombrio</h3><div class="master-list-meta"><span class="master-status danger">Hostil</span><span class="master-pill">14</span></div></div></header><p>Foco no portal central.</p></article>
+            </div>
+          </div>
+          <div>
+            <small class="master-panel-kicker">Rolagens</small>
+            <div class="master-stats-strip">
+              <span><small>Ultima</small><b>24</b></span>
+              <span><small>Dado</small><b>D20</b></span>
+              <span><small>CD</small><b>15</b></span>
+            </div>
+          </div>
+          <div class="master-field">
+            <label for="private-note">Notas privadas</label>
+            <textarea id="private-note" class="master-note-box" data-table-note="private" placeholder="Segredos, armadilhas e reacoes dos NPCs."></textarea>
+          </div>
+          <div class="master-field">
+            <label for="public-note">Anuncio para jogadores</label>
+            <textarea id="public-note" class="master-note-box" data-table-note="public" placeholder="Texto que sera compartilhado com o grupo futuramente."></textarea>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script src="../assets/js/app.js?v=portal-brand-v1"></script>
+  <script src="../assets/js/master.js?v=master-stage-1"></script>
+</body>
+</html>

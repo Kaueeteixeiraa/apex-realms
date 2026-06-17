@@ -11,7 +11,8 @@ function setAuthStatus(form, message, type = "info") {
 function redirectAfterAuth() {
   const user = window.ApexStaticAuth?.getUser();
   const next = new URLSearchParams(window.location.search).get("next");
-  const target = next && window.ApexStaticAuth?.canAccessRoute(user, next) ? next : "dashboard.html";
+  const homeRoute = window.ApexStaticAuth?.homeRoute?.(user) || (user?.role === "master" ? "master/dashboard.html" : "dashboard.html");
+  const target = next && window.ApexStaticAuth?.canAccessRoute(user, next) ? next : homeRoute;
   setTimeout(() => {
     window.location.href = target;
   }, 520);

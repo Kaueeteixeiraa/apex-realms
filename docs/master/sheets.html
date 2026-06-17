@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Realms | Fichas dos Jogadores</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=master-stage-1">
+</head>
+<body class="master-area" data-master-page="sheets">
+  <aside class="master-sidebar">
+    <a class="master-brand" href="../index.html" aria-label="Apex Realms"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
+    <nav class="master-nav" aria-label="Navegacao do Mestre">
+      <small>Area do Mestre</small>
+      <a href="dashboard.html"><i>D</i>Dashboard</a>
+      <a href="campaigns.html"><i>C</i>Campanhas</a>
+      <a href="table.html"><i>M</i>Mesa</a>
+      <a href="library.html"><i>B</i>Biblioteca</a>
+      <a class="active" href="sheets.html"><i>F</i>Fichas</a>
+      <a href="players.html"><i>J</i>Jogadores</a>
+      <a href="invites.html"><i>I</i>Convites</a>
+      <a href="settings.html"><i>A</i>Configuracoes</a>
+      <small>Atalhos</small>
+      <a href="../dashboard.html"><i>P</i>Area do jogador</a>
+    </nav>
+    <div class="master-sidebar-card">
+      <small>Permissoes</small>
+      <b>Fichas sob controle</b>
+      <p>O Mestre visualiza fichas vinculadas e pode bloquear edicoes durante a sessao.</p>
+    </div>
+    <div class="master-profile"><div class="master-avatar" data-user-initial>A</div><span><b data-user-name>Mestre Apex</b><small><span data-user-role>Mestre</span> ativo</small></span><button type="button" data-logout>Sair</button></div>
+  </aside>
+
+  <main class="master-main">
+    <header class="master-topbar">
+      <div>
+        <small class="master-eyebrow">Fichas vinculadas</small>
+        <h1>Fichas dos Jogadores</h1>
+      </div>
+      <div class="master-actions">
+        <a class="master-ghost" href="../fichas.html">Abrir minhas fichas</a>
+        <button class="master-btn" type="button" data-master-toast="Bloqueio global sera aplicado quando houver fichas vinculadas.">Bloquear edicao</button>
+      </div>
+    </header>
+
+    <section class="master-panel">
+      <div class="master-filter-grid three">
+        <label class="master-field"><span>Campanha</span><select><option>Todas as campanhas</option></select></label>
+        <label class="master-field"><span>Status</span><select><option>Todas</option><option>Aguardando aprovacao</option><option>Aprovada</option><option>Edicao bloqueada</option></select></label>
+        <label class="master-field"><span>Buscar ficha</span><input class="master-search" placeholder="Nome do personagem ou jogador"></label>
+      </div>
+    </section>
+
+    <section class="master-grid">
+      <article class="master-card"><span class="master-icon">A</span><div><strong>Aprovacao</strong><h2>0 pendentes</h2><p>Fichas enviadas por jogadores aguardarao sua liberacao aqui.</p></div></article>
+      <article class="master-card"><span class="master-icon">V</span><div><strong>Visibilidade</strong><h2>Compartilhamento claro</h2><p>Privada, mestre, grupo e bloqueada ficam com indicadores visuais.</p></div></article>
+      <article class="master-card"><span class="master-icon">L</span><div><strong>Durante a sessao</strong><h2>Bloqueio de edicao</h2><p>O Mestre pode impedir alteracoes enquanto a mesa estiver ativa.</p></div></article>
+      <article class="master-card"><span class="master-icon">O</span><div><strong>Notas</strong><h2>Observacoes privadas</h2><p>Espaco reservado para comentarios que jogadores nao veem.</p></div></article>
+    </section>
+
+    <section class="master-panel">
+      <div class="master-panel-header">
+        <div>
+          <small class="master-panel-kicker">Lista</small>
+          <h2>Fichas enviadas para o Mestre</h2>
+        </div>
+        <button class="master-ghost" type="button" data-master-toast="Atualizacao feita localmente.">Atualizar</button>
+      </div>
+      <div class="master-list" data-master-sheets-list></div>
+    </section>
+  </main>
+
+  <script src="../assets/js/app.js?v=portal-brand-v1"></script>
+  <script src="../assets/js/master.js?v=master-stage-1"></script>
+</body>
+</html>

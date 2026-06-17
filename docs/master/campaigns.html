@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Realms | Campanhas do Mestre</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=master-stage-1">
+</head>
+<body class="master-area" data-master-page="campaigns">
+  <aside class="master-sidebar">
+    <a class="master-brand" href="../index.html" aria-label="Apex Realms"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
+    <nav class="master-nav" aria-label="Navegacao do Mestre">
+      <small>Area do Mestre</small>
+      <a href="dashboard.html"><i>D</i>Dashboard</a>
+      <a class="active" href="campaigns.html"><i>C</i>Campanhas</a>
+      <a href="table.html"><i>M</i>Mesa</a>
+      <a href="library.html"><i>B</i>Biblioteca</a>
+      <a href="sheets.html"><i>F</i>Fichas</a>
+      <a href="players.html"><i>J</i>Jogadores</a>
+      <a href="invites.html"><i>I</i>Convites</a>
+      <a href="settings.html"><i>A</i>Configuracoes</a>
+      <small>Atalhos</small>
+      <a href="../dashboard.html"><i>P</i>Area do jogador</a>
+    </nav>
+    <div class="master-sidebar-card">
+      <small>Campanhas</small>
+      <b>Privadas por padrao</b>
+      <p>Jogadores entram por convite e so veem o que o Mestre liberar.</p>
+    </div>
+    <div class="master-profile"><div class="master-avatar" data-user-initial>A</div><span><b data-user-name>Mestre Apex</b><small><span data-user-role>Mestre</span> ativo</small></span><button type="button" data-logout>Sair</button></div>
+  </aside>
+
+  <main class="master-main">
+    <header class="master-topbar">
+      <div>
+        <small class="master-eyebrow">Gestao de campanhas</small>
+        <h1>Campanhas</h1>
+      </div>
+      <div class="master-actions">
+        <a class="master-ghost" href="dashboard.html">Voltar ao painel</a>
+        <a class="master-btn" href="table.html">Abrir mesa</a>
+      </div>
+    </header>
+
+    <section class="master-two-col">
+      <form class="master-form-card" id="new-campaign" data-master-campaign-form>
+        <input type="hidden" data-editing-campaign-id>
+        <div class="master-panel-header">
+          <div>
+            <small class="master-panel-kicker">Nova campanha</small>
+            <h2>Crie um mundo jogavel</h2>
+            <p>Dados salvos localmente para GitHub Pages/Vercel enquanto o backend real nao entra.</p>
+          </div>
+          <span class="master-status warn">Convite privado automatico</span>
+        </div>
+
+        <div class="master-form-grid">
+          <div class="master-field full">
+            <label for="campaign-name">Nome da campanha</label>
+            <input id="campaign-name" name="name" required placeholder="Ex.: Ruinas do Portal Astral">
+          </div>
+          <div class="master-field">
+            <label for="campaign-system">Sistema de RPG</label>
+            <select id="campaign-system" name="system">
+              <option>D&D 5e</option>
+              <option>Tormenta 20</option>
+              <option>Pathfinder</option>
+              <option>Ordem Paranormal</option>
+              <option>Sistema Proprio</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="master-field">
+            <label for="campaign-status">Status</label>
+            <select id="campaign-status" name="status">
+              <option>Preparacao</option>
+              <option>Em andamento</option>
+              <option>Pausada</option>
+              <option>Finalizada</option>
+            </select>
+          </div>
+          <div class="master-field">
+            <label for="campaign-level">Nivel inicial</label>
+            <input id="campaign-level" name="initialLevel" type="number" min="1" value="1">
+          </div>
+          <div class="master-field">
+            <label for="campaign-limit">Limite de jogadores</label>
+            <input id="campaign-limit" name="maxPlayers" type="number" min="1" value="4" required>
+          </div>
+          <div class="master-field full">
+            <label for="campaign-description">Descricao</label>
+            <textarea id="campaign-description" name="description" placeholder="Tema, premissa, tom e o que os jogadores podem esperar."></textarea>
+          </div>
+          <div class="master-field full">
+            <span>Banner da campanha</span>
+            <label class="master-upload">Enviar imagem da campanha<input name="banner" type="file" accept="image/*"></label>
+            <small>A imagem aparece como preview, sem distorcer. Se nao enviar, o Apex usa o visual padrao.</small>
+          </div>
+        </div>
+        <div class="master-preview" data-campaign-banner-preview>
+          <small class="master-panel-kicker">Preview do banner</small>
+          <h2>Portal da campanha</h2>
+        </div>
+        <div class="master-button-row">
+          <button class="master-btn" type="submit">Salvar campanha</button>
+          <button class="master-ghost" type="reset">Limpar formulario</button>
+        </div>
+      </form>
+
+      <aside class="master-panel master-stack">
+        <div class="master-panel-header">
+          <div>
+            <small class="master-panel-kicker">Resumo</small>
+            <h2><span data-master-total-campaigns>0</span> campanhas</h2>
+          </div>
+        </div>
+        <div class="master-callout">
+          <b>Separacao clara</b>
+          <span>A campanha e gerenciada aqui. A mesa fica focada em jogar, narrar e acompanhar a cena.</span>
+        </div>
+        <div class="master-stats-strip">
+          <span><small>Tipo</small><b>Privada</b></span>
+          <span><small>Codigo</small><b>Auto</b></span>
+          <span><small>Dados</small><b>Local</b></span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="master-panel" aria-label="Lista de campanhas">
+      <div class="master-panel-header">
+        <div>
+          <small class="master-panel-kicker">Minhas campanhas</small>
+          <h2>Campanhas criadas</h2>
+        </div>
+        <a class="master-ghost" href="invites.html">Gerenciar convites</a>
+      </div>
+      <div class="master-list" data-master-campaign-list></div>
+    </section>
+  </main>
+
+  <script src="../assets/js/app.js?v=portal-brand-v1"></script>
+  <script src="../assets/js/master.js?v=master-stage-1"></script>
+</body>
+</html>

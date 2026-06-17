@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Realms | Dashboard do Mestre</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=master-stage-1">
+</head>
+<body class="master-area" data-master-page="dashboard">
+  <aside class="master-sidebar">
+    <a class="master-brand" href="../index.html" aria-label="Apex Realms">
+      <i class="realm-mark"></i>
+      <span><b>APEX</b><em>REALMS</em></span>
+    </a>
+    <nav class="master-nav" aria-label="Navegacao do Mestre">
+      <small>Area do Mestre</small>
+      <a class="active" href="dashboard.html"><i>D</i>Dashboard</a>
+      <a href="campaigns.html"><i>C</i>Campanhas</a>
+      <a href="table.html"><i>M</i>Mesa</a>
+      <a href="library.html"><i>B</i>Biblioteca</a>
+      <a href="sheets.html"><i>F</i>Fichas</a>
+      <a href="players.html"><i>J</i>Jogadores</a>
+      <a href="invites.html"><i>I</i>Convites</a>
+      <a href="settings.html"><i>A</i>Configuracoes</a>
+      <small>Atalhos</small>
+      <a href="../dashboard.html"><i>P</i>Area do jogador</a>
+    </nav>
+    <div class="master-sidebar-card">
+      <small>Comando privado</small>
+      <b>Seu painel de narracao</b>
+      <p>Campanhas, convites, fichas e biblioteca ficam fora da mesa para a sessao respirar.</p>
+      <a class="master-btn" href="campaigns.html">Nova campanha</a>
+    </div>
+    <div class="master-profile">
+      <div class="master-avatar" data-user-initial>A</div>
+      <span>
+        <b data-user-name>Mestre Apex</b>
+        <small><span data-user-role>Mestre</span> ativo</small>
+      </span>
+      <button type="button" data-logout>Sair</button>
+    </div>
+  </aside>
+
+  <main class="master-main">
+    <header class="master-topbar">
+      <div>
+        <small class="master-eyebrow">Painel exclusivo</small>
+        <h1>Dashboard do Mestre</h1>
+      </div>
+      <div class="master-actions">
+        <a class="master-ghost" href="../demo.html">Ver mesa publica</a>
+        <a class="master-btn" href="campaigns.html#new-campaign">Criar campanha</a>
+      </div>
+    </header>
+
+    <section class="master-hero">
+      <div>
+        <small class="master-eyebrow">Central de controle</small>
+        <h1>Prepare o mundo antes dos jogadores entrarem.</h1>
+        <p>O Apex Realms agora separa gerenciamento e experiencia de jogo. Aqui o Mestre organiza campanhas, jogadores, convites, fichas, biblioteca e ferramentas de mesa sem poluir a sessao.</p>
+        <div class="master-kpi">
+          <article><small>Campanhas ativas</small><b data-master-campaign-count>0</b></article>
+          <article><small>Convite atual</small><b data-master-invite-code>SEM-CAMPANHA</b></article>
+          <article><small>Proxima sessao</small><b data-master-next-session>A definir</b></article>
+          <article><small>Permissao</small><b>Mestre</b></article>
+        </div>
+      </div>
+      <div class="master-hero-portal" aria-hidden="true"><b>D20</b></div>
+    </section>
+
+    <section class="master-grid" aria-label="Acoes principais do Mestre">
+      <a class="master-card" href="campaigns.html#new-campaign">
+        <span class="master-icon">+</span>
+        <div><strong>Criacao</strong><h2>Criar Nova Campanha</h2><p>Nome, sistema, banner, limite de jogadores e convite privado.</p></div>
+      </a>
+      <a class="master-card" href="campaigns.html">
+        <span class="master-icon">C</span>
+        <div><strong>Gestao</strong><h2>Continuar Campanha</h2><p>Edite, duplique, arquive ou exclua campanhas simuladas localmente.</p></div>
+      </a>
+      <a class="master-card" href="table.html">
+        <span class="master-icon">M</span>
+        <div><strong>Sessao</strong><h2>Abrir Mesa</h2><p>Mapa grande, tokens, notas privadas e controles de narracao.</p></div>
+      </a>
+      <a class="master-card" href="players.html">
+        <span class="master-icon">J</span>
+        <div><strong>Grupo</strong><h2>Gerenciar Jogadores</h2><p>Aprove entradas, acompanhe papeis e controle acessos.</p></div>
+      </a>
+      <a class="master-card" href="library.html">
+        <span class="master-icon">B</span>
+        <div><strong>Recursos</strong><h2>Biblioteca do Mestre</h2><p>Mapas, tokens, monstros, itens, magias, imagens e documentos.</p></div>
+      </a>
+      <a class="master-card" href="sheets.html">
+        <span class="master-icon">F</span>
+        <div><strong>Fichas</strong><h2>Fichas Recebidas</h2><p>Visualize fichas vinculadas, aprovacoes e bloqueios de edicao.</p></div>
+      </a>
+      <a class="master-card" href="invites.html">
+        <span class="master-icon">I</span>
+        <div><strong>Acesso</strong><h2>Convites</h2><p>Gere codigos privados e links claros para jogadores.</p></div>
+      </a>
+      <a class="master-card" href="settings.html">
+        <span class="master-icon">A</span>
+        <div><strong>Regras</strong><h2>Configuracoes</h2><p>Defina sistema padrao, politicas e preferencias da campanha.</p></div>
+      </a>
+    </section>
+
+    <section class="master-dashboard-layout">
+      <article class="master-panel">
+        <div class="master-panel-header">
+          <div>
+            <small class="master-panel-kicker">Campanhas recentes</small>
+            <h2>Mundos em preparacao</h2>
+          </div>
+          <a class="master-ghost" href="campaigns.html">Ver todas</a>
+        </div>
+        <div class="master-list" data-master-recent-campaigns></div>
+      </article>
+      <aside class="master-panel master-stack">
+        <div class="master-companion" aria-hidden="true"><i></i></div>
+        <div class="master-callout">
+          <b>Fluxo recomendado</b>
+          <span>Crie a campanha, envie convite, aprove fichas, prepare recursos e abra a mesa somente na hora da sessao.</span>
+        </div>
+        <button class="master-ghost" type="button" data-master-toast="Checklist do Mestre salvo localmente.">Salvar checklist</button>
+      </aside>
+    </section>
+  </main>
+
+  <script src="../assets/js/app.js?v=portal-brand-v1"></script>
+  <script src="../assets/js/master.js?v=master-stage-1"></script>
+</body>
+</html>

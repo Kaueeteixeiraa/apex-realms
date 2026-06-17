@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Realms | Configuracoes do Mestre</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=master-stage-1">
+</head>
+<body class="master-area" data-master-page="settings">
+  <aside class="master-sidebar">
+    <a class="master-brand" href="../index.html" aria-label="Apex Realms"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
+    <nav class="master-nav" aria-label="Navegacao do Mestre">
+      <small>Area do Mestre</small>
+      <a href="dashboard.html"><i>D</i>Dashboard</a>
+      <a href="campaigns.html"><i>C</i>Campanhas</a>
+      <a href="table.html"><i>M</i>Mesa</a>
+      <a href="library.html"><i>B</i>Biblioteca</a>
+      <a href="sheets.html"><i>F</i>Fichas</a>
+      <a href="players.html"><i>J</i>Jogadores</a>
+      <a href="invites.html"><i>I</i>Convites</a>
+      <a class="active" href="settings.html"><i>A</i>Configuracoes</a>
+      <small>Atalhos</small>
+      <a href="../dashboard.html"><i>P</i>Area do jogador</a>
+    </nav>
+    <div class="master-sidebar-card">
+      <small>Preferencias</small>
+      <b>Regras da mesa</b>
+      <p>Defina padroes do Mestre para campanhas, permissoes e comportamento da sessao.</p>
+    </div>
+    <div class="master-profile"><div class="master-avatar" data-user-initial>A</div><span><b data-user-name>Mestre Apex</b><small><span data-user-role>Mestre</span> ativo</small></span><button type="button" data-logout>Sair</button></div>
+  </aside>
+
+  <main class="master-main">
+    <header class="master-topbar">
+      <div>
+        <small class="master-eyebrow">Preferencias</small>
+        <h1>Configuracoes</h1>
+      </div>
+      <div class="master-actions">
+        <a class="master-ghost" href="dashboard.html">Voltar ao dashboard</a>
+      </div>
+    </header>
+
+    <form class="master-form-card" data-master-settings-form>
+      <div class="master-panel-header">
+        <div>
+          <small class="master-panel-kicker">Mesa e permissoes</small>
+          <h2>Configuracoes do Mestre</h2>
+          <p>Salvo localmente nesta primeira entrega. Depois esses dados migram para backend real.</p>
+        </div>
+      </div>
+      <div class="master-form-grid three">
+        <label class="master-field"><span>Nome publico do Mestre</span><input name="masterName" placeholder="Mestre Apex"></label>
+        <label class="master-field"><span>Sistema padrao</span><select name="defaultSystem"><option>D&D 5e</option><option>Tormenta 20</option><option>Pathfinder</option><option>Ordem Paranormal</option><option>Outro</option></select></label>
+        <label class="master-field"><span>Tema visual</span><select name="theme"><option>Dark fantasy neon</option><option>Arcano classico</option><option>Alta fantasia</option></select></label>
+        <label class="master-field"><span>Densidade da interface</span><select name="visualDensity"><option>Confortavel</option><option>Compacta</option><option>Ampla</option></select></label>
+        <label class="master-field"><span>Notificacoes</span><select name="notifications"><option>Eventos importantes</option><option>Tudo</option><option>Silencioso</option></select></label>
+        <label class="master-field"><span>Seguranca de convite</span><select name="securityMode"><option>Aprovacao manual</option><option>Entrada automatica</option><option>Somente convite direto</option></select></label>
+        <label class="master-field full"><span>Politica de permissoes</span><textarea name="permissionsPolicy" placeholder="Ex.: jogadores podem editar fichas fora da sessao; durante a sessao a edicao fica bloqueada."></textarea></label>
+      </div>
+      <div class="master-button-row">
+        <button class="master-btn" type="submit">Salvar configuracoes</button>
+        <button class="master-ghost" type="reset">Restaurar formulario</button>
+      </div>
+    </form>
+
+    <section class="master-grid">
+      <article class="master-card"><span class="master-icon">1</span><div><strong>Acesso</strong><h2>Mestre separado</h2><p>Jogadores nao entram nesta area pelo controle de rotas estatico.</p></div></article>
+      <article class="master-card"><span class="master-icon">2</span><div><strong>Dados</strong><h2>LocalStorage</h2><p>A simulacao funciona no Vercel/GitHub Pages ate o banco real entrar.</p></div></article>
+      <article class="master-card"><span class="master-icon">3</span><div><strong>Mesa</strong><h2>Experiencia limpa</h2><p>Gerenciamento fora da mesa, jogo dentro da mesa.</p></div></article>
+      <article class="master-card"><span class="master-icon">4</span><div><strong>Futuro</strong><h2>Player area preparada</h2><p>A estrutura esta pronta para criar o dashboard do jogador depois.</p></div></article>
+    </section>
+  </main>
+
+  <script src="../assets/js/app.js?v=portal-brand-v1"></script>
+  <script src="../assets/js/master.js?v=master-stage-1"></script>
+</body>
+</html>

@@ -91,31 +91,48 @@ const APEX_ROLE_LABELS = {
 const APEX_PUBLIC_ROUTES = new Set(["", "index.html", "login.html", "cadastro.html"]);
 const APEX_MASTER_ROUTES = new Set([
   "biblioteca.html",
+  "campanhas.html",
   "configuracoes.html",
   "criar-campanha.html",
   "fichas-jogadores.html",
+  "master/campaigns.html",
+  "master/dashboard.html",
+  "master/invites.html",
+  "master/library.html",
+  "master/players.html",
+  "master/settings.html",
+  "master/sheets.html",
+  "master/table.html",
   "mestre.html",
   "monstros.html"
 ]);
 
 function canonicalStaticRoute(route) {
-  const cleanRoute = String(route || "")
+  const rawRoute = String(route || "")
     .split("#")[0]
     .split("?")[0]
-    .split("/")
-    .filter(Boolean)
-    .pop()
-    ?.trim()
-    .toLowerCase() || "index.html";
+    .replace(/\\/g, "/")
+    .trim()
+    .toLowerCase();
+  let path = rawRoute.replace(/^https?:\/\/[^/]+/i, "").replace(/^\/+/, "");
+  const parts = path.split("/").filter(Boolean);
+  const repoIndex = parts.lastIndexOf("apex-realms");
+  const cleanParts = repoIndex >= 0 ? parts.slice(repoIndex + 1) : parts;
+  let cleanRoute = cleanParts.join("/") || "index.html";
 
   if (cleanRoute === "." || cleanRoute === "..") return "index.html";
-  if (cleanRoute.endsWith(".html")) return cleanRoute;
-  if (!cleanRoute.includes(".")) return `${cleanRoute}.html`;
+  if (cleanRoute.endsWith("/")) cleanRoute = `${cleanRoute}index.html`;
+  const fileName = cleanRoute.split("/").pop() || "";
+  if (!fileName.includes(".")) return `${cleanRoute}.html`;
   return cleanRoute;
 }
 
 function roleLabel(role) {
   return APEX_ROLE_LABELS[role] || "Visitante";
+}
+
+function roleHomeRoute(user) {
+  return user?.role === "master" ? "master/dashboard.html" : "dashboard.html";
 }
 
 function normalizeStaticRoute(value) {
@@ -131,6 +148,10 @@ function normalizeStaticRoute(value) {
 
 function currentStaticRoute() {
   return normalizeStaticRoute(window.location.href);
+}
+
+function rootRelativeTarget(route) {
+  return currentStaticRoute().startsWith("master/") ? `../${route}` : route;
 }
 
 function canAccessStaticRoute(user, route) {
@@ -150,11 +171,11 @@ function enforceStaticRoute(user) {
   const route = currentStaticRoute();
   if (APEX_PUBLIC_ROUTES.has(route)) return true;
   if (!user) {
-    redirectWithNotice(`login.html?next=${encodeURIComponent(route)}`, "Entre na sua conta para acessar a plataforma.");
+    redirectWithNotice(`${rootRelativeTarget("login.html")}?next=${encodeURIComponent(route)}`, "Entre na sua conta para acessar a plataforma.");
     return false;
   }
   if (APEX_MASTER_ROUTES.has(route) && user.role !== "master") {
-    redirectWithNotice("dashboard.html", "Apenas contas de Mestre podem criar campanhas e acessar ferramentas de mestre.");
+    redirectWithNotice(rootRelativeTarget("dashboard.html"), "Apenas contas de Mestre podem criar campanhas e acessar ferramentas de mestre.");
     return false;
   }
   return true;
@@ -358,7 +379,7 @@ document.addEventListener("click", event => {
   clearStaticUser();
   showPrototypeToast("Conta encerrada. Voltando para o login.");
   setTimeout(() => {
-    window.location.href = "login.html";
+    window.location.href = rootRelativeTarget("login.html");
   }, 550);
 });
 
@@ -368,6 +389,7 @@ window.ApexStaticAuth = {
   canAccessRoute: canAccessStaticRoute,
   findAccount: findStaticAccount,
   getUser: getStaticUser,
+  homeRoute: roleHomeRoute,
   roleLabel,
   saveUser: saveStaticUser,
   upsertAccount: upsertStaticAccount
