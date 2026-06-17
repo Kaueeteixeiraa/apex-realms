@@ -1198,6 +1198,10 @@ body[data-master-page="dashboard"] .master-nav a.active {
   transform: none;
 }
 
+body[data-master-page="dashboard"] .master-nav a:hover {
+  transform: scale(1.04);
+}
+
 body[data-master-page="dashboard"] .master-nav a::after {
   content: attr(data-tooltip);
   position: absolute;
@@ -1238,7 +1242,7 @@ body[data-master-page="dashboard"] .master-nav i {
 body[data-master-page="dashboard"] .master-nav a.active i {
   color: #fff;
   border-color: #9b78ff;
-  box-shadow: 0 0 26px #9b78ff4f;
+  box-shadow: 0 0 22px #9b78ff45;
 }
 
 .dashboard-player-shortcut {
@@ -1376,7 +1380,7 @@ body[data-master-page="dashboard"] .master-sidebar-card {
 
 .dashboard-topbar h1 {
   margin-top: 3px;
-  font-size: clamp(22px, 1.95vw, 30px);
+  font-size: clamp(20px, 1.72vw, 26px);
   letter-spacing: -.8px;
 }
 
@@ -1414,8 +1418,8 @@ body[data-master-page="dashboard"] .master-sidebar-card {
 .dashboard-banner h2 {
   margin: 4px 0 3px;
   color: #fff;
-  font: 800 clamp(26px, 2.8vw, 38px)/1 var(--serif);
-  letter-spacing: -1.3px;
+  font: 800 clamp(23px, 2.35vw, 33px)/1 var(--serif);
+  letter-spacing: -1px;
 }
 
 .dashboard-banner p {
@@ -1456,30 +1460,31 @@ body[data-master-page="dashboard"] .master-sidebar-card {
 
 .dashboard-stats article {
   min-height: 48px;
-  padding: 8px 11px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  padding: 9px 12px;
+  display: grid;
+  align-content: center;
+  gap: 3px;
   border: 1px solid #382e45;
   border-radius: 15px;
-  background: linear-gradient(145deg, #14121c, #0d0c13);
-  box-shadow: 0 16px 45px #0005;
+  background:
+    radial-gradient(circle at 100% 0%, #9b78ff12, transparent 42%),
+    linear-gradient(145deg, #14121c, #0d0c13);
+  box-shadow: 0 14px 38px #0004;
 }
 
 .dashboard-stats span {
   color: var(--master-muted);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: .9px;
 }
 
 .dashboard-stats b {
-  max-width: 60%;
+  max-width: 100%;
   overflow: hidden;
   color: #fff;
-  font: 800 clamp(15px, 1.35vw, 21px)/1 var(--serif);
+  font: 800 clamp(13.5px, 1.18vw, 18.5px)/1.05 var(--serif);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1515,6 +1520,19 @@ body[data-master-page="dashboard"] .master-sidebar-card {
   box-shadow: 0 22px 65px #0008, 0 0 26px #9b78ff20;
 }
 
+.dashboard-shortcut:nth-child(-n + 2) {
+  border-color: #6f5a8d;
+  background:
+    radial-gradient(circle at 16% 22%, #a77dff38, transparent 34%),
+    linear-gradient(145deg, #1a1524, #100d17);
+  box-shadow: 0 20px 62px #0008, 0 0 30px #9b78ff1d;
+}
+
+.dashboard-shortcut:nth-child(-n + 2):hover {
+  border-color: #9b78ff;
+  box-shadow: 0 24px 70px #0009, 0 0 36px #9b78ff33;
+}
+
 .dashboard-shortcut-icon {
   width: 43px;
   height: 43px;
@@ -1537,7 +1555,7 @@ body[data-master-page="dashboard"] .master-sidebar-card {
 .dashboard-shortcut h2 {
   margin: 0;
   color: #fff;
-  font: 800 15.5px/1.05 var(--serif);
+  font: 800 14px/1.05 var(--serif);
 }
 
 .dashboard-shortcut p {
@@ -1554,7 +1572,7 @@ body[data-master-page="dashboard"] .master-sidebar-card {
   min-height: 0;
   flex: 1 1 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 270px;
+  grid-template-columns: minmax(0, 1fr) 250px;
   gap: 10px;
 }
 
@@ -1576,7 +1594,7 @@ body[data-master-page="dashboard"] .master-sidebar-card {
 
 .dashboard-bottom .master-panel h2 {
   margin: 3px 0 0;
-  font-size: 17px;
+  font-size: 15.5px;
 }
 
 .dashboard-bottom .master-ghost {
@@ -1659,7 +1677,7 @@ body[data-master-page="dashboard"] .master-sidebar-card {
 .dashboard-empty-campaign b {
   display: block;
   color: #fff;
-  font: 800 16px/1.1 var(--serif);
+  font: 800 14.5px/1.1 var(--serif);
 }
 
 .dashboard-empty-campaign p {
@@ -1678,30 +1696,34 @@ body[data-master-page="dashboard"] .master-sidebar-card {
 
 .dashboard-checklist {
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
+  grid-template-columns: 46px minmax(0, 1fr);
   align-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
+  border-color: #3f334d;
+  background:
+    radial-gradient(circle at 0% 50%, #9b78ff15, transparent 40%),
+    linear-gradient(145deg, #13111b, #0c0b12);
 }
 
 .dashboard-mini-portal {
   grid-row: span 2;
-  width: 52px;
-  height: 52px;
+  width: 46px;
+  height: 46px;
   display: grid;
   place-items: center;
   border: 1px solid #735c95;
-  border-radius: 18px;
+  border-radius: 16px;
   color: #fff;
   background:
     radial-gradient(circle, #ffffff 0 7%, #9b78ff 8% 32%, #090810 33%),
     #111019;
-  box-shadow: 0 0 46px #9b78ff50;
+  box-shadow: 0 0 28px #9b78ff35;
 }
 
 .dashboard-mini-portal svg {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
 }
 
 .dashboard-checklist p {
@@ -1714,8 +1736,10 @@ body[data-master-page="dashboard"] .master-sidebar-card {
 .dashboard-checklist button {
   grid-column: 1 / -1;
   width: max-content;
-  min-height: 32px;
-  margin-left: 62px;
+  min-height: 28px;
+  margin-left: 55px;
+  padding-inline: 9px;
+  opacity: .82;
 }
 
 @keyframes dashboardFloat {

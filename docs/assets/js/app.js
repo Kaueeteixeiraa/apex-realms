@@ -342,6 +342,7 @@ function applyQueuedNotice() {
   const message = sessionStorage.getItem("apex-realms-notice");
   if (!message) return;
   sessionStorage.removeItem("apex-realms-notice");
+  if (document.body.matches("[data-master-page='dashboard']") && message.includes("Apenas contas de Mestre")) return;
   setTimeout(() => showPrototypeToast(message), 120);
 }
 
@@ -370,7 +371,6 @@ document.addEventListener("click", event => {
     const route = normalizeStaticRoute(restrictedLink.getAttribute("href"));
     if (APEX_MASTER_ROUTES.has(route) && getStaticUser()?.role !== "master") {
       event.preventDefault();
-      showPrototypeToast("Apenas contas de Mestre podem acessar essa área.");
       return;
     }
   }

@@ -96,7 +96,7 @@ function renderDashboard() {
       recent.innerHTML = `
         <div class="dashboard-empty-campaign">
           <span class="dashboard-empty-icon"><svg><use href="#dash-icon-scroll"></use></svg></span>
-          <div><b>Nenhuma campanha</b><p>Crie o primeiro mundo para liberar convites e mesa.</p></div>
+          <div><b>Nenhuma campanha criada</b><p>Crie seu primeiro mundo para liberar convites, fichas e mesa.</p></div>
           <a class="master-btn" href="campaigns.html#new-campaign">Criar primeira campanha</a>
         </div>`;
     } else {
