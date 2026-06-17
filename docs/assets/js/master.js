@@ -9,6 +9,8 @@ const MASTER_NOTES_KEY = "apex-realms-master-notes";
 const masterSystems = ["D&D 5e", "Tormenta 20", "Pathfinder", "Ordem Paranormal", "Sistema Proprio", "Outro"];
 const masterStatuses = ["Preparacao", "Em andamento", "Pausada", "Finalizada"];
 const libraryTypes = ["Mapas", "Tokens", "NPCs", "Monstros", "Itens", "Imagens", "Documentos", "Sons", "Anotacoes", "Handouts"];
+const MASTER_BANNER_MAX_FILE_BYTES = 8 * 1024 * 1024;
+const MASTER_BANNER_MAX_DATA_CHARS = 900000;
 
 function readStore(key, fallback = []) {
   try {
@@ -81,6 +83,62 @@ function campaignInviteLink(code) {
   return `${window.location.origin}${window.location.pathname.replace(/\/master\/[^/]*$/, "/")}cadastro.html?invite=${encodeURIComponent(code)}`;
 }
 
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Nao foi possivel ler a imagem."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImageFromDataUrl(source) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Nao foi possivel preparar esta imagem."));
+    image.src = source;
+  });
+}
+
+async function prepareCampaignBanner(file) {
+  if (!file.type.startsWith("image/")) throw new Error("Envie uma imagem valida para o banner.");
+  if (file.size > MASTER_BANNER_MAX_FILE_BYTES) throw new Error("Imagem muito grande. Use um banner com ate 8 MB.");
+
+  const originalSource = await readFileAsDataUrl(file);
+  try {
+    const image = await loadImageFromDataUrl(originalSource);
+    const maxWidth = 1280;
+    const maxHeight = 720;
+    const scale = Math.min(1, maxWidth / image.width, maxHeight / image.height);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.width * scale));
+    canvas.height = Math.max(1, Math.round(image.height * scale));
+    canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    let compressed = "";
+    for (const quality of [.82, .72, .62, .52]) {
+      compressed = canvas.toDataURL("image/webp", quality);
+      if (compressed.length <= MASTER_BANNER_MAX_DATA_CHARS) return compressed;
+    }
+    if (compressed.length <= MASTER_BANNER_MAX_DATA_CHARS * 1.5) return compressed;
+  } catch {
+    if (originalSource.length <= MASTER_BANNER_MAX_DATA_CHARS) return originalSource;
+  }
+  throw new Error("O banner ficou pesado demais para salvar neste navegador. Tente uma imagem menor.");
+}
+
+function applyCampaignBannerPreview(preview, source) {
+  if (!preview) return;
+  if (source) {
+    preview.style.backgroundImage = `linear-gradient(transparent,#07070de8), url("${source}")`;
+    preview.classList.add("has-banner");
+    return;
+  }
+  preview.removeAttribute("style");
+  preview.classList.remove("has-banner");
+}
+
 function activeCampaign() {
   return readCampaigns().find(campaign => !campaign.archived) || readCampaigns()[0] || null;
 }
@@ -139,26 +197,45 @@ function bindCampaignForm() {
   const preview = document.querySelector("[data-campaign-banner-preview]");
   const imageInput = form.querySelector("[name='banner']");
   const editingId = document.querySelector("[data-editing-campaign-id]");
+  let bannerProcessing = Promise.resolve("");
 
   imageInput?.addEventListener("change", () => {
     const file = imageInput.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      imageInput.value = "";
-      masterToast("Envie uma imagem valida para o banner.");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      form.dataset.bannerData = String(reader.result || "");
-      if (preview) preview.style.backgroundImage = `linear-gradient(transparent,#07070de8), url("${form.dataset.bannerData}")`;
-    };
-    reader.readAsDataURL(file);
+    form.dataset.bannerPending = "true";
+    masterToast("Preparando banner...");
+    bannerProcessing = prepareCampaignBanner(file)
+      .then(source => {
+        form.dataset.bannerData = source;
+        applyCampaignBannerPreview(preview, source);
+        masterToast("Banner pronto para salvar.");
+        return source;
+      })
+      .catch(error => {
+        imageInput.value = "";
+        form.dataset.bannerData = "";
+        applyCampaignBannerPreview(preview, "");
+        masterToast(error.message || "Nao foi possivel preparar o banner.");
+        return "";
+      })
+      .finally(() => {
+        delete form.dataset.bannerPending;
+      });
   });
 
-  form.addEventListener("submit", event => {
+  form.addEventListener("reset", () => {
+    form.dataset.bannerData = "";
+    if (editingId) editingId.value = "";
+    applyCampaignBannerPreview(preview, "");
+  });
+
+  form.addEventListener("submit", async event => {
     event.preventDefault();
     if (!form.reportValidity()) return;
+    if (form.dataset.bannerPending === "true") {
+      masterToast("Aguarde o banner terminar de carregar.");
+      await bannerProcessing;
+    }
     const data = new FormData(form);
     const campaigns = readCampaigns();
     const id = editingId?.value || "";
@@ -177,12 +254,17 @@ function bindCampaignForm() {
       updatedAt: new Date().toISOString()
     });
     const nextCampaigns = existing ? campaigns.map(item => item.id === id ? campaign : item) : [campaign, ...campaigns];
-    saveCampaigns(nextCampaigns);
+    try {
+      saveCampaigns(nextCampaigns);
+    } catch {
+      masterToast("Nao foi possivel salvar. Tente remover ou trocar o banner.");
+      return;
+    }
     form.reset();
     form.dataset.bannerData = "";
     if (editingId) editingId.value = "";
-    if (preview) preview.removeAttribute("style");
-    masterToast(existing ? "Campanha atualizada." : "Campanha criada com convite privado.");
+    applyCampaignBannerPreview(preview, "");
+    masterToast(existing ? "Campanha atualizada." : "Campanha criada com convite.");
     renderCampaignsPage();
     renderDashboard();
   });
@@ -197,7 +279,7 @@ function renderCampaignsPage() {
   if (!list) return;
   list.innerHTML = "";
   if (!campaigns.length) {
-    list.innerHTML = `<div class="master-empty"><b>Nenhuma campanha cadastrada</b><span>Preencha o formulario para criar uma campanha privada com codigo unico.</span></div>`;
+    list.innerHTML = `<div class="master-empty"><b>Nenhuma campanha cadastrada</b><span>Preencha o formulario para criar uma campanha com codigo unico.</span></div>`;
     return;
   }
   campaigns.forEach(campaign => {
@@ -257,10 +339,10 @@ function bindCampaignActions() {
       form.maxPlayers.value = campaign.maxPlayers;
       form.status.value = campaign.status;
       form.dataset.bannerData = campaign.banner || "";
+      applyCampaignBannerPreview(document.querySelector("[data-campaign-banner-preview]"), campaign.banner || "");
       if (!document.body.classList.contains("campaigns-page")) {
         document.querySelector("[data-campaign-banner-preview]")?.scrollIntoView({behavior: "smooth", block: "center"});
       }
-      masterToast("Campanha carregada para edicao.");
     }
     if (action === "duplicate") {
       saveCampaigns([{
