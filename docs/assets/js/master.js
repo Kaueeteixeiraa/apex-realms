@@ -237,7 +237,9 @@ function bindCampaignActions() {
       form.maxPlayers.value = campaign.maxPlayers;
       form.status.value = campaign.status;
       form.dataset.bannerData = campaign.banner || "";
-      document.querySelector("[data-campaign-banner-preview]")?.scrollIntoView({behavior: "smooth", block: "center"});
+      if (!document.body.classList.contains("campaigns-page")) {
+        document.querySelector("[data-campaign-banner-preview]")?.scrollIntoView({behavior: "smooth", block: "center"});
+      }
       masterToast("Campanha carregada para edicao.");
     }
     if (action === "duplicate") {
