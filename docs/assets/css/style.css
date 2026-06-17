@@ -478,11 +478,16 @@
 
 /* Cadastro v3: layout compacto para desktop em 100% de zoom. */
 @media(min-width:1101px){
+  html.register-home-lock,.register-home-lock{height:100%;max-height:100%;overflow:hidden!important;overscroll-behavior:none}
+  body.register-home-page,.register-home-page{height:100vh;max-height:100vh;min-height:100vh;overflow:hidden!important;overscroll-behavior:none}
+  html.register-home-lock,body.register-home-page{scrollbar-width:none;-ms-overflow-style:none}
+  html.register-home-lock::-webkit-scrollbar,body.register-home-page::-webkit-scrollbar{width:0;height:0;display:none}
+  .register-home-page .particles{position:fixed;inset:0;height:100vh;max-height:100vh;overflow:hidden}
   .register-home-page .register-home-topbar{height:60px;min-height:60px;padding:8px clamp(24px,4vw,56px)}
   .register-home-page .brand .realm-mark{width:36px;height:36px}
   .register-home-page .brand>span:last-child{font-size:11px}
   .register-home-page .brand em{font-size:7px}
-  .register-home-shell{min-height:calc(100vh - 60px);padding:14px clamp(24px,4vw,56px) 18px;align-items:center}
+  .register-home-shell{height:calc(100vh - 60px);min-height:0;padding:14px clamp(24px,4vw,56px) 18px;align-items:center;overflow:hidden}
   .register-home-layout{max-width:1240px;margin:0 auto;grid-template-columns:minmax(0,1fr) minmax(360px,410px);gap:clamp(22px,3vw,46px);align-items:center}
   .register-home-copy{position:relative;z-index:4;grid-column:1;grid-row:1;max-width:360px}
   .register-home-copy h1{margin:12px 0 10px;font-size:clamp(34px,3.4vw,48px);letter-spacing:-1.8px}
