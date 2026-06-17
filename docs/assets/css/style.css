@@ -677,3 +677,22 @@ html.landing-lock::-webkit-scrollbar,body.landing-single::-webkit-scrollbar{widt
   .hero-core-features{grid-template-columns:1fr;gap:8px;margin-top:18px}
   .hero-core-features span{min-height:0;padding:12px 14px}
 }
+
+/* Home usa o mesmo portal das telas de entrada, mas encaixado no hero. */
+.landing-single .home-hero-portal{grid-column:auto;grid-row:auto;justify-self:center;align-self:center;width:min(46vw,520px);height:min(70vh,520px);min-height:0;margin:0;opacity:1;transform:none;scale:1;pointer-events:none}
+.landing-single .home-hero-portal .login-home-aura{width:520px;height:520px}
+.landing-single .home-hero-portal .login-ring-outer{width:500px;height:500px}
+.landing-single .home-hero-portal .login-ring-middle{width:390px;height:390px}
+.landing-single .home-hero-portal .login-ring-middle span:nth-child(1){transform:rotate(0deg) translateY(-195px)}
+.landing-single .home-hero-portal .login-ring-middle span:nth-child(2){transform:rotate(60deg) translateY(-195px) rotate(-60deg)}
+.landing-single .home-hero-portal .login-ring-middle span:nth-child(3){transform:rotate(120deg) translateY(-195px) rotate(-120deg)}
+.landing-single .home-hero-portal .login-ring-middle span:nth-child(4){transform:rotate(180deg) translateY(-195px) rotate(-180deg)}
+.landing-single .home-hero-portal .login-ring-middle span:nth-child(5){transform:rotate(240deg) translateY(-195px) rotate(-240deg)}
+.landing-single .home-hero-portal .login-ring-middle span:nth-child(6){transform:rotate(300deg) translateY(-195px) rotate(-300deg)}
+.landing-single .home-hero-portal .login-ring-inner{width:290px;height:290px}
+.landing-single .home-hero-portal .login-home-core{width:230px;height:230px}
+.landing-single .home-hero-portal .login-home-wordmark b{font-size:28px;letter-spacing:9px}
+
+@media(max-width:1000px){
+  .landing-single .home-hero-portal{position:absolute;inset:auto 0 -190px;z-index:0;width:100%;height:520px;opacity:.38;scale:.58}
+}
