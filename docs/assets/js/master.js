@@ -131,12 +131,22 @@ async function prepareCampaignBanner(file) {
 function applyCampaignBannerPreview(preview, source) {
   if (!preview) return;
   if (source) {
-    preview.style.backgroundImage = `linear-gradient(transparent,#07070de8), url("${source}")`;
+    preview.style.background = `linear-gradient(180deg, #08071022 0%, #07070df2 100%), url("${source}") center / cover`;
     preview.classList.add("has-banner");
     return;
   }
   preview.removeAttribute("style");
   preview.classList.remove("has-banner");
+}
+
+function applyCampaignCardBanner(card, campaign) {
+  const source = campaign?.banner || campaign?.image || "";
+  if (!card || !source) return;
+  card.classList.add("has-campaign-banner");
+  card.style.background = `
+    linear-gradient(90deg, #0c0a13f2 0%, #0c0a13d8 46%, #0c0a1390 100%),
+    url("${source}") center / cover
+  `;
 }
 
 function activeCampaign() {
@@ -179,8 +189,9 @@ function renderDashboard() {
     } else {
       active.slice(0, 3).forEach(item => {
         const article = document.createElement("article");
-        article.className = "master-list-item";
+        article.className = "master-list-item dashboard-campaign-card";
         article.innerHTML = `<header><div><h3></h3><div class="master-list-meta"><span class="master-pill"></span><span class="master-status warn"></span></div></div><a class="master-ghost" href="campaigns.html">Gerenciar</a></header><p></p>`;
+        applyCampaignCardBanner(article, item);
         article.querySelector("h3").textContent = item.name;
         article.querySelector(".master-pill").textContent = item.system;
         article.querySelector(".master-status").textContent = item.status;
@@ -284,7 +295,7 @@ function renderCampaignsPage() {
   }
   campaigns.forEach(campaign => {
     const article = document.createElement("article");
-    article.className = "master-list-item";
+    article.className = "master-list-item campaigns-campaign-card";
     article.dataset.campaignId = campaign.id;
     article.innerHTML = `
       <header>
@@ -305,6 +316,7 @@ function renderCampaignsPage() {
         </div>
       </header>
       <p></p>`;
+    applyCampaignCardBanner(article, campaign);
     article.querySelector("h3").textContent = campaign.name;
     article.querySelector("p").textContent = campaign.description || "Sem descricao cadastrada.";
     article.querySelector("[data-system]").textContent = campaign.system;
