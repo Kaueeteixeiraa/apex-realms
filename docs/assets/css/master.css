@@ -1153,6 +1153,8 @@ body[data-master-page="dashboard"] .master-sidebar {
   align-items: center;
   padding: 12px 10px;
   gap: 10px;
+  z-index: 120;
+  overflow: visible;
 }
 
 body[data-master-page="dashboard"] .master-brand {
@@ -1201,7 +1203,7 @@ body[data-master-page="dashboard"] .master-nav a::after {
   position: absolute;
   left: calc(100% + 12px);
   top: 50%;
-  z-index: 30;
+  z-index: 240;
   min-width: max-content;
   padding: 8px 10px;
   border: 1px solid #695584;
@@ -1289,7 +1291,7 @@ body[data-master-page="dashboard"] .master-sidebar-card {
   position: absolute;
   left: calc(100% + 12px);
   bottom: 0;
-  z-index: 35;
+  z-index: 250;
   width: 190px;
   padding: 12px;
   display: grid;
@@ -1357,6 +1359,8 @@ body[data-master-page="dashboard"] .master-sidebar-card {
 }
 
 .dashboard-main {
+  position: relative;
+  z-index: 1;
   height: 100vh;
   padding: 14px clamp(16px, 2vw, 26px) 16px;
   display: flex;
