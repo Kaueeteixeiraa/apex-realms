@@ -86,13 +86,13 @@ function renderDashboard() {
   const active = campaigns.filter(campaign => !campaign.archived);
   const campaign = active[0];
   setText("[data-master-campaign-count]", active.length);
-  setText("[data-master-invite-code]", campaign?.inviteCode || "SEM-CAMPANHA");
-  setText("[data-master-next-session]", campaign ? "Proxima sessao a definir" : "Crie uma campanha para agendar");
+  setText("[data-master-invite-code]", campaign?.inviteCode || "Sem campanha");
+  setText("[data-master-next-session]", campaign ? "A definir" : "Aguardando");
   const recent = document.querySelector("[data-master-recent-campaigns]");
   if (recent) {
     recent.innerHTML = "";
     if (!active.length) {
-      recent.innerHTML = `<div class="master-empty"><b>Nenhuma campanha criada</b><span>Use o card Criar Nova Campanha para iniciar o primeiro mundo.</span></div>`;
+      recent.innerHTML = `<div class="master-empty"><b>Nenhuma campanha criada</b><span>Use o card Criar campanha para iniciar o primeiro mundo.</span></div>`;
     } else {
       active.slice(0, 3).forEach(item => {
         const article = document.createElement("article");

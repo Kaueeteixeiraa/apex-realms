@@ -8,45 +8,72 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=master-stage-1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=master-dashboard-compact-v1">
 </head>
-<body class="master-area" data-master-page="dashboard">
-  <aside class="master-sidebar">
-    <a class="master-brand" href="../index.html" aria-label="Apex Realms">
+<body class="master-area master-dashboard-page" data-master-page="dashboard">
+  <svg class="dashboard-symbols" aria-hidden="true">
+    <symbol id="dash-icon-castle" viewBox="0 0 48 48">
+      <path d="M9 40V18l5 3 5-3 5 3 5-3 5 3 5-3v22M15 40V27h18v13M8 18V9h7v9M33 18V9h7v9M20 20V8h8v12" />
+      <path d="M21 40v-8a3 3 0 0 1 6 0v8" />
+    </symbol>
+    <symbol id="dash-icon-scroll" viewBox="0 0 48 48">
+      <path d="M13 11h24v23a6 6 0 0 1-6 6H13a6 6 0 0 0 6-6V15a4 4 0 0 0-8 0v2h8" />
+      <path d="M22 18h11M22 25h10M22 32h7" />
+    </symbol>
+    <symbol id="dash-icon-d20" viewBox="0 0 48 48">
+      <path d="M24 6 41 17v14L24 42 7 31V17L24 6Z" />
+      <path d="M7 17h34M7 31l17-25 17 25M24 42V6M15 31h18" />
+    </symbol>
+    <symbol id="dash-icon-book" viewBox="0 0 48 48">
+      <path d="M8 10h14a6 6 0 0 1 6 6v24a6 6 0 0 0-6-6H8V10ZM40 10H28a6 6 0 0 0-6 6v24a6 6 0 0 1 6-6h12V10Z" />
+      <path d="M15 18h7M15 25h7M32 18h4M32 25h4" />
+    </symbol>
+    <symbol id="dash-icon-sheet" viewBox="0 0 48 48">
+      <path d="M14 6h14l8 8v28H14V6Z" />
+      <path d="M28 6v9h8M20 23h10M20 30h12M20 36h8" />
+      <path d="M18 16h5" />
+    </symbol>
+    <symbol id="dash-icon-group" viewBox="0 0 48 48">
+      <path d="M24 23a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM12 40a12 12 0 0 1 24 0" />
+      <path d="M11 25a5 5 0 1 0 0-10M5 39a9 9 0 0 1 10-9M37 25a5 5 0 1 1 0-10M43 39a9 9 0 0 0-10-9" />
+    </symbol>
+    <symbol id="dash-icon-key" viewBox="0 0 48 48">
+      <path d="M19 27a10 10 0 1 1 7-7l14 14-5 5-4-4-4 4-5-5 4-4-3-3a10 10 0 0 1-4 0Z" />
+      <path d="M16 18h.1" />
+    </symbol>
+    <symbol id="dash-icon-gear" viewBox="0 0 48 48">
+      <path d="M24 17a7 7 0 1 0 0 14 7 7 0 0 0 0-14Z" />
+      <path d="M24 6v7M24 35v7M6 24h7M35 24h7M11 11l5 5M32 32l5 5M37 11l-5 5M16 32l-5 5" />
+    </symbol>
+  </svg>
+
+  <aside class="master-sidebar dashboard-sidebar">
+    <a class="master-brand" href="../index.html" aria-label="Apex Realms" title="Apex Realms">
       <i class="realm-mark"></i>
       <span><b>APEX</b><em>REALMS</em></span>
     </a>
-    <nav class="master-nav" aria-label="Navegacao do Mestre">
-      <small>Area do Mestre</small>
-      <a class="active" href="dashboard.html"><i>D</i>Dashboard</a>
-      <a href="campaigns.html"><i>C</i>Campanhas</a>
-      <a href="table.html"><i>M</i>Mesa</a>
-      <a href="library.html"><i>B</i>Biblioteca</a>
-      <a href="sheets.html"><i>F</i>Fichas</a>
-      <a href="players.html"><i>J</i>Jogadores</a>
-      <a href="invites.html"><i>I</i>Convites</a>
-      <a href="settings.html"><i>A</i>Configuracoes</a>
-      <small>Atalhos</small>
-      <a href="../dashboard.html"><i>P</i>Area do jogador</a>
+    <nav class="master-nav dashboard-icon-nav" aria-label="Navegacao do Mestre">
+      <a class="active" href="dashboard.html" aria-label="Dashboard" title="Dashboard" data-tooltip="Dashboard"><i><svg><use href="#dash-icon-castle"></use></svg></i></a>
+      <a href="campaigns.html" aria-label="Campanhas" title="Campanhas" data-tooltip="Campanhas"><i><svg><use href="#dash-icon-scroll"></use></svg></i></a>
+      <a href="table.html" aria-label="Mesa" title="Mesa" data-tooltip="Mesa"><i><svg><use href="#dash-icon-d20"></use></svg></i></a>
+      <a href="library.html" aria-label="Biblioteca" title="Biblioteca" data-tooltip="Biblioteca"><i><svg><use href="#dash-icon-book"></use></svg></i></a>
+      <a href="sheets.html" aria-label="Fichas" title="Fichas" data-tooltip="Fichas"><i><svg><use href="#dash-icon-sheet"></use></svg></i></a>
+      <a href="players.html" aria-label="Jogadores" title="Jogadores" data-tooltip="Jogadores"><i><svg><use href="#dash-icon-group"></use></svg></i></a>
+      <a href="invites.html" aria-label="Convites" title="Convites" data-tooltip="Convites"><i><svg><use href="#dash-icon-key"></use></svg></i></a>
+      <a href="settings.html" aria-label="Configuracoes" title="Configuracoes" data-tooltip="Configuracoes"><i><svg><use href="#dash-icon-gear"></use></svg></i></a>
     </nav>
-    <div class="master-sidebar-card">
-      <small>Comando privado</small>
-      <b>Seu painel de narracao</b>
-      <p>Campanhas, convites, fichas e biblioteca ficam fora da mesa para a sessao respirar.</p>
-      <a class="master-btn" href="campaigns.html">Nova campanha</a>
-    </div>
-    <div class="master-profile">
+    <div class="master-profile dashboard-profile" title="Conta do Mestre">
       <div class="master-avatar" data-user-initial>A</div>
       <span>
         <b data-user-name>Mestre Apex</b>
         <small><span data-user-role>Mestre</span> ativo</small>
       </span>
-      <button type="button" data-logout>Sair</button>
+      <button type="button" data-logout title="Sair">Sair</button>
     </div>
   </aside>
 
-  <main class="master-main">
-    <header class="master-topbar">
+  <main class="master-main dashboard-main">
+    <header class="master-topbar dashboard-topbar">
       <div>
         <small class="master-eyebrow">Painel exclusivo</small>
         <h1>Dashboard do Mestre</h1>
@@ -57,58 +84,59 @@
       </div>
     </header>
 
-    <section class="master-hero">
+    <section class="dashboard-banner">
       <div>
-        <small class="master-eyebrow">Central de controle</small>
-        <h1>Prepare o mundo antes dos jogadores entrarem.</h1>
-        <p>O Apex Realms agora separa gerenciamento e experiencia de jogo. Aqui o Mestre organiza campanhas, jogadores, convites, fichas, biblioteca e ferramentas de mesa sem poluir a sessao.</p>
-        <div class="master-kpi">
-          <article><small>Campanhas ativas</small><b data-master-campaign-count>0</b></article>
-          <article><small>Convite atual</small><b data-master-invite-code>SEM-CAMPANHA</b></article>
-          <article><small>Proxima sessao</small><b data-master-next-session>A definir</b></article>
-          <article><small>Permissao</small><b>Mestre</b></article>
-        </div>
+        <small class="master-eyebrow">Central do Mestre</small>
+        <h2>Painel do Mestre</h2>
+        <p>Organize campanhas, jogadores, fichas e mesa em um so lugar.</p>
       </div>
-      <div class="master-hero-portal" aria-hidden="true"><b>D20</b></div>
+      <div class="dashboard-banner-orb" aria-hidden="true"><svg><use href="#dash-icon-d20"></use></svg></div>
     </section>
 
-    <section class="master-grid" aria-label="Acoes principais do Mestre">
-      <a class="master-card" href="campaigns.html#new-campaign">
-        <span class="master-icon">+</span>
-        <div><strong>Criacao</strong><h2>Criar Nova Campanha</h2><p>Nome, sistema, banner, limite de jogadores e convite privado.</p></div>
+    <section class="dashboard-stats" aria-label="Resumo do Mestre">
+      <article><span>Campanhas</span><b data-master-campaign-count>0</b></article>
+      <article><span>Convite</span><b data-master-invite-code>Sem campanha</b></article>
+      <article><span>Sessao</span><b data-master-next-session>A definir</b></article>
+      <article><span>Perfil</span><b>Mestre</b></article>
+    </section>
+
+    <section class="dashboard-shortcuts" aria-label="Acoes principais do Mestre">
+      <a class="dashboard-shortcut" href="campaigns.html#new-campaign">
+        <span class="dashboard-shortcut-icon"><svg><use href="#dash-icon-scroll"></use></svg></span>
+        <div><h2>Criar campanha</h2><p>Novo mundo com convite privado.</p></div>
       </a>
-      <a class="master-card" href="campaigns.html">
-        <span class="master-icon">C</span>
-        <div><strong>Gestao</strong><h2>Continuar Campanha</h2><p>Edite, duplique, arquive ou exclua campanhas simuladas localmente.</p></div>
+      <a class="dashboard-shortcut" href="campaigns.html">
+        <span class="dashboard-shortcut-icon"><svg><use href="#dash-icon-castle"></use></svg></span>
+        <div><h2>Continuar</h2><p>Gerencie campanhas ativas.</p></div>
       </a>
-      <a class="master-card" href="table.html">
-        <span class="master-icon">M</span>
-        <div><strong>Sessao</strong><h2>Abrir Mesa</h2><p>Mapa grande, tokens, notas privadas e controles de narracao.</p></div>
+      <a class="dashboard-shortcut" href="table.html">
+        <span class="dashboard-shortcut-icon"><svg><use href="#dash-icon-d20"></use></svg></span>
+        <div><h2>Abrir mesa</h2><p>Mapa, tokens e notas.</p></div>
       </a>
-      <a class="master-card" href="players.html">
-        <span class="master-icon">J</span>
-        <div><strong>Grupo</strong><h2>Gerenciar Jogadores</h2><p>Aprove entradas, acompanhe papeis e controle acessos.</p></div>
+      <a class="dashboard-shortcut" href="players.html">
+        <span class="dashboard-shortcut-icon"><svg><use href="#dash-icon-group"></use></svg></span>
+        <div><h2>Jogadores</h2><p>Acessos e permissoes.</p></div>
       </a>
-      <a class="master-card" href="library.html">
-        <span class="master-icon">B</span>
-        <div><strong>Recursos</strong><h2>Biblioteca do Mestre</h2><p>Mapas, tokens, monstros, itens, magias, imagens e documentos.</p></div>
+      <a class="dashboard-shortcut" href="library.html">
+        <span class="dashboard-shortcut-icon"><svg><use href="#dash-icon-book"></use></svg></span>
+        <div><h2>Biblioteca</h2><p>Mapas, NPCs e itens.</p></div>
       </a>
-      <a class="master-card" href="sheets.html">
-        <span class="master-icon">F</span>
-        <div><strong>Fichas</strong><h2>Fichas Recebidas</h2><p>Visualize fichas vinculadas, aprovacoes e bloqueios de edicao.</p></div>
+      <a class="dashboard-shortcut" href="sheets.html">
+        <span class="dashboard-shortcut-icon"><svg><use href="#dash-icon-sheet"></use></svg></span>
+        <div><h2>Fichas</h2><p>Aprove e bloqueie edicoes.</p></div>
       </a>
-      <a class="master-card" href="invites.html">
-        <span class="master-icon">I</span>
-        <div><strong>Acesso</strong><h2>Convites</h2><p>Gere codigos privados e links claros para jogadores.</p></div>
+      <a class="dashboard-shortcut" href="invites.html">
+        <span class="dashboard-shortcut-icon"><svg><use href="#dash-icon-key"></use></svg></span>
+        <div><h2>Convites</h2><p>Codigos para jogadores.</p></div>
       </a>
-      <a class="master-card" href="settings.html">
-        <span class="master-icon">A</span>
-        <div><strong>Regras</strong><h2>Configuracoes</h2><p>Defina sistema padrao, politicas e preferencias da campanha.</p></div>
+      <a class="dashboard-shortcut" href="settings.html">
+        <span class="dashboard-shortcut-icon"><svg><use href="#dash-icon-gear"></use></svg></span>
+        <div><h2>Configuracoes</h2><p>Regras da mesa.</p></div>
       </a>
     </section>
 
-    <section class="master-dashboard-layout">
-      <article class="master-panel">
+    <section class="dashboard-bottom">
+      <article class="master-panel dashboard-recent-panel">
         <div class="master-panel-header">
           <div>
             <small class="master-panel-kicker">Campanhas recentes</small>
@@ -118,13 +146,14 @@
         </div>
         <div class="master-list" data-master-recent-campaigns></div>
       </article>
-      <aside class="master-panel master-stack">
-        <div class="master-companion" aria-hidden="true"><i></i></div>
-        <div class="master-callout">
-          <b>Fluxo recomendado</b>
-          <span>Crie a campanha, envie convite, aprove fichas, prepare recursos e abra a mesa somente na hora da sessao.</span>
+      <aside class="master-panel dashboard-checklist">
+        <div class="dashboard-mini-portal" aria-hidden="true"><svg><use href="#dash-icon-castle"></use></svg></div>
+        <div>
+          <small class="master-panel-kicker">Checklist</small>
+          <h2>Antes da sessao</h2>
+          <p>Campanha, convite, fichas e biblioteca prontos.</p>
         </div>
-        <button class="master-ghost" type="button" data-master-toast="Checklist do Mestre salvo localmente.">Salvar checklist</button>
+        <button class="master-ghost" type="button" data-master-toast="Checklist do Mestre salvo localmente.">Salvar</button>
       </aside>
     </section>
   </main>
