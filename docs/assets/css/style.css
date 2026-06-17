@@ -9,6 +9,10 @@
 .page-noise{position:fixed;inset:0;z-index:1000;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")}
 .particles{position:absolute;inset:0 0 auto;height:1000px;overflow:hidden;pointer-events:none}.particle{position:absolute;width:2px;height:2px;border-radius:50%;background:var(--violet-2);box-shadow:0 0 9px 2px #9b78ff99;animation:drift var(--speed) ease-in-out infinite alternate;opacity:var(--opacity)}@keyframes drift{to{transform:translate(var(--x),var(--y)) scale(.5);opacity:.1}}
 .brand,.vtt-brand{display:flex;align-items:center;gap:11px}.realm-mark{width:42px;height:42px;filter:drop-shadow(0 0 12px #9b78ff66)}.brand>span:last-child,.vtt-brand>span:last-child{display:grid;font-size:12px;line-height:1;letter-spacing:3px}.brand b,.vtt-brand b{font-weight:800}.brand em,.vtt-brand em{font-style:normal;color:var(--violet-2);font-size:8px;margin-top:5px;letter-spacing:4px}
+/* Miniatura do portal principal usada como marca em todas as telas. */
+.realm-mark{display:block;flex:0 0 auto;aspect-ratio:1/1;background:url("../apex-mini-logo.svg") center/contain no-repeat;filter:drop-shadow(0 0 10px #9b78ff99) drop-shadow(0 0 18px #55dfff33)}
+.realm-mark>*{display:none}
+.brand .realm-mark,.app-logo .realm-mark,.vtt-brand .realm-mark,.mini-brand .realm-mark{height:auto}
 .site-header{height:80px;padding:0 5vw;display:flex;align-items:center;justify-content:space-between;position:fixed;z-index:100;inset:0 0 auto;border-bottom:1px solid transparent;transition:.3s}.site-header.scrolled{height:68px;background:#08080de8;backdrop-filter:blur(22px);border-color:#ffffff10}.site-header nav{display:flex;gap:32px;color:#a39dab;font-size:9px;font-weight:700;letter-spacing:.8px}.site-header nav a{transition:.2s}.site-header nav a:hover{color:#fff}
 .btn{position:relative;overflow:hidden;border:1px solid transparent;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:12px 18px;color:#fff;font:700 9px var(--sans);letter-spacing:.6px;transition:.25s}.btn:hover{transform:translateY(-2px)}.btn-primary{background:linear-gradient(135deg,#7555e7,#a66bed);box-shadow:0 10px 32px #795be342,inset 0 1px #ffffff4d}.btn-primary:before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,#ffffff22 50%,transparent 65%);transform:translateX(-120%);transition:.5s}.btn-primary:hover:before{transform:translateX(120%)}.btn-primary:hover{box-shadow:0 14px 42px #795be366,inset 0 1px #ffffff55}.btn-ghost{border-color:#454050;background:#15141dbb;color:#ddd8e7}.btn-ghost:hover{border-color:#706580;background:#1c1a27}.btn-small{padding:10px 14px;font-size:8px}.btn-large{padding:15px 22px;font-size:10px}.play{font-size:7px;color:var(--cyan)}
 .eyebrow{display:flex;align-items:center;gap:10px;color:var(--gold);font-size:7px;font-weight:800;letter-spacing:2.2px}.eyebrow span{width:30px;height:1px;background:var(--gold);box-shadow:0 0 8px var(--gold)}.eyebrow.centered{justify-content:center}
@@ -602,6 +606,18 @@
   .login-home-card{max-width:390px}
 }
 
+/* Portal da landing: versao grande da marca com profundidade e brilho. */
+.hero-brand-portal .portal-core{position:relative;left:auto;top:auto;width:300px;height:300px;display:grid;place-items:center;border:0;border-radius:0;background:transparent;box-shadow:none;transform:none;animation:portal-hover 5.5s ease-in-out infinite}
+.hero-brand-portal .portal-core:before,.hero-brand-portal .portal-core:after{content:"";position:absolute;left:50%;top:50%;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%)}
+.hero-brand-portal .portal-core:before{z-index:0;width:82%;height:82%;background:radial-gradient(circle,#fff7 0 5%,#d8c8ff34 7% 24%,#9b78ff2e 25% 48%,transparent 72%);box-shadow:0 0 35px #f4e8ff55,0 0 85px #9b78ff5c,0 0 130px #55dfff25;filter:blur(.2px);animation:portal-core-glow 3.2s ease-in-out infinite}
+.hero-brand-portal .portal-core:after{z-index:1;width:112%;height:112%;border:1px solid #f2bf7250;box-shadow:inset 0 0 24px #f2bf721f,0 0 0 14px #9b78ff0b,0 0 0 28px #55dfff08;animation:portal-spin 18s linear infinite}
+.hero-brand-portal .portal-core svg{position:relative;z-index:2;filter:drop-shadow(0 0 18px #d8c8ff80) drop-shadow(0 0 42px #9b78ff66) drop-shadow(0 28px 46px #000)}
+.hero-brand-portal .portal-core svg path:first-of-type{filter:drop-shadow(0 0 10px #f2bf7245)}
+.hero-brand-portal .portal-wordmark{z-index:3}
+.hero-brand-portal .portal-wordmark small,.hero-brand-portal .portal-wordmark em{text-shadow:0 0 12px #9b78ff66,0 0 20px #55dfff22}
+.hero-brand-portal .portal-rune{border-color:#9b78ff7a;background:linear-gradient(145deg,#181124e8,#0b0a12d8);box-shadow:0 15px 40px #000a,0 0 24px #9b78ff45,inset 0 1px #ffffff1a}
+@keyframes portal-core-glow{50%{transform:translate(-50%,-50%) scale(1.08);opacity:.76;filter:blur(2px)}}
+
 /* Home de uma tela: sem rolagem e sem seções abaixo do hero. */
 html.landing-lock{height:100%;max-height:100%;overflow:hidden!important;overscroll-behavior:none}
 body.landing-single{height:100vh;max-height:100vh;min-height:100vh;overflow:hidden!important;overscroll-behavior:none}
@@ -623,19 +639,22 @@ html.landing-lock::-webkit-scrollbar,body.landing-single::-webkit-scrollbar{widt
 .hero-core-features span:before{content:"";position:absolute;inset:auto 12px 0;height:2px;background:linear-gradient(90deg,var(--gold),var(--violet),var(--cyan));opacity:.7}
 .hero-core-features b{display:block;color:#fff;font-size:12px;letter-spacing:.2px}
 .hero-core-features small{display:block;margin-top:7px;color:#9f98aa;font-size:10px;line-height:1.45}
-.landing-single .hero-brand-portal{min-height:0;height:min(68vh,560px);scale:.78;margin:0}
-.landing-single .portal-aura{width:560px;height:560px}
-.landing-single .portal-ring-outer{width:540px;height:540px}
-.landing-single .portal-ring-middle{width:430px;height:430px}
-.landing-single .portal-ring-middle span:nth-child(1){transform:rotate(0deg) translateY(-215px)}
-.landing-single .portal-ring-middle span:nth-child(2){transform:rotate(60deg) translateY(-215px) rotate(-60deg)}
-.landing-single .portal-ring-middle span:nth-child(3){transform:rotate(120deg) translateY(-215px) rotate(-120deg)}
-.landing-single .portal-ring-middle span:nth-child(4){transform:rotate(180deg) translateY(-215px) rotate(-180deg)}
-.landing-single .portal-ring-middle span:nth-child(5){transform:rotate(240deg) translateY(-215px) rotate(-240deg)}
-.landing-single .portal-ring-middle span:nth-child(6){transform:rotate(300deg) translateY(-215px) rotate(-300deg)}
-.landing-single .portal-ring-inner{width:310px;height:310px}
+.landing-single .hero-brand-portal{min-height:0;height:min(68vh,560px);scale:.8;margin:0;filter:drop-shadow(0 0 36px #9b78ff38)}
+.landing-single .hero-brand-portal:before{content:"";position:absolute;left:50%;top:50%;z-index:-4;width:650px;height:650px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,#ffffff0f 0 2%,#9b78ff20 17%,#4a2a7a17 46%,transparent 70%);box-shadow:0 0 0 72px #9b78ff06,0 0 120px #55dfff18;pointer-events:none}
+.landing-single .portal-aura{width:590px;height:590px;background:radial-gradient(circle,#fff1 0 5%,#c39aff34 8% 18%,#8054ca27 30%,#55dfff10 48%,transparent 72%);filter:blur(10px)}
+.landing-single .portal-ring-outer{width:560px;height:560px;border-color:#cbb3ff55;box-shadow:inset 0 0 36px #9b78ff18,0 0 42px #9b78ff20,0 0 95px #55dfff0f}
+.landing-single .portal-ring-outer:before{border-color:#d8c6ff36}
+.landing-single .portal-ring-outer:after{border-color:#55dfff2c #55dfff2c transparent transparent}
+.landing-single .portal-ring-middle{width:440px;height:440px;border-color:#bda4f064;box-shadow:0 0 42px #9b78ff16}
+.landing-single .portal-ring-middle span:nth-child(1){transform:rotate(0deg) translateY(-220px)}
+.landing-single .portal-ring-middle span:nth-child(2){transform:rotate(60deg) translateY(-220px) rotate(-60deg)}
+.landing-single .portal-ring-middle span:nth-child(3){transform:rotate(120deg) translateY(-220px) rotate(-120deg)}
+.landing-single .portal-ring-middle span:nth-child(4){transform:rotate(180deg) translateY(-220px) rotate(-180deg)}
+.landing-single .portal-ring-middle span:nth-child(5){transform:rotate(240deg) translateY(-220px) rotate(-240deg)}
+.landing-single .portal-ring-middle span:nth-child(6){transform:rotate(300deg) translateY(-220px) rotate(-300deg)}
+.landing-single .portal-ring-inner{width:318px;height:318px;border-color:#f2bf7258;box-shadow:0 0 70px #9b78ff34,inset 0 0 80px #9b78ff18}
 .landing-single .portal-core{width:250px;height:250px}
-.landing-single .portal-wordmark b{font-size:27px}
+.landing-single .portal-wordmark b{font-size:27px;text-shadow:0 0 22px #d9c5ff55,0 10px 28px #000}
 .landing-single .scroll-cue{display:none}
 
 @media(max-width:1000px){
