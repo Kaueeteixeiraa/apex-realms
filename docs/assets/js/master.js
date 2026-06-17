@@ -85,6 +85,7 @@ function renderDashboard() {
   const campaigns = readCampaigns();
   const active = campaigns.filter(campaign => !campaign.archived);
   const campaign = active[0];
+  document.body.classList.toggle("dashboard-empty-state", !active.length);
   setText("[data-master-campaign-count]", active.length);
   setText("[data-master-invite-code]", campaign?.inviteCode || "Sem campanha");
   setText("[data-master-next-session]", campaign ? "A definir" : "Aguardando");
@@ -92,7 +93,12 @@ function renderDashboard() {
   if (recent) {
     recent.innerHTML = "";
     if (!active.length) {
-      recent.innerHTML = `<div class="master-empty"><b>Nenhuma campanha criada</b><span>Use o card Criar campanha para iniciar o primeiro mundo.</span></div>`;
+      recent.innerHTML = `
+        <div class="dashboard-empty-campaign">
+          <span class="dashboard-empty-icon"><svg><use href="#dash-icon-scroll"></use></svg></span>
+          <div><b>Nenhuma campanha</b><p>Crie o primeiro mundo para liberar convites e mesa.</p></div>
+          <a class="master-btn" href="campaigns.html#new-campaign">Criar primeira campanha</a>
+        </div>`;
     } else {
       active.slice(0, 3).forEach(item => {
         const article = document.createElement("article");
