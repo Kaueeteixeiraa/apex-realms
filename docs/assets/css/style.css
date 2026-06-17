@@ -617,10 +617,12 @@ html.landing-lock::-webkit-scrollbar,body.landing-single::-webkit-scrollbar{widt
 .landing-single .hero-aura{width:520px;height:520px;right:7%;top:14%;opacity:.8}
 .landing-single .hero-copy h1{font-size:clamp(48px,5vw,78px);letter-spacing:-4px;margin:18px 0}
 .landing-single .hero-copy>p{max-width:520px;font-size:13px;line-height:1.7}
-.landing-single .hero-actions{margin-top:24px}
-.landing-single .hero-proof{margin-top:26px}
-.landing-single .hero-proof b{font-size:8px}
-.landing-single .hero-proof span{font-size:7px}
+.landing-single .hero-actions,.landing-single .hero-proof{display:none}
+.hero-core-features{max-width:560px;margin-top:28px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.hero-core-features span{position:relative;min-height:82px;padding:15px 14px;border:1px solid #4c435b;border-radius:12px;background:linear-gradient(145deg,#17131fe8,#0b0a12d9);box-shadow:0 18px 45px #0008,inset 0 1px #ffffff12;overflow:hidden}
+.hero-core-features span:before{content:"";position:absolute;inset:auto 12px 0;height:2px;background:linear-gradient(90deg,var(--gold),var(--violet),var(--cyan));opacity:.7}
+.hero-core-features b{display:block;color:#fff;font-size:12px;letter-spacing:.2px}
+.hero-core-features small{display:block;margin-top:7px;color:#9f98aa;font-size:10px;line-height:1.45}
 .landing-single .hero-brand-portal{min-height:0;height:min(68vh,560px);scale:.78;margin:0}
 .landing-single .portal-aura{width:560px;height:560px}
 .landing-single .portal-ring-outer{width:540px;height:540px}
@@ -640,9 +642,10 @@ html.landing-lock::-webkit-scrollbar,body.landing-single::-webkit-scrollbar{widt
   .landing-single .site-header{height:66px}
   .landing-single .site-header nav{display:none}
   .landing-single .hero{height:100vh;display:grid;grid-template-columns:1fr;padding:96px 22px 26px;text-align:center}
-  .landing-single .hero-copy .eyebrow,.landing-single .hero-actions,.landing-single .hero-proof{justify-content:center}
+  .landing-single .hero-copy .eyebrow{justify-content:center}
   .landing-single .hero-copy h1{font-size:clamp(36px,9vw,58px);letter-spacing:-2.5px;margin:14px 0}
   .landing-single .hero-copy>p{max-width:600px;margin:auto;font-size:13px}
+  .hero-core-features{max-width:620px;margin:24px auto 0}
   .landing-single .hero-brand-portal{position:absolute;inset:auto 0 -190px;z-index:0;opacity:.38;scale:.58}
   .landing-single .hero-copy{z-index:4}
 }
@@ -652,6 +655,6 @@ html.landing-lock::-webkit-scrollbar,body.landing-single::-webkit-scrollbar{widt
   .landing-single .hero{padding:88px 18px 22px}
   .landing-single .hero-copy h1{font-size:36px;letter-spacing:-2px}
   .landing-single .hero-copy>p{font-size:12px;line-height:1.65}
-  .landing-single .hero-actions{display:grid}
-  .landing-single .hero-proof{display:none}
+  .hero-core-features{grid-template-columns:1fr;gap:8px;margin-top:18px}
+  .hero-core-features span{min-height:0;padding:12px 14px}
 }
