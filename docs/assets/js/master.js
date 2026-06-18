@@ -765,7 +765,6 @@ function bindLibraryPage() {
     typeFilter.value = item.type;
     dialog.close();
     renderLibrary();
-    masterToast(existing ? "Recurso atualizado." : "Recurso adicionado a biblioteca.");
   });
 
   list.addEventListener("click", event => {

@@ -46,6 +46,8 @@ function showPrototypeToast(message) {
   if (!toast) {
     toast = document.createElement("div");
     toast.className = "prototype-toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
     document.body.append(toast);
   }
   toast.textContent = message;
