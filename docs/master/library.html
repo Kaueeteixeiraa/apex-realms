@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=master-library-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=master-library-upload-v1">
 </head>
 <body class="master-area library-page" data-master-page="library">
   <svg class="dashboard-symbols" aria-hidden="true">
@@ -101,7 +101,15 @@
         <label class="library-field"><span>Visibilidade</span><select name="visibility"><option value="Privado do Mestre">Privado do Mestre</option><option value="Disponivel na mesa">Disponivel na mesa</option><option value="Liberado para jogadores">Liberado para jogadores</option></select></label>
         <label class="library-field library-field-wide"><span>Descricao e notas</span><textarea name="description" maxlength="600" placeholder="Estatisticas essenciais, segredo, uso em cena ou contexto do recurso."></textarea></label>
         <label class="library-field"><span>Tags</span><input name="tags" maxlength="140" placeholder="chefe, ruina, nivel 5"></label>
-        <label class="library-field"><span>Arquivo de referencia</span><input name="file" type="file"><small data-library-current-file>Nenhum arquivo selecionado.</small></label>
+        <div class="library-field library-file-field">
+          <span>Arquivo de referencia</span>
+          <label class="library-upload" data-library-upload>
+            <input name="file" type="file">
+            <i><svg><use href="#dash-icon-sheet"></use></svg></i>
+            <span><b>Enviar arquivo</b><small data-library-current-file>Nenhum arquivo selecionado.</small></span>
+            <em>Procurar</em>
+          </label>
+        </div>
         <label class="library-favorite"><input name="favorite" type="checkbox"><span>Marcar como favorito para acesso rapido</span></label>
       </div>
       <footer>
@@ -112,6 +120,6 @@
   </dialog>
 
   <script src="../assets/js/app.js?v=campaign-banners-v1"></script>
-  <script src="../assets/js/master.js?v=master-library-v1"></script>
+  <script src="../assets/js/master.js?v=master-library-upload-v1"></script>
 </body>
 </html>

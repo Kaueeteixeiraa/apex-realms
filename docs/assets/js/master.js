@@ -657,6 +657,7 @@ function bindLibraryPage() {
     form.elements.favorite.checked = Boolean(item?.favorite);
     form.dataset.fileName = item?.fileName || "";
     document.querySelector("[data-library-current-file]").textContent = item?.fileName || "Nenhum arquivo selecionado.";
+    document.querySelector("[data-library-upload]")?.classList.toggle("has-file", Boolean(item?.fileName));
     document.querySelector("[data-library-form-kicker]").textContent = item ? "Editar recurso" : "Novo recurso";
     document.querySelector("[data-library-form-title]").textContent = item ? item.name : "Adicionar a biblioteca";
     dialog.showModal();
@@ -674,6 +675,7 @@ function bindLibraryPage() {
   form.elements.file.addEventListener("change", () => {
     const file = form.elements.file.files?.[0];
     document.querySelector("[data-library-current-file]").textContent = file?.name || form.dataset.fileName || "Nenhum arquivo selecionado.";
+    document.querySelector("[data-library-upload]")?.classList.toggle("has-file", Boolean(file?.name || form.dataset.fileName));
   });
   form.addEventListener("submit", event => {
     event.preventDefault();

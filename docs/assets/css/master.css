@@ -3362,6 +3362,106 @@ body[data-master-page="library"] .master-nav a.active i {
   font-size: 8.5px;
 }
 
+.library-upload {
+  min-width: 0;
+  min-height: 54px;
+  padding: 7px 8px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  overflow: hidden;
+  border: 1px solid #4d3c60;
+  border-radius: 11px;
+  background:
+    radial-gradient(circle at 8% 50%, #9b78ff29, transparent 28%),
+    #0d0a13;
+  box-shadow: inset 0 1px #ffffff0b;
+  cursor: pointer;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.library-upload:hover,
+.library-upload:focus-within {
+  border-color: #8f6cba;
+  box-shadow: 0 0 0 2px #9b78ff1b, 0 0 24px #9b78ff18;
+  transform: translateY(-1px);
+}
+
+.library-upload.has-file {
+  border-color: #9b78ff;
+  background:
+    radial-gradient(circle at 8% 50%, #9b78ff42, transparent 30%),
+    linear-gradient(145deg, #171021, #0d0a13);
+  box-shadow: 0 0 24px #9b78ff20, inset 0 1px #ffffff10;
+}
+
+.library-upload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.library-upload > i {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #6c5389;
+  border-radius: 11px;
+  color: #d9c9ff;
+  background: #15101e;
+  font-style: normal;
+  box-shadow: 0 0 16px #9b78ff20;
+}
+
+.library-upload > i svg {
+  width: 22px;
+  height: 22px;
+}
+
+.library-upload > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.library-upload b {
+  color: #f4eff9;
+  font-size: 10.5px;
+}
+
+.library-upload small {
+  overflow: hidden;
+  color: #82798b;
+  font-size: 8.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.library-upload.has-file small {
+  color: #bba8d8;
+}
+
+.library-upload em {
+  min-height: 29px;
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #735795;
+  border-radius: 8px;
+  background: #9b78ff18;
+  color: #dacbff;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
 .library-favorite {
   grid-column: 1 / -1;
   display: flex;
