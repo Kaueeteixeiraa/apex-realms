@@ -1489,6 +1489,90 @@ body[data-master-page="dashboard"] .master-sidebar-card {
   white-space: nowrap;
 }
 
+.dashboard-invite-stat {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+}
+
+.dashboard-stat-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dashboard-stat-label small {
+  color: #b79de1;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.dashboard-invite-control {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 29px;
+  gap: 6px;
+}
+
+.dashboard-invite-control select {
+  width: 100%;
+  min-width: 0;
+  height: 27px;
+  padding: 0 24px 0 8px;
+  overflow: hidden;
+  border: 1px solid #4c3b61;
+  border-radius: 8px;
+  outline: 0;
+  color: #f4effb;
+  background: #0b0911;
+  font: 800 11px/1 var(--sans);
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.dashboard-invite-control select:focus-visible {
+  border-color: #a77dff;
+  box-shadow: 0 0 0 2px #9b78ff2e;
+}
+
+.dashboard-invite-control button {
+  width: 29px;
+  height: 27px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid #6f55a0;
+  border-radius: 8px;
+  color: #f1e9ff;
+  background: linear-gradient(145deg, #5f35a6, #32204f);
+  box-shadow: 0 0 16px #9b78ff24;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.dashboard-invite-control button:hover:not(:disabled) {
+  border-color: #b99aff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 20px #9b78ff4a;
+}
+
+.dashboard-invite-control button:disabled,
+.dashboard-invite-control select:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.dashboard-invite-control svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+}
+
 .dashboard-shortcuts {
   flex: 0 0 auto;
   display: grid;

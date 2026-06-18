@@ -167,6 +167,45 @@ function renderMasterShell() {
   });
 }
 
+function renderDashboardInvites(campaigns) {
+  const select = document.querySelector("[data-master-invite-select]");
+  const copyButton = document.querySelector("[data-master-copy-invite]");
+  const count = document.querySelector("[data-master-invite-count]");
+  if (!select || !copyButton || !count) return;
+
+  count.textContent = `${campaigns.length} ${campaigns.length === 1 ? "ativo" : "ativos"}`;
+  select.replaceChildren();
+
+  if (!campaigns.length) {
+    select.add(new Option("Sem campanha", ""));
+    select.disabled = true;
+    copyButton.disabled = true;
+    return;
+  }
+
+  campaigns.forEach(campaign => {
+    select.add(new Option(`${campaign.name} - ${campaign.inviteCode}`, campaign.id));
+  });
+
+  const savedCampaignId = localStorage.getItem("apex-realms-dashboard-invite");
+  if (campaigns.some(campaign => campaign.id === savedCampaignId)) select.value = savedCampaignId;
+  select.disabled = false;
+  copyButton.disabled = false;
+
+  if (select.dataset.bound !== "true") {
+    select.dataset.bound = "true";
+    select.addEventListener("change", () => {
+      localStorage.setItem("apex-realms-dashboard-invite", select.value);
+    });
+    copyButton.addEventListener("click", async () => {
+      const campaign = readCampaigns().find(item => !item.archived && item.id === select.value);
+      if (!campaign) return;
+      await navigator.clipboard?.writeText(campaign.inviteCode);
+      masterToast(`Codigo de ${campaign.name} copiado.`);
+    });
+  }
+}
+
 function renderDashboard() {
   if (!document.body.matches("[data-master-page='dashboard']")) return;
   const campaigns = readCampaigns();
@@ -174,7 +213,7 @@ function renderDashboard() {
   const campaign = active[0];
   document.body.classList.toggle("dashboard-empty-state", !active.length);
   setText("[data-master-campaign-count]", active.length);
-  setText("[data-master-invite-code]", campaign?.inviteCode || "Sem campanha");
+  renderDashboardInvites(active);
   setText("[data-master-next-session]", campaign ? "A definir" : "Aguardando");
   const recent = document.querySelector("[data-master-recent-campaigns]");
   if (recent) {

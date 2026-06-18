@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=campaign-banners-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=dashboard-invites-v1">
 </head>
 <body class="master-area master-dashboard-page" data-master-page="dashboard">
   <svg class="dashboard-symbols" aria-hidden="true">
@@ -48,6 +48,10 @@
     <symbol id="dash-icon-power" viewBox="0 0 48 48">
       <path d="M24 7v15" />
       <path d="M14 14a17 17 0 1 0 20 0" />
+    </symbol>
+    <symbol id="dash-icon-copy" viewBox="0 0 48 48">
+      <rect x="17" y="15" width="22" height="25" rx="4" />
+      <path d="M31 15v-3a4 4 0 0 0-4-4H13a4 4 0 0 0-4 4v18a4 4 0 0 0 4 4h4" />
     </symbol>
   </svg>
 
@@ -100,7 +104,20 @@
 
     <section class="dashboard-stats" aria-label="Resumo do Mestre">
       <article><span>Campanhas</span><b data-master-campaign-count>0</b></article>
-      <article><span>Convite</span><b data-master-invite-code>Sem campanha</b></article>
+      <article class="dashboard-invite-stat">
+        <div class="dashboard-stat-label">
+          <span>Convites</span>
+          <small data-master-invite-count>0 ativos</small>
+        </div>
+        <div class="dashboard-invite-control">
+          <select data-master-invite-select aria-label="Escolher convite da campanha">
+            <option>Sem campanha</option>
+          </select>
+          <button type="button" data-master-copy-invite aria-label="Copiar codigo do convite" title="Copiar codigo" disabled>
+            <svg><use href="#dash-icon-copy"></use></svg>
+          </button>
+        </div>
+      </article>
       <article><span>Sessao</span><b data-master-next-session>A definir</b></article>
       <article><span>Perfil</span><b>Mestre</b></article>
     </section>
@@ -164,6 +181,6 @@
   </main>
 
   <script src="../assets/js/app.js?v=campaign-banners-v1"></script>
-  <script src="../assets/js/master.js?v=campaign-banners-v1"></script>
+  <script src="../assets/js/master.js?v=dashboard-invites-v1"></script>
 </body>
 </html>
