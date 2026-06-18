@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=master-library-upload-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=master-library-cards-v1">
 </head>
 <body class="master-area library-page" data-master-page="library">
   <svg class="dashboard-symbols" aria-hidden="true">
@@ -60,11 +60,6 @@
         <h1>Biblioteca</h1>
         <p>Organize monstros, NPCs, itens, mapas e recursos por campanha.</p>
       </div>
-      <div class="library-actions">
-        <button class="master-btn" type="button" data-library-new>Novo recurso</button>
-        <label class="master-ghost library-import-button">Importar<input type="file" accept="application/json,.json" data-library-import hidden></label>
-        <button class="master-ghost" type="button" data-library-export>Exportar</button>
-      </div>
     </header>
 
     <section class="library-toolbar" aria-label="Filtros da biblioteca">
@@ -104,7 +99,7 @@
         <div class="library-field library-file-field">
           <span>Arquivo de referencia</span>
           <label class="library-upload" data-library-upload>
-            <input name="file" type="file">
+            <input name="file" type="file" accept="image/*,.pdf,.doc,.docx,.txt">
             <i><svg><use href="#dash-icon-sheet"></use></svg></i>
             <span><b>Enviar arquivo</b><small data-library-current-file>Nenhum arquivo selecionado.</small></span>
             <em>Procurar</em>
@@ -120,6 +115,6 @@
   </dialog>
 
   <script src="../assets/js/app.js?v=campaign-banners-v1"></script>
-  <script src="../assets/js/master.js?v=master-library-upload-v1"></script>
+  <script src="../assets/js/master.js?v=master-library-cards-v1"></script>
 </body>
 </html>

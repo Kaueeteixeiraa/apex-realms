@@ -11,6 +11,7 @@ const masterStatuses = ["Preparacao", "Em andamento", "Pausada", "Finalizada"];
 const libraryTypes = ["Monstros", "NPCs", "Itens", "Mapas", "Anotacoes", "Magias", "Armadilhas", "Locais", "Encontros", "Recompensas", "Documentos/lore"];
 const MASTER_BANNER_MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MASTER_BANNER_MAX_DATA_CHARS = 900000;
+const MASTER_LIBRARY_IMAGE_MAX_DATA_CHARS = 420000;
 
 function readStore(key, fallback = []) {
   try {
@@ -126,6 +127,25 @@ async function prepareCampaignBanner(file) {
     if (originalSource.length <= MASTER_BANNER_MAX_DATA_CHARS) return originalSource;
   }
   throw new Error("O banner ficou pesado demais para salvar neste navegador. Tente uma imagem menor.");
+}
+
+async function prepareLibraryImage(file) {
+  if (!file.type.startsWith("image/")) return "";
+  if (file.size > MASTER_BANNER_MAX_FILE_BYTES) throw new Error("Imagem muito grande. Use um arquivo com ate 8 MB.");
+  const originalSource = await readFileAsDataUrl(file);
+  const image = await loadImageFromDataUrl(originalSource);
+  const maxWidth = 720;
+  const maxHeight = 520;
+  const scale = Math.min(1, maxWidth / image.width, maxHeight / image.height);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.width * scale));
+  canvas.height = Math.max(1, Math.round(image.height * scale));
+  canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+  for (const quality of [.8, .68, .56, .44]) {
+    const compressed = canvas.toDataURL("image/webp", quality);
+    if (compressed.length <= MASTER_LIBRARY_IMAGE_MAX_DATA_CHARS) return compressed;
+  }
+  throw new Error("A imagem ficou pesada demais. Tente um arquivo menor.");
 }
 
 function applyCampaignBannerPreview(preview, source) {
@@ -477,6 +497,7 @@ function bindLibraryPage() {
   const systemFilter = document.querySelector("[data-library-system-filter]");
   const searchInput = document.querySelector("[data-library-search]");
   const summary = document.querySelector("[data-library-summary]");
+  let libraryFileProcessing = Promise.resolve("");
   const campaigns = readCampaigns().filter(campaign => !campaign.archived);
   const summaryTypes = ["Monstros", "NPCs", "Itens", "Mapas", "Magias", "Anotacoes"];
   const typeIcons = {
@@ -514,6 +535,7 @@ function bindLibraryPage() {
       tags: String(raw.tags || ""),
       visibility: raw.visibility || "Privado do Mestre",
       fileName: String(raw.fileName || ""),
+      image: String(raw.image || "").startsWith("data:image/") ? raw.image : "",
       favorite: Boolean(raw.favorite),
       createdAt,
       updatedAt: raw.updatedAt || createdAt
@@ -588,20 +610,30 @@ function bindLibraryPage() {
     article.className = `library-resource-card${item.favorite ? " favorite" : ""}`;
     article.dataset.libraryId = item.id;
     article.innerHTML = `
-      <header>
-        <i class="library-resource-icon"><svg><use href="#${typeIcons[item.type] || "dash-icon-book"}"></use></svg></i>
-        <div><small data-type></small><h3></h3></div>
+      <div class="library-card-cover">
+        <div class="library-card-cover-fallback"><svg><use href="#${typeIcons[item.type] || "dash-icon-book"}"></use></svg></div>
+        <span data-type></span>
         <button class="library-favorite-toggle" type="button" data-library-action="favorite" aria-label="Favoritar recurso" title="Favoritar">&#9733;</button>
-      </header>
-      <div class="library-card-badges"><span data-scope></span><span data-system></span><span data-visibility></span></div>
-      <p></p>
-      <div class="library-card-tags" data-tags></div>
-      <footer>
-        <button type="button" data-library-action="use">Levar a mesa</button>
-        <button type="button" data-library-action="edit">Editar</button>
-        <button type="button" data-library-action="duplicate">Duplicar</button>
-        <button class="danger" type="button" data-library-action="delete">Excluir</button>
-      </footer>`;
+      </div>
+      <div class="library-card-content">
+        <header><h3></h3><small data-scope></small></header>
+        <div class="library-card-badges"><span data-system></span><span data-visibility></span></div>
+        <p></p>
+        <div class="library-card-tags" data-tags></div>
+        <footer>
+          <button type="button" data-library-action="use">Levar a mesa</button>
+          <button type="button" data-library-action="edit">Editar</button>
+          <button type="button" data-library-action="duplicate">Duplicar</button>
+          <button class="danger" type="button" data-library-action="delete">Excluir</button>
+        </footer>
+      </div>`;
+    if (item.image) {
+      const image = document.createElement("img");
+      image.src = item.image;
+      image.alt = `Imagem de ${item.name}`;
+      article.querySelector(".library-card-cover").prepend(image);
+      article.classList.add("has-image");
+    }
     article.querySelector("[data-type]").textContent = item.type;
     article.querySelector("h3").textContent = item.name;
     article.querySelector("[data-scope]").textContent = campaign ? campaign.name : "Global";
@@ -631,13 +663,18 @@ function bindLibraryPage() {
       .filter(item => typeFilter.value === "all" || item.type === typeFilter.value)
       .sort((a, b) => Number(b.favorite) - Number(a.favorite) || new Date(b.updatedAt) - new Date(a.updatedAt));
     list.replaceChildren();
+    const newCard = document.createElement("button");
+    newCard.type = "button";
+    newCard.className = "library-new-resource-card";
+    newCard.innerHTML = `<i>+</i><span><b>Novo recurso</b><small>Adicione uma nova carta a biblioteca.</small></span>`;
+    newCard.addEventListener("click", () => openResourceDialog());
+    list.append(newCard);
     document.querySelector("[data-library-result-count]").textContent = filtered.length;
     document.querySelector("[data-library-result-title]").textContent = typeFilter.value === "all" ? scopeTitle() : `${typeFilter.value} - ${scopeTitle()}`;
     if (!filtered.length) {
       const empty = document.createElement("div");
       empty.className = "library-empty";
-      empty.innerHTML = `<i><svg><use href="#dash-icon-book"></use></svg></i><div><b>Nenhum recurso encontrado</b><span>Crie um recurso ou ajuste os filtros para explorar a biblioteca.</span></div><button class="master-btn" type="button">Novo recurso</button>`;
-      empty.querySelector("button").addEventListener("click", () => openResourceDialog());
+      empty.innerHTML = `<i><svg><use href="#dash-icon-book"></use></svg></i><div><b>Nenhum recurso encontrado</b><span>Use a carta ao lado ou ajuste os filtros para explorar a biblioteca.</span></div>`;
       list.append(empty);
       return;
     }
@@ -656,6 +693,8 @@ function bindLibraryPage() {
     form.elements.tags.value = item?.tags || "";
     form.elements.favorite.checked = Boolean(item?.favorite);
     form.dataset.fileName = item?.fileName || "";
+    form.dataset.imageData = item?.image || "";
+    libraryFileProcessing = Promise.resolve(item?.image || "");
     document.querySelector("[data-library-current-file]").textContent = item?.fileName || "Nenhum arquivo selecionado.";
     document.querySelector("[data-library-upload]")?.classList.toggle("has-file", Boolean(item?.fileName));
     document.querySelector("[data-library-form-kicker]").textContent = item ? "Editar recurso" : "Novo recurso";
@@ -663,7 +702,6 @@ function bindLibraryPage() {
     dialog.showModal();
   };
 
-  document.querySelector("[data-library-new]")?.addEventListener("click", () => openResourceDialog());
   document.querySelectorAll("[data-library-close]").forEach(button => button.addEventListener("click", () => dialog.close()));
   dialog.addEventListener("click", event => {
     if (event.target === dialog) dialog.close();
@@ -676,10 +714,33 @@ function bindLibraryPage() {
     const file = form.elements.file.files?.[0];
     document.querySelector("[data-library-current-file]").textContent = file?.name || form.dataset.fileName || "Nenhum arquivo selecionado.";
     document.querySelector("[data-library-upload]")?.classList.toggle("has-file", Boolean(file?.name || form.dataset.fileName));
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      form.dataset.imageData = "";
+      libraryFileProcessing = Promise.resolve("");
+      return;
+    }
+    const fileLabel = document.querySelector("[data-library-current-file]");
+    fileLabel.textContent = "Preparando imagem...";
+    document.querySelector("[data-library-upload]")?.classList.add("is-processing");
+    libraryFileProcessing = prepareLibraryImage(file)
+      .then(source => {
+        form.dataset.imageData = source;
+        fileLabel.textContent = file.name;
+        return source;
+      })
+      .catch(error => {
+        form.dataset.imageData = "";
+        fileLabel.textContent = "Imagem nao carregada.";
+        masterToast(error.message);
+        return "";
+      })
+      .finally(() => document.querySelector("[data-library-upload]")?.classList.remove("is-processing"));
   });
-  form.addEventListener("submit", event => {
+  form.addEventListener("submit", async event => {
     event.preventDefault();
     if (!form.reportValidity()) return;
+    await libraryFileProcessing;
     const data = new FormData(form);
     const items = readLibrary();
     const existing = items.find(item => item.id === data.get("id"));
@@ -695,6 +756,7 @@ function bindLibraryPage() {
       tags: String(data.get("tags") || "").trim(),
       visibility: data.get("visibility"),
       fileName: file?.name || form.dataset.fileName || "",
+      image: form.dataset.imageData || "",
       favorite: data.get("favorite") === "on",
       createdAt: existing?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -731,10 +793,8 @@ function bindLibraryPage() {
       masterToast("Recurso adicionado as notas privadas da mesa.");
     }
     if (action === "delete") {
-      if (!confirm(`Excluir ${item.name} da biblioteca?`)) return;
       saveLibrary(items.filter(saved => saved.id !== item.id));
       renderLibrary();
-      masterToast("Recurso excluido.");
     }
   });
 
@@ -746,35 +806,6 @@ function bindLibraryPage() {
     systemFilter.value = "all";
     searchInput.value = "";
     renderLibrary();
-  });
-
-  document.querySelector("[data-library-export]")?.addEventListener("click", () => {
-    const payload = JSON.stringify({version: 1, exportedAt: new Date().toISOString(), resources: readLibrary()}, null, 2);
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(new Blob([payload], {type: "application/json"}));
-    link.download = `apex-realms-biblioteca-${new Date().toISOString().slice(0, 10)}.json`;
-    link.click();
-    URL.revokeObjectURL(link.href);
-    masterToast("Biblioteca exportada.");
-  });
-  document.querySelector("[data-library-import]")?.addEventListener("change", async event => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    try {
-      const parsed = JSON.parse(await file.text());
-      const imported = Array.isArray(parsed) ? parsed : parsed.resources;
-      if (!Array.isArray(imported)) throw new Error("Formato invalido");
-      const existing = readLibrary();
-      const existingIds = new Set(existing.map(item => item.id));
-      const normalized = imported.filter(item => item && item.name).map(item => normalizeLibraryItem({...item, id: existingIds.has(item.id) ? undefined : item.id}));
-      saveLibrary([...normalized, ...existing]);
-      renderLibrary();
-      masterToast(`${normalized.length} recursos importados.`);
-    } catch {
-      masterToast("Arquivo de biblioteca invalido.");
-    } finally {
-      event.target.value = "";
-    }
   });
 
   populateControls();
