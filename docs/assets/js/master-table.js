@@ -15,6 +15,7 @@
   };
   const WORLD = {width: 1600, height: 1000, grid: 50};
   const body = document.body;
+  const isPlayerMode = body.matches("[data-player-page='table']");
   const $ = selector => document.querySelector(selector);
   const $$ = selector => [...document.querySelectorAll(selector)];
   const now = () => new Date().toISOString();
@@ -67,7 +68,14 @@
   function readCampaigns() {
     const primary = readStore(KEYS.campaigns, []);
     const values = primary.length ? primary : readStore(KEYS.campaignsAlias, []);
-    return values.filter(campaign => !campaign.archived).map(campaign => ({
+    const account = window.ApexStaticAuth?.getUser?.();
+    const joined = isPlayerMode && window.ApexInvites?.readJoinedCampaigns ? window.ApexInvites.readJoinedCampaigns(account) : [];
+    const scopedValues = isPlayerMode && joined.length ? joined : values.filter(campaign => {
+      if (!isPlayerMode) return true;
+      const players = Array.isArray(campaign.players) ? campaign.players : [];
+      return players.some(player => normalizeEmail(player.email) === normalizeEmail(account?.email));
+    });
+    return scopedValues.filter(campaign => !campaign.archived).map(campaign => ({
       ...campaign,
       id: campaign.id || uid("campaign"),
       name: campaign.name || "Campanha sem nome",
@@ -179,11 +187,57 @@
 
   function currentUser() {
     const account = window.ApexStaticAuth?.getUser?.() || {};
-    const profile = readStore(KEYS.profile, {});
+    const profile = readStore(isPlayerMode ? "apex_player_profile" : KEYS.profile, {});
     return {
-      name: profile.displayName || account.name || account.nickname || "Mestre",
+      name: profile.displayName || account.name || account.nickname || (isPlayerMode ? "Jogador" : "Mestre"),
       avatar: String(profile.avatar || account.avatar || "").startsWith("data:image/") ? (profile.avatar || account.avatar) : ""
     };
+  }
+
+  function normalizeEmail(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function currentAccount() {
+    return window.ApexStaticAuth?.getUser?.() || {};
+  }
+
+  function currentPlayerRecord() {
+    if (!isPlayerMode || !campaign) return null;
+    const account = currentAccount();
+    return readStore(KEYS.players, []).find(player => {
+      return player.campaignId === campaign.id && normalizeEmail(player.email) === normalizeEmail(account.email);
+    }) || null;
+  }
+
+  function canControlSource(source) {
+    if (!isPlayerMode) return true;
+    const account = currentAccount();
+    const player = currentPlayerRecord();
+    if (source.type !== "Personagem") return false;
+    if (source.permissions?.moveToken === false) return false;
+    if (player?.id && source.playerId === player.id) return true;
+    const names = [account.name, account.nickname, player?.name, player?.nickname]
+      .map(value => String(value || "").trim().toLowerCase())
+      .filter(Boolean);
+    return names.includes(String(source.owner || "").trim().toLowerCase()) || names.includes(String(source.name || "").trim().toLowerCase());
+  }
+
+  function canControlToken(token) {
+    if (!isPlayerMode) return true;
+    const source = [...sources.heroes, ...sources.creatures].find(item => item.id === token.sourceId && item.origin === token.sourceOrigin);
+    if (source) return canControlSource(source);
+    const player = currentPlayerRecord();
+    const account = currentAccount();
+    const names = [account.name, account.nickname, player?.name, player?.nickname]
+      .map(value => String(value || "").trim().toLowerCase())
+      .filter(Boolean);
+    return Boolean(token.playerId && player?.id && token.playerId === player.id) || names.includes(String(token.owner || "").trim().toLowerCase());
+  }
+
+  function blockPlayerAction(message = "Somente o Mestre pode alterar este controle.") {
+    setMapStatus(message, false);
+    if (typeof showPrototypeToast === "function") showPrototypeToast(message);
   }
 
   function avatarContent(container, item) {
@@ -343,6 +397,11 @@
   function renderSessionButton() {
     const button = $("[data-session-toggle]");
     button.classList.toggle("live", state.live);
+    if (isPlayerMode) {
+      button.querySelector("span").textContent = state.live ? "AO VIVO" : "Aguardando Mestre";
+      setMapStatus(state.live ? "Sessao ao vivo" : "Aguardando Mestre", true);
+      return;
+    }
     button.querySelector("span").textContent = state.live ? "Encerrar sessao" : "Iniciar sessao";
     setMapStatus(state.live ? "Sessao ao vivo" : "Cena pronta", true);
   }
@@ -391,8 +450,14 @@
     add.classList.toggle("on-map", Boolean(token));
     add.setAttribute("aria-label", token ? "Remover do mapa" : "Adicionar ao mapa");
     add.querySelector("use").setAttribute("href", token ? "#vtt-minus" : "#vtt-plus");
+    if (isPlayerMode && !canControlSource(source)) {
+      add.disabled = true;
+      add.title = "Controle liberado apenas para o Mestre ou dono da ficha";
+      article.classList.add("locked");
+    }
     add.addEventListener("click", () => token ? removeToken(token.id) : addSourceToMap(source));
     article.addEventListener("dblclick", () => {
+      if (isPlayerMode && !canControlSource(source)) return blockPlayerAction("Voce so controla o seu proprio personagem.");
       if (token) openTokenDialog(token.id);
       else addSourceToMap(source, true);
     });
@@ -418,6 +483,10 @@
   }
 
   function addSourceToMap(source, openAfter = false) {
+    if (isPlayerMode && !canControlSource(source)) {
+      blockPlayerAction("Voce so pode adicionar o seu proprio personagem ao mapa.");
+      return;
+    }
     const existing = state.tokens.find(item => item.sourceId === source.id && item.sourceOrigin === source.origin);
     if (existing) {
       if (openAfter) openTokenDialog(existing.id);
@@ -429,6 +498,8 @@
       sourceId: source.id,
       sourceOrigin: source.origin,
       sourceType: source.type,
+      playerId: source.playerId || "",
+      owner: source.owner || "",
       name: source.name,
       portrait: source.portrait,
       className: source.className,
@@ -451,6 +522,10 @@
 
   function removeToken(tokenId) {
     const token = state.tokens.find(item => item.id === tokenId);
+    if (isPlayerMode && token && !canControlToken(token)) {
+      blockPlayerAction("Apenas o Mestre pode remover este token.");
+      return;
+    }
     state.tokens = state.tokens.filter(item => item.id !== tokenId);
     selectedTokenId = "";
     syncInitiative();
@@ -467,11 +542,11 @@
       const button = document.createElement("button");
       button.type = "button";
       const typeClass = token.sourceType === "Monstro" ? "hostile" : token.sourceType === "NPC" ? "npc" : "friendly";
-      button.className = `vtt-token ${typeClass}${selectedTokenId === token.id ? " selected" : ""}`;
+      button.className = `vtt-token ${typeClass}${selectedTokenId === token.id ? " selected" : ""}${isPlayerMode && !canControlToken(token) ? " locked" : ""}`;
       button.dataset.tokenId = token.id;
       button.style.left = `${token.x}px`;
       button.style.top = `${token.y}px`;
-      button.title = `${token.name} · duplo clique para editar`;
+      button.title = isPlayerMode && !canControlToken(token) ? `${token.name} - controlado pelo Mestre` : `${token.name} · duplo clique para editar`;
       if (token.portrait) {
         const image = document.createElement("img");
         image.src = token.portrait;
@@ -518,6 +593,12 @@
     if (tokenElement && state.tool === "select" && !wantsPan) {
       const token = state.tokens.find(item => item.id === tokenElement.dataset.tokenId);
       if (!token) return;
+      if (!canControlToken(token)) {
+        selectedTokenId = token.id;
+        renderTokens();
+        blockPlayerAction("Voce nao tem permissao para mover este token.");
+        return;
+      }
       selectedTokenId = token.id;
       pointer = {type: "token", id: token.id, startX: event.clientX, startY: event.clientY, tokenX: token.x, tokenY: token.y, moved: false};
       renderTokens();
@@ -618,7 +699,7 @@
     ping.style.top = `${point.y}px`;
     elements.effectLayer.append(ping);
     setTimeout(() => ping.remove(), 950);
-    addEvent("Marcacao do Mestre", "Um ponto de interesse foi destacado no mapa.");
+    addEvent(isPlayerMode ? "Marcacao do jogador" : "Marcacao do Mestre", "Um ponto de interesse foi destacado no mapa.");
   }
 
   function setZoom(value, focusEvent = null) {
@@ -645,6 +726,10 @@
   function openTokenDialog(tokenId) {
     const token = state.tokens.find(item => item.id === tokenId);
     if (!token) return;
+    if (!canControlToken(token)) {
+      blockPlayerAction("Voce pode consultar o mapa, mas nao editar este token.");
+      return;
+    }
     elements.tokenForm.elements.tokenId.value = token.id;
     elements.tokenForm.elements.hpCurrent.value = token.hpCurrent;
     elements.tokenForm.elements.hpMax.value = token.hpMax;
@@ -661,6 +746,7 @@
     const data = Object.fromEntries(new FormData(elements.tokenForm).entries());
     const token = state.tokens.find(item => item.id === data.tokenId);
     if (!token) return;
+    if (!canControlToken(token)) return blockPlayerAction("Voce nao pode editar este token.");
     token.hpCurrent = Math.max(0, Number(data.hpCurrent || 0));
     token.hpMax = Math.max(0, Number(data.hpMax || 0));
     token.status = data.status;
@@ -716,27 +802,31 @@
       article.querySelector("span").textContent = token.status;
       const input = article.querySelector("input");
       input.value = entry.value;
-      input.addEventListener("change", () => {
-        entry.value = Number(input.value || 0);
-        token.initiative = entry.value;
-        state.initiative.entries.sort((a, b) => b.value - a.value);
-        state.initiative.current = 0;
-        renderInitiative();
-        saveState();
-      });
-      article.addEventListener("click", event => {
-        if (event.target === input) return;
-        state.initiative.current = index;
-        selectedTokenId = token.id;
-        renderInitiative();
-        renderTokens();
-        saveState();
-      });
+      input.disabled = isPlayerMode;
+      if (!isPlayerMode) {
+        input.addEventListener("change", () => {
+          entry.value = Number(input.value || 0);
+          token.initiative = entry.value;
+          state.initiative.entries.sort((a, b) => b.value - a.value);
+          state.initiative.current = 0;
+          renderInitiative();
+          saveState();
+        });
+        article.addEventListener("click", event => {
+          if (event.target === input) return;
+          state.initiative.current = index;
+          selectedTokenId = token.id;
+          renderInitiative();
+          renderTokens();
+          saveState();
+        });
+      }
       elements.initiativeList.append(article);
     });
   }
 
   function rollInitiative() {
+    if (isPlayerMode) return blockPlayerAction("A iniciativa e controlada pelo Mestre.");
     state.tokens.forEach(token => {
       const source = [...sources.heroes, ...sources.creatures].find(item => item.id === token.sourceId && item.origin === token.sourceOrigin);
       token.initiative = Math.floor(Math.random() * 20) + 1 + Number(source?.initiative || 0);
@@ -750,6 +840,7 @@
   }
 
   function nextTurn() {
+    if (isPlayerMode) return blockPlayerAction("O Mestre avanca os turnos da mesa.");
     if (!state.initiative.entries.length) return;
     state.initiative.current += 1;
     if (state.initiative.current >= state.initiative.entries.length) {
@@ -1077,6 +1168,7 @@
   }
 
   function sharePublicNote() {
+    if (isPlayerMode) return blockPlayerAction("Somente o Mestre publica avisos oficiais.");
     const message = state.notes.public.trim();
     if (!message) return;
     const user = currentUser();
@@ -1193,11 +1285,20 @@
     $$('[data-zoom]').forEach(button => button.addEventListener("click", () => setZoom(state.view.zoom + Number(button.dataset.zoom))));
 
     $("[data-grid-toggle]").addEventListener("click", () => { state.grid = !state.grid; renderMap(); saveState(); });
-    $("[data-snap-toggle]").addEventListener("click", () => { state.snap = !state.snap; renderMap(); saveState(); });
-    $("[data-fog-toggle]").addEventListener("click", () => { state.fog = !state.fog; renderMap(); addEvent("Neblina ajustada", state.fog ? "A visão da cena foi reduzida." : "A cena completa foi revelada."); saveState(); });
+    $("[data-snap-toggle]").addEventListener("click", () => {
+      if (isPlayerMode) return blockPlayerAction("Encaixe de tokens e controlado pelo Mestre.");
+      state.snap = !state.snap; renderMap(); saveState();
+    });
+    $("[data-fog-toggle]").addEventListener("click", () => {
+      if (isPlayerMode) return blockPlayerAction("A neblina da cena e controlada pelo Mestre.");
+      state.fog = !state.fog; renderMap(); addEvent("Neblina ajustada", state.fog ? "A visão da cena foi reduzida." : "A cena completa foi revelada."); saveState();
+    });
     $("[data-reset-view]").addEventListener("click", () => { state.view = {panX: 0, panY: 0, zoom: 1}; applyView(); saveState(); });
-    $("[data-session-toggle]").addEventListener("click", () => { state.live = !state.live; addEvent(state.live ? "Sessão iniciada" : "Sessão encerrada", state.live ? "A mesa está ao vivo para o grupo." : "O registro da sessão foi pausado."); renderSessionButton(); saveState(); });
-    $("[data-open-library]").addEventListener("click", () => openResources());
+    $("[data-session-toggle]").addEventListener("click", () => {
+      if (isPlayerMode) return blockPlayerAction("A sessao e iniciada pelo Mestre.");
+      state.live = !state.live; addEvent(state.live ? "Sessão iniciada" : "Sessão encerrada", state.live ? "A mesa está ao vivo para o grupo." : "O registro da sessão foi pausado."); renderSessionButton(); saveState();
+    });
+    $("[data-open-library]").addEventListener("click", () => isPlayerMode ? blockPlayerAction("Biblioteca completa e ferramenta do Mestre.") : openResources());
     $("[data-fullscreen]").addEventListener("click", () => document.fullscreenElement ? document.exitFullscreen?.() : document.documentElement.requestFullscreen?.());
     $("[data-roll-form]").addEventListener("submit", event => { event.preventDefault(); rollDice(event.currentTarget.elements.formula.value); event.currentTarget.elements.formula.select(); });
     $("[data-chat-form]").addEventListener("submit", sendChat);
@@ -1232,7 +1333,11 @@
     $("[data-close-dialog]").addEventListener("click", () => elements.resourceDialog.close());
     elements.resourceDialog.addEventListener("click", event => { if (event.target === elements.resourceDialog) elements.resourceDialog.close(); });
     $$('[data-resource-tab]').forEach(button => button.addEventListener("click", () => { resourceTab = button.dataset.resourceTab; renderResources(); }));
-    $("[data-map-upload]").addEventListener("change", event => { uploadMap(event.target.files?.[0]); event.target.value = ""; });
+    $("[data-map-upload]").addEventListener("change", event => {
+      if (isPlayerMode) blockPlayerAction("Upload de mapas e exclusivo do Mestre.");
+      else uploadMap(event.target.files?.[0]);
+      event.target.value = "";
+    });
 
     window.addEventListener("keydown", event => {
       if (/INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
@@ -1249,6 +1354,7 @@
   }
 
   function initialize() {
+    if (isPlayerMode) body.classList.add("player-table-mode");
     if (window.innerWidth <= 900) body.classList.add("roster-collapsed", "session-collapsed");
     if (!populateCampaigns()) return;
     bindEvents();

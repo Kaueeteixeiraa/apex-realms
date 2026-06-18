@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Realms | Minha Ficha</title>
+  <meta name="description" content="Ficha do jogador Apex Realms sincronizada com a mesa virtual.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
+  <link rel="stylesheet" href="../assets/css/player.css?v=player-area-v1">
+</head>
+<body class="player-area" data-player-page="sheet">
+  <div class="player-layout">
+    <aside class="player-sidebar">
+      <a class="player-brand" href="../index.html"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
+      <nav class="player-nav" aria-label="Navegacao do Jogador">
+        <a href="dashboard.html" data-icon="IN">Inicio</a>
+        <a href="campaigns.html" data-icon="CP">Campanhas</a>
+        <a class="active" href="sheet.html" data-icon="FC">Minha ficha</a>
+        <a href="table.html" data-icon="D20">Mesa</a>
+        <a href="profile.html" data-icon="PJ">Perfil</a>
+      </nav>
+      <div class="player-profile-mini"><span class="player-avatar" data-player-avatar data-player-initial>J</span><span><b data-player-name>Jogador Apex</b><small>Conta de jogador</small></span></div>
+    </aside>
+
+    <main class="player-main">
+      <header class="player-topbar">
+        <div>
+          <small class="player-kicker">Personagem</small>
+          <h1>Minha Ficha</h1>
+          <p>Edite somente seu personagem. Ao salvar, a ficha fica disponivel na mesa da campanha.</p>
+        </div>
+        <div class="player-actions">
+          <a class="player-ghost" href="campaigns.html">Campanhas</a>
+          <a class="player-btn" href="table.html">Abrir mesa</a>
+        </div>
+      </header>
+
+      <section class="player-grid two">
+        <form class="player-panel player-form" data-player-sheet-form>
+          <div class="player-form-grid">
+            <label>Campanha
+              <select name="campaignId"></select>
+            </label>
+            <label>Nome do personagem
+              <input name="name" required>
+            </label>
+            <label>Raca
+              <input name="race">
+            </label>
+            <label>Classe
+              <input name="className">
+            </label>
+            <label>Nivel
+              <input type="number" min="1" name="level">
+            </label>
+            <label>Defesa
+              <input type="number" min="0" name="armorClass">
+            </label>
+            <label>PV atual
+              <input type="number" min="0" name="hpCurrent">
+            </label>
+            <label>PV maximo
+              <input type="number" min="0" name="hpMax">
+            </label>
+            <label>Recurso atual
+              <input type="number" min="0" name="resourceCurrent">
+            </label>
+            <label>Recurso maximo
+              <input type="number" min="0" name="resourceMax">
+            </label>
+            <label>Iniciativa
+              <input type="number" name="initiative">
+            </label>
+            <label>Imagem do personagem
+              <input name="portrait" placeholder="URL ou base64 de imagem">
+            </label>
+          </div>
+          <label>Atributos
+            <textarea name="attributes"></textarea>
+          </label>
+          <label>Pericias
+            <textarea name="skills"></textarea>
+          </label>
+          <label>Inventario
+            <textarea name="inventory"></textarea>
+          </label>
+          <label>Magias e habilidades
+            <textarea name="spells"></textarea>
+          </label>
+          <label>Historia do personagem
+            <textarea name="story"></textarea>
+          </label>
+          <label>Campo livre para sistema personalizado
+            <textarea name="custom"></textarea>
+          </label>
+          <button class="player-btn" type="submit">Salvar ficha</button>
+        </form>
+
+        <aside class="player-panel">
+          <small class="player-kicker">Preview</small>
+          <div class="player-card" data-player-sheet-preview></div>
+          <div class="player-card" style="margin-top:14px">
+            <small>Permissoes</small>
+            <h3>Controle do jogador</h3>
+            <p>Voce controla seu token, rola dados e fala no chat. NPCs, monstros, mapas e neblina continuam com o Mestre.</p>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <script src="../assets/js/app.js?v=player-area-v1"></script>
+  <script src="../assets/js/player.js?v=player-area-v1"></script>
+</body>
+</html>

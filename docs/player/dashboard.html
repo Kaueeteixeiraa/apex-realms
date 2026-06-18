@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Realms | Area do Jogador</title>
+  <meta name="description" content="Painel do jogador Apex Realms para entrar em campanhas, abrir ficha, rolar dados e acessar a mesa.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
+  <link rel="stylesheet" href="../assets/css/player.css?v=player-area-v1">
+</head>
+<body class="player-area" data-player-page="dashboard">
+  <div class="player-layout">
+    <aside class="player-sidebar">
+      <a class="player-brand" href="../index.html" aria-label="Apex Realms">
+        <i class="realm-mark"></i>
+        <span><b>APEX</b><em>REALMS</em></span>
+      </a>
+      <nav class="player-nav" aria-label="Navegacao do Jogador">
+        <a class="active" href="dashboard.html" data-icon="IN">Inicio</a>
+        <a href="campaigns.html" data-icon="CP">Campanhas</a>
+        <a href="sheet.html" data-icon="FC">Minha ficha</a>
+        <a href="table.html" data-icon="D20">Mesa</a>
+        <a href="profile.html" data-icon="PJ">Perfil</a>
+      </nav>
+      <div class="player-profile-mini">
+        <span class="player-avatar" data-player-avatar data-player-initial>J</span>
+        <span><b data-player-name>Jogador Apex</b><small>Conta de jogador</small></span>
+      </div>
+    </aside>
+
+    <main class="player-main">
+      <header class="player-topbar">
+        <div>
+          <small class="player-kicker">Portal do jogador</small>
+          <h1>Area do Jogador</h1>
+          <p>Entre em campanhas, mantenha sua ficha pronta e participe da mesa sem controles de mestre.</p>
+        </div>
+        <div class="player-actions">
+          <a class="player-ghost" href="campaigns.html">Entrar por convite</a>
+          <a class="player-btn" href="table.html">Abrir mesa</a>
+        </div>
+      </header>
+
+      <section class="player-hero">
+        <div>
+          <small class="player-kicker">Sua jornada</small>
+          <h2>Seu personagem sempre pronto para a proxima cena.</h2>
+          <p>O painel do jogador separa o que voce precisa: campanhas vinculadas, ficha, vida, dados, chat e turnos da sessao.</p>
+          <div class="player-actions">
+            <a class="player-btn" href="sheet.html">Editar minha ficha</a>
+            <a class="player-ghost" href="table.html">Ir para a mesa</a>
+          </div>
+        </div>
+        <div class="player-orb" aria-hidden="true"><b><span>D20</span></b></div>
+      </section>
+
+      <section class="player-stats" aria-label="Resumo do Jogador">
+        <article class="player-stat"><span>Campanhas</span><b data-player-campaign-count>0</b></article>
+        <article class="player-stat"><span>Personagem</span><b data-player-character-name>Ficha</b></article>
+        <article class="player-stat"><span>Vida</span><b data-player-hp>0/0</b></article>
+        <article class="player-stat"><span>Nivel</span><b data-player-level>Nv. 1</b></article>
+      </section>
+
+      <section class="player-grid two">
+        <article class="player-panel">
+          <div class="player-panel-header">
+            <div>
+              <small class="player-kicker">Campanhas vinculadas</small>
+              <h2>Minhas mesas</h2>
+            </div>
+            <a class="player-ghost" href="campaigns.html">Ver campanhas</a>
+          </div>
+          <div class="player-list" data-player-active-campaign></div>
+        </article>
+
+        <aside class="player-panel">
+          <small class="player-kicker">Convite rapido</small>
+          <h2>Entrar em campanha</h2>
+          <p>Use o codigo AR enviado pelo Mestre para solicitar acesso.</p>
+          <form class="player-form" data-player-join-form>
+            <label>Codigo de convite
+              <input name="inviteCode" placeholder="AR-ABCD-1234" autocomplete="off">
+            </label>
+            <button class="player-btn" type="submit">Entrar por convite</button>
+          </form>
+        </aside>
+      </section>
+
+      <section class="player-panel" style="margin-top:14px">
+        <div class="player-panel-header">
+          <div>
+            <small class="player-kicker">Historico</small>
+            <h2>Ultimas rolagens</h2>
+          </div>
+          <a class="player-ghost" href="table.html">Rolar dados</a>
+        </div>
+        <div class="player-list" data-player-recent-rolls></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../assets/js/app.js?v=player-area-v1"></script>
+  <script src="../assets/js/player.js?v=player-area-v1"></script>
+</body>
+</html>

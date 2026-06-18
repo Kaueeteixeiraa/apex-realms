@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Realms | Campanhas do Jogador</title>
+  <meta name="description" content="Campanhas do jogador no Apex Realms com entrada por codigo de convite.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
+  <link rel="stylesheet" href="../assets/css/player.css?v=player-area-v1">
+</head>
+<body class="player-area" data-player-page="campaigns">
+  <div class="player-layout">
+    <aside class="player-sidebar">
+      <a class="player-brand" href="../index.html"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
+      <nav class="player-nav" aria-label="Navegacao do Jogador">
+        <a href="dashboard.html" data-icon="IN">Inicio</a>
+        <a class="active" href="campaigns.html" data-icon="CP">Campanhas</a>
+        <a href="sheet.html" data-icon="FC">Minha ficha</a>
+        <a href="table.html" data-icon="D20">Mesa</a>
+        <a href="profile.html" data-icon="PJ">Perfil</a>
+      </nav>
+      <div class="player-profile-mini"><span class="player-avatar" data-player-avatar data-player-initial>J</span><span><b data-player-name>Jogador Apex</b><small>Conta de jogador</small></span></div>
+    </aside>
+
+    <main class="player-main">
+      <header class="player-topbar">
+        <div>
+          <small class="player-kicker">Campanhas</small>
+          <h1>Mesas do Jogador</h1>
+          <p>Jogadores nao criam campanhas aqui. Eles entram por convite e acessam apenas as mesas liberadas.</p>
+        </div>
+        <div class="player-actions">
+          <a class="player-ghost" href="sheet.html">Minha ficha</a>
+          <a class="player-btn" href="table.html">Abrir mesa</a>
+        </div>
+      </header>
+
+      <section class="player-grid two">
+        <article class="player-panel">
+          <small class="player-kicker">Convite do Mestre</small>
+          <h2>Entrar por codigo</h2>
+          <p>Digite o codigo AR da campanha. Se a mesa exigir aprovacao, o Mestre vera sua solicitacao.</p>
+          <form class="player-form" data-player-join-form>
+            <label>Codigo de convite
+              <input name="inviteCode" placeholder="AR-ABCD-1234" autocomplete="off">
+            </label>
+            <button class="player-btn" type="submit">Solicitar entrada</button>
+          </form>
+        </article>
+
+        <article class="player-panel">
+          <small class="player-kicker">Regras do jogador</small>
+          <h2>Permissoes limitadas</h2>
+          <p>Voce pode ver campanhas vinculadas, abrir sua ficha, usar chat e rolar dados. Criacao de campanha, upload de mapas e controle de NPCs ficam com o Mestre.</p>
+        </article>
+      </section>
+
+      <section class="player-grid two" style="margin-top:14px">
+        <article class="player-panel">
+          <div class="player-panel-header"><div><small class="player-kicker">Acesso registrado</small><h2>Minhas campanhas</h2></div></div>
+          <div class="player-list" data-player-campaign-list></div>
+        </article>
+        <article class="player-panel">
+          <div class="player-panel-header"><div><small class="player-kicker">Neste navegador</small><h2>Campanhas disponiveis</h2></div></div>
+          <div class="player-list" data-player-available-list></div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="../assets/js/app.js?v=player-area-v1"></script>
+  <script src="../assets/js/player.js?v=player-area-v1"></script>
+</body>
+</html>

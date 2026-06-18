@@ -112,6 +112,13 @@ const APEX_MASTER_ROUTES = new Set([
   "mestre.html",
   "monstros.html"
 ]);
+const APEX_PLAYER_ROUTES = new Set([
+  "player/campaigns.html",
+  "player/dashboard.html",
+  "player/profile.html",
+  "player/sheet.html",
+  "player/table.html"
+]);
 
 function canonicalStaticRoute(route) {
   const rawRoute = String(route || "")
@@ -138,7 +145,9 @@ function roleLabel(role) {
 }
 
 function roleHomeRoute(user) {
-  return user?.role === "master" ? "master/dashboard.html" : "dashboard.html";
+  if (user?.role === "master") return "master/dashboard.html";
+  if (user?.role === "player") return "player/dashboard.html";
+  return "dashboard.html";
 }
 
 function normalizeStaticRoute(value) {
@@ -157,7 +166,7 @@ function currentStaticRoute() {
 }
 
 function rootRelativeTarget(route) {
-  return currentStaticRoute().startsWith("master/") ? `../${route}` : route;
+  return /^(master|player)\//.test(currentStaticRoute()) ? `../${route}` : route;
 }
 
 function canAccessStaticRoute(user, route) {
@@ -165,6 +174,7 @@ function canAccessStaticRoute(user, route) {
   if (APEX_PUBLIC_ROUTES.has(cleanRoute)) return true;
   if (!user) return false;
   if (APEX_MASTER_ROUTES.has(cleanRoute)) return user.role === "master";
+  if (APEX_PLAYER_ROUTES.has(cleanRoute)) return user.role === "player";
   return true;
 }
 
@@ -181,7 +191,11 @@ function enforceStaticRoute(user) {
     return false;
   }
   if (APEX_MASTER_ROUTES.has(route) && user.role !== "master") {
-    redirectWithNotice(rootRelativeTarget("dashboard.html"), "Apenas contas de Mestre podem criar campanhas e acessar ferramentas de mestre.");
+    redirectWithNotice(rootRelativeTarget(roleHomeRoute(user)), "Apenas contas de Mestre podem criar campanhas e acessar ferramentas de mestre.");
+    return false;
+  }
+  if (APEX_PLAYER_ROUTES.has(route) && user.role !== "player") {
+    redirectWithNotice(rootRelativeTarget(roleHomeRoute(user)), "Esta area e exclusiva para contas de jogador.");
     return false;
   }
   return true;

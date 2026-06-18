@@ -21,8 +21,8 @@ function redirectAfterAuth() {
   const user = window.ApexStaticAuth?.getUser();
   const next = new URLSearchParams(window.location.search).get("next");
   const inviteResult = joinPendingInvite(user);
-  const homeRoute = window.ApexStaticAuth?.homeRoute?.(user) || (user?.role === "master" ? "master/dashboard.html" : "dashboard.html");
-  const target = inviteResult ? (user?.role === "player" ? "dashboard.html" : homeRoute) : (next && window.ApexStaticAuth?.canAccessRoute(user, next) ? next : homeRoute);
+  const homeRoute = window.ApexStaticAuth?.homeRoute?.(user) || (user?.role === "master" ? "master/dashboard.html" : "player/dashboard.html");
+  const target = inviteResult ? (user?.role === "player" ? "player/dashboard.html" : homeRoute) : (next && window.ApexStaticAuth?.canAccessRoute(user, next) ? next : homeRoute);
   setTimeout(() => {
     window.location.href = target;
   }, 520);

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Realms | Perfil do Jogador</title>
+  <meta name="description" content="Perfil do jogador Apex Realms com preferencias de RPG e avatar.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
+  <link rel="stylesheet" href="../assets/css/player.css?v=player-area-v1">
+</head>
+<body class="player-area" data-player-page="profile">
+  <div class="player-layout">
+    <aside class="player-sidebar">
+      <a class="player-brand" href="../index.html"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
+      <nav class="player-nav" aria-label="Navegacao do Jogador">
+        <a href="dashboard.html" data-icon="IN">Inicio</a>
+        <a href="campaigns.html" data-icon="CP">Campanhas</a>
+        <a href="sheet.html" data-icon="FC">Minha ficha</a>
+        <a href="table.html" data-icon="D20">Mesa</a>
+        <a class="active" href="profile.html" data-icon="PJ">Perfil</a>
+      </nav>
+      <div class="player-profile-mini"><span class="player-avatar" data-player-avatar data-player-initial>J</span><span><b data-player-name>Jogador Apex</b><small>Conta de jogador</small></span></div>
+    </aside>
+
+    <main class="player-main">
+      <header class="player-topbar">
+        <div>
+          <small class="player-kicker">Conta</small>
+          <h1>Perfil do Jogador</h1>
+          <p>Defina como voce aparece para o grupo e salve preferencias para futuras mesas.</p>
+        </div>
+        <div class="player-actions">
+          <button class="player-ghost" type="button" data-logout>Sair</button>
+          <a class="player-btn" href="dashboard.html">Voltar ao painel</a>
+        </div>
+      </header>
+
+      <section class="player-grid two">
+        <form class="player-panel player-form" data-player-profile-form>
+          <input type="hidden" name="avatar">
+          <div class="player-form-grid">
+            <label>Nome
+              <input name="displayName" required>
+            </label>
+            <label>Apelido
+              <input name="nickname" required>
+            </label>
+            <label>Sistema favorito
+              <select name="favoriteSystem">
+                <option>D&D 5e</option>
+                <option>Tormenta 20</option>
+                <option>Ordem Paranormal</option>
+                <option>Pathfinder</option>
+                <option>Sistema proprio</option>
+                <option>Outro</option>
+              </select>
+            </label>
+            <label>Foto de perfil
+              <input type="file" accept="image/jpeg,image/png,image/webp" data-avatar-upload>
+            </label>
+          </div>
+          <label>Bio
+            <textarea name="bio" placeholder="Conte um pouco sobre seu estilo como jogador."></textarea>
+          </label>
+          <label>Preferencias de RPG
+            <textarea name="playStyle"></textarea>
+          </label>
+          <button class="player-btn" type="submit">Salvar perfil</button>
+        </form>
+
+        <aside class="player-panel">
+          <small class="player-kicker">Resumo</small>
+          <div class="player-card">
+            <span class="player-avatar" data-player-avatar data-player-initial>J</span>
+            <h3 data-player-name style="margin-top:14px">Jogador Apex</h3>
+            <p><b data-player-nickname>Aventureiro</b> aparece nas mesas, chat e rolagens de dados.</p>
+          </div>
+          <div class="player-card" style="margin-top:14px">
+            <small>Seguranca</small>
+            <h3>Conta de jogador</h3>
+            <p>Esta conta nao cria campanhas, nao envia mapas, nao altera NPCs e nao acessa ferramentas privadas do Mestre.</p>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <script src="../assets/js/app.js?v=player-area-v1"></script>
+  <script src="../assets/js/player.js?v=player-area-v1"></script>
+</body>
+</html>
