@@ -8,7 +8,7 @@ const MASTER_NOTES_KEY = "apex-realms-master-notes";
 
 const masterSystems = ["D&D 5e", "Tormenta 20", "Pathfinder", "Ordem Paranormal", "Sistema Proprio", "Outro"];
 const masterStatuses = ["Preparacao", "Em andamento", "Pausada", "Finalizada"];
-const libraryTypes = ["Mapas", "Tokens", "NPCs", "Monstros", "Itens", "Imagens", "Documentos", "Sons", "Anotacoes", "Handouts"];
+const libraryTypes = ["Monstros", "NPCs", "Itens", "Mapas", "Anotacoes", "Magias", "Armadilhas", "Locais", "Encontros", "Recompensas", "Documentos/lore"];
 const MASTER_BANNER_MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MASTER_BANNER_MAX_DATA_CHARS = 900000;
 
@@ -469,74 +469,313 @@ function bindTablePage() {
 
 function bindLibraryPage() {
   if (!document.body.matches("[data-master-page='library']")) return;
-  const categoryButtons = document.querySelector("[data-library-categories]");
+  const dialog = document.querySelector("[data-library-dialog]");
   const list = document.querySelector("[data-library-list]");
   const form = document.querySelector("[data-library-form]");
-  let activeType = "Mapas";
+  const campaignFilter = document.querySelector("[data-library-campaign-filter]");
+  const typeFilter = document.querySelector("[data-library-type-filter]");
+  const systemFilter = document.querySelector("[data-library-system-filter]");
+  const searchInput = document.querySelector("[data-library-search]");
+  const summary = document.querySelector("[data-library-summary]");
+  const campaigns = readCampaigns().filter(campaign => !campaign.archived);
+  const summaryTypes = ["Monstros", "NPCs", "Itens", "Mapas", "Magias", "Anotacoes"];
+  const typeIcons = {
+    Monstros: "lib-icon-monster",
+    NPCs: "dash-icon-group",
+    Itens: "lib-icon-item",
+    Mapas: "lib-icon-map",
+    Anotacoes: "lib-icon-note",
+    Magias: "lib-icon-magic",
+    Armadilhas: "lib-icon-trap",
+    Locais: "lib-icon-location",
+    Encontros: "dash-icon-d20",
+    Recompensas: "lib-icon-reward",
+    "Documentos/lore": "dash-icon-book"
+  };
+  const legacyTypes = {
+    Documentos: "Documentos/lore",
+    Handouts: "Documentos/lore",
+    Imagens: "Documentos/lore",
+    Sons: "Documentos/lore",
+    Tokens: "NPCs"
+  };
 
-  const renderCategories = () => {
-    const items = readStore(MASTER_LIBRARY_KEY, []);
-    categoryButtons.innerHTML = "";
-    libraryTypes.forEach(type => {
+  const campaignById = id => campaigns.find(campaign => campaign.id === id);
+  const normalizeLibraryItem = (raw = {}) => {
+    const matchedCampaign = campaignById(raw.campaignId) || campaigns.find(campaign => campaign.name === raw.campaign);
+    const createdAt = raw.createdAt || new Date().toISOString();
+    return {
+      id: raw.id || `lib-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: String(raw.name || "Recurso sem nome"),
+      type: libraryTypes.includes(raw.type) ? raw.type : (legacyTypes[raw.type] || "Documentos/lore"),
+      campaignId: matchedCampaign?.id || "",
+      system: raw.system || matchedCampaign?.system || "Todos os sistemas",
+      description: String(raw.description || ""),
+      tags: String(raw.tags || ""),
+      visibility: raw.visibility || "Privado do Mestre",
+      fileName: String(raw.fileName || ""),
+      favorite: Boolean(raw.favorite),
+      createdAt,
+      updatedAt: raw.updatedAt || createdAt
+    };
+  };
+  const readLibrary = () => readStore(MASTER_LIBRARY_KEY, []).map(normalizeLibraryItem);
+  const saveLibrary = items => writeStore(MASTER_LIBRARY_KEY, items.map(normalizeLibraryItem));
+  const addOption = (select, label, value) => select.add(new Option(label, value));
+
+  const populateControls = () => {
+    campaignFilter.replaceChildren();
+    addOption(campaignFilter, "Todas as campanhas", "all");
+    addOption(campaignFilter, "Recursos globais", "global");
+    campaigns.forEach(campaign => addOption(campaignFilter, `Campanha: ${campaign.name}`, campaign.id));
+
+    typeFilter.replaceChildren();
+    addOption(typeFilter, "Todos os recursos", "all");
+    libraryTypes.forEach(type => addOption(typeFilter, type, type));
+
+    systemFilter.replaceChildren();
+    addOption(systemFilter, "Todos os sistemas", "all");
+    masterSystems.forEach(system => addOption(systemFilter, system, system));
+
+    form.elements.type.replaceChildren();
+    libraryTypes.forEach(type => addOption(form.elements.type, type, type));
+    form.elements.campaignId.replaceChildren();
+    addOption(form.elements.campaignId, "Global - todas as campanhas", "");
+    campaigns.forEach(campaign => addOption(form.elements.campaignId, campaign.name, campaign.id));
+    form.elements.system.replaceChildren();
+    addOption(form.elements.system, "Todos os sistemas", "Todos os sistemas");
+    masterSystems.forEach(system => addOption(form.elements.system, system, system));
+  };
+
+  const matchesScope = item => {
+    if (campaignFilter.value === "global") return !item.campaignId;
+    if (campaignFilter.value !== "all") return !item.campaignId || item.campaignId === campaignFilter.value;
+    return true;
+  };
+  const matchesSystem = item => systemFilter.value === "all" || item.system === "Todos os sistemas" || item.system === systemFilter.value;
+  const matchesSearch = item => {
+    const term = searchInput.value.trim().toLocaleLowerCase("pt-BR");
+    if (!term) return true;
+    return [item.name, item.description, item.tags, item.type, campaignById(item.campaignId)?.name].some(value => String(value || "").toLocaleLowerCase("pt-BR").includes(term));
+  };
+  const visibleWithoutType = items => items.filter(item => matchesScope(item) && matchesSystem(item) && matchesSearch(item));
+
+  const renderSummary = items => {
+    const scopedItems = visibleWithoutType(items);
+    summary.replaceChildren();
+    summaryTypes.forEach(type => {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = type === activeType ? "active" : "";
-      button.innerHTML = `<span>${type}</span><small class="master-badge-count">${items.filter(item => item.type === type).length} itens</small>`;
+      button.className = typeFilter.value === type ? "active" : "";
+      button.innerHTML = `<i><svg><use href="#${typeIcons[type]}"></use></svg></i><span><small>${type}</small><b>${scopedItems.filter(item => item.type === type).length}</b></span>`;
       button.addEventListener("click", () => {
-        activeType = type;
-        renderCategories();
+        typeFilter.value = typeFilter.value === type ? "all" : type;
         renderLibrary();
       });
-      categoryButtons.append(button);
+      summary.append(button);
     });
   };
+
+  const scopeTitle = () => {
+    if (campaignFilter.value === "global") return "Recursos globais";
+    if (campaignFilter.value !== "all") return `Campanha: ${campaignById(campaignFilter.value)?.name || "Campanha"}`;
+    return "Toda a biblioteca";
+  };
+
+  const createResourceCard = item => {
+    const campaign = campaignById(item.campaignId);
+    const article = document.createElement("article");
+    article.className = `library-resource-card${item.favorite ? " favorite" : ""}`;
+    article.dataset.libraryId = item.id;
+    article.innerHTML = `
+      <header>
+        <i class="library-resource-icon"><svg><use href="#${typeIcons[item.type] || "dash-icon-book"}"></use></svg></i>
+        <div><small data-type></small><h3></h3></div>
+        <button class="library-favorite-toggle" type="button" data-library-action="favorite" aria-label="Favoritar recurso" title="Favoritar">&#9733;</button>
+      </header>
+      <div class="library-card-badges"><span data-scope></span><span data-system></span><span data-visibility></span></div>
+      <p></p>
+      <div class="library-card-tags" data-tags></div>
+      <footer>
+        <button type="button" data-library-action="use">Levar a mesa</button>
+        <button type="button" data-library-action="edit">Editar</button>
+        <button type="button" data-library-action="duplicate">Duplicar</button>
+        <button class="danger" type="button" data-library-action="delete">Excluir</button>
+      </footer>`;
+    article.querySelector("[data-type]").textContent = item.type;
+    article.querySelector("h3").textContent = item.name;
+    article.querySelector("[data-scope]").textContent = campaign ? campaign.name : "Global";
+    article.querySelector("[data-system]").textContent = item.system;
+    article.querySelector("[data-visibility]").textContent = item.visibility;
+    article.querySelector("p").textContent = item.description || "Sem descricao cadastrada.";
+    const tags = article.querySelector("[data-tags]");
+    const tagList = item.tags.split(",").map(tag => tag.trim()).filter(Boolean).slice(0, 4);
+    tags.replaceChildren(...tagList.map(tag => {
+      const span = document.createElement("span");
+      span.textContent = `#${tag}`;
+      return span;
+    }));
+    if (item.fileName) {
+      const file = document.createElement("span");
+      file.className = "library-file-tag";
+      file.textContent = item.fileName;
+      tags.append(file);
+    }
+    return article;
+  };
+
   const renderLibrary = () => {
-    const items = readStore(MASTER_LIBRARY_KEY, []).filter(item => item.type === activeType);
-    list.innerHTML = "";
-    if (!items.length) {
-      list.innerHTML = `<div class="master-empty"><b>Nenhum item em ${activeType}</b><span>Envie arquivos pelo formulario para montar a biblioteca da campanha.</span></div>`;
+    const items = readLibrary();
+    renderSummary(items);
+    const filtered = visibleWithoutType(items)
+      .filter(item => typeFilter.value === "all" || item.type === typeFilter.value)
+      .sort((a, b) => Number(b.favorite) - Number(a.favorite) || new Date(b.updatedAt) - new Date(a.updatedAt));
+    list.replaceChildren();
+    document.querySelector("[data-library-result-count]").textContent = filtered.length;
+    document.querySelector("[data-library-result-title]").textContent = typeFilter.value === "all" ? scopeTitle() : `${typeFilter.value} - ${scopeTitle()}`;
+    if (!filtered.length) {
+      const empty = document.createElement("div");
+      empty.className = "library-empty";
+      empty.innerHTML = `<i><svg><use href="#dash-icon-book"></use></svg></i><div><b>Nenhum recurso encontrado</b><span>Crie um recurso ou ajuste os filtros para explorar a biblioteca.</span></div><button class="master-btn" type="button">Novo recurso</button>`;
+      empty.querySelector("button").addEventListener("click", () => openResourceDialog());
+      list.append(empty);
       return;
     }
-    items.forEach(item => {
-      const article = document.createElement("article");
-      article.className = "master-list-item";
-      article.innerHTML = `<header><div><h3></h3><div class="master-list-meta"><span class="master-pill"></span><span class="master-status"></span></div></div><button class="master-danger" type="button">Remover</button></header><p></p>`;
-      article.querySelector("h3").textContent = item.name;
-      article.querySelector(".master-pill").textContent = item.campaign || "Sem campanha";
-      article.querySelector(".master-status").textContent = item.visibility;
-      article.querySelector("p").textContent = `${item.description || "Sem descricao."} ${item.tags ? `Tags: ${item.tags}` : ""}`;
-      article.querySelector("button").addEventListener("click", () => {
-        writeStore(MASTER_LIBRARY_KEY, readStore(MASTER_LIBRARY_KEY, []).filter(saved => saved.id !== item.id));
-        renderCategories();
-        renderLibrary();
-        masterToast("Item removido da biblioteca.");
-      });
-      list.append(article);
-    });
+    filtered.forEach(item => list.append(createResourceCard(item)));
   };
-  form?.addEventListener("submit", event => {
+
+  const openResourceDialog = (item = null) => {
+    form.reset();
+    form.elements.id.value = item?.id || "";
+    form.elements.name.value = item?.name || "";
+    form.elements.type.value = item?.type || (typeFilter.value !== "all" ? typeFilter.value : "Monstros");
+    form.elements.campaignId.value = item?.campaignId || (campaignFilter.value !== "all" && campaignFilter.value !== "global" ? campaignFilter.value : "");
+    form.elements.system.value = item?.system || campaignById(form.elements.campaignId.value)?.system || "Todos os sistemas";
+    form.elements.visibility.value = item?.visibility || "Privado do Mestre";
+    form.elements.description.value = item?.description || "";
+    form.elements.tags.value = item?.tags || "";
+    form.elements.favorite.checked = Boolean(item?.favorite);
+    form.dataset.fileName = item?.fileName || "";
+    document.querySelector("[data-library-current-file]").textContent = item?.fileName || "Nenhum arquivo selecionado.";
+    document.querySelector("[data-library-form-kicker]").textContent = item ? "Editar recurso" : "Novo recurso";
+    document.querySelector("[data-library-form-title]").textContent = item ? item.name : "Adicionar a biblioteca";
+    dialog.showModal();
+  };
+
+  document.querySelector("[data-library-new]")?.addEventListener("click", () => openResourceDialog());
+  document.querySelectorAll("[data-library-close]").forEach(button => button.addEventListener("click", () => dialog.close()));
+  dialog.addEventListener("click", event => {
+    if (event.target === dialog) dialog.close();
+  });
+  form.elements.campaignId.addEventListener("change", () => {
+    const campaign = campaignById(form.elements.campaignId.value);
+    if (campaign && form.elements.system.value === "Todos os sistemas") form.elements.system.value = campaign.system;
+  });
+  form.elements.file.addEventListener("change", () => {
+    const file = form.elements.file.files?.[0];
+    document.querySelector("[data-library-current-file]").textContent = file?.name || form.dataset.fileName || "Nenhum arquivo selecionado.";
+  });
+  form.addEventListener("submit", event => {
     event.preventDefault();
     if (!form.reportValidity()) return;
     const data = new FormData(form);
-    const file = form.file.files?.[0];
+    const items = readLibrary();
+    const existing = items.find(item => item.id === data.get("id"));
+    const file = form.elements.file.files?.[0];
     const item = {
-      id: `lib-${Date.now()}`,
-      name: data.get("name"),
+      ...existing,
+      id: existing?.id || `lib-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: String(data.get("name") || "").trim(),
       type: data.get("type"),
-      campaign: data.get("campaign"),
-      description: data.get("description"),
-      tags: data.get("tags"),
+      campaignId: data.get("campaignId"),
+      system: data.get("system"),
+      description: String(data.get("description") || "").trim(),
+      tags: String(data.get("tags") || "").trim(),
       visibility: data.get("visibility"),
-      fileName: file?.name || "arquivo local"
+      fileName: file?.name || form.dataset.fileName || "",
+      favorite: data.get("favorite") === "on",
+      createdAt: existing?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
-    writeStore(MASTER_LIBRARY_KEY, [item, ...readStore(MASTER_LIBRARY_KEY, [])]);
-    activeType = item.type;
-    form.reset();
-    renderCategories();
+    saveLibrary(existing ? items.map(saved => saved.id === item.id ? item : saved) : [item, ...items]);
+    typeFilter.value = item.type;
+    dialog.close();
     renderLibrary();
-    masterToast("Item adicionado a biblioteca.");
+    masterToast(existing ? "Recurso atualizado." : "Recurso adicionado a biblioteca.");
   });
-  renderCategories();
+
+  list.addEventListener("click", event => {
+    const button = event.target.closest("[data-library-action]");
+    const card = event.target.closest("[data-library-id]");
+    if (!button || !card) return;
+    const items = readLibrary();
+    const item = items.find(saved => saved.id === card.dataset.libraryId);
+    if (!item) return;
+    const action = button.dataset.libraryAction;
+    if (action === "favorite") {
+      saveLibrary(items.map(saved => saved.id === item.id ? {...saved, favorite: !saved.favorite, updatedAt: new Date().toISOString()} : saved));
+      renderLibrary();
+    }
+    if (action === "edit") openResourceDialog(item);
+    if (action === "duplicate") {
+      saveLibrary([{...item, id: `lib-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, name: `${item.name} (copia)`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()}, ...items]);
+      renderLibrary();
+      masterToast("Recurso duplicado.");
+    }
+    if (action === "use") {
+      const notes = readStore(MASTER_NOTES_KEY, {});
+      const snippet = `[${item.type}] ${item.name}\n${item.description || "Sem descricao."}`;
+      writeStore(MASTER_NOTES_KEY, {...notes, private: [notes.private, snippet].filter(Boolean).join("\n\n")});
+      masterToast("Recurso adicionado as notas privadas da mesa.");
+    }
+    if (action === "delete") {
+      if (!confirm(`Excluir ${item.name} da biblioteca?`)) return;
+      saveLibrary(items.filter(saved => saved.id !== item.id));
+      renderLibrary();
+      masterToast("Recurso excluido.");
+    }
+  });
+
+  [campaignFilter, typeFilter, systemFilter].forEach(control => control.addEventListener("change", renderLibrary));
+  searchInput.addEventListener("input", renderLibrary);
+  document.querySelector("[data-library-clear-filters]")?.addEventListener("click", () => {
+    campaignFilter.value = "all";
+    typeFilter.value = "all";
+    systemFilter.value = "all";
+    searchInput.value = "";
+    renderLibrary();
+  });
+
+  document.querySelector("[data-library-export]")?.addEventListener("click", () => {
+    const payload = JSON.stringify({version: 1, exportedAt: new Date().toISOString(), resources: readLibrary()}, null, 2);
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([payload], {type: "application/json"}));
+    link.download = `apex-realms-biblioteca-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    masterToast("Biblioteca exportada.");
+  });
+  document.querySelector("[data-library-import]")?.addEventListener("change", async event => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const parsed = JSON.parse(await file.text());
+      const imported = Array.isArray(parsed) ? parsed : parsed.resources;
+      if (!Array.isArray(imported)) throw new Error("Formato invalido");
+      const existing = readLibrary();
+      const existingIds = new Set(existing.map(item => item.id));
+      const normalized = imported.filter(item => item && item.name).map(item => normalizeLibraryItem({...item, id: existingIds.has(item.id) ? undefined : item.id}));
+      saveLibrary([...normalized, ...existing]);
+      renderLibrary();
+      masterToast(`${normalized.length} recursos importados.`);
+    } catch {
+      masterToast("Arquivo de biblioteca invalido.");
+    } finally {
+      event.target.value = "";
+    }
+  });
+
+  populateControls();
   renderLibrary();
 }
 

@@ -8,125 +8,110 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=master-stage-1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=master-library-v1">
 </head>
-<body class="master-area" data-master-page="library">
-  <aside class="master-sidebar">
-    <a class="master-brand" href="../index.html" aria-label="Apex Realms"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
-    <nav class="master-nav" aria-label="Navegacao do Mestre">
-      <small>Area do Mestre</small>
-      <a href="dashboard.html"><i>D</i>Dashboard</a>
-      <a href="campaigns.html"><i>C</i>Campanhas</a>
-      <a href="table.html"><i>M</i>Mesa</a>
-      <a class="active" href="library.html"><i>B</i>Biblioteca</a>
-      <a href="sheets.html"><i>F</i>Fichas</a>
-      <a href="players.html"><i>J</i>Jogadores</a>
-      <a href="invites.html"><i>I</i>Convites</a>
-      <a href="settings.html"><i>A</i>Configuracoes</a>
-      <small>Atalhos</small>
-      <a href="../dashboard.html"><i>P</i>Area do jogador</a>
+<body class="master-area library-page" data-master-page="library">
+  <svg class="dashboard-symbols" aria-hidden="true">
+    <symbol id="dash-icon-castle" viewBox="0 0 48 48"><path d="M9 40V18l5 3 5-3 5 3 5-3 5 3 5-3v22M15 40V27h18v13M8 18V9h7v9M33 18V9h7v9M20 20V8h8v12"/><path d="M21 40v-8a3 3 0 0 1 6 0v8"/></symbol>
+    <symbol id="dash-icon-scroll" viewBox="0 0 48 48"><path d="M13 11h24v23a6 6 0 0 1-6 6H13a6 6 0 0 0 6-6V15a4 4 0 0 0-8 0v2h8"/><path d="M22 18h11M22 25h10M22 32h7"/></symbol>
+    <symbol id="dash-icon-d20" viewBox="0 0 48 48"><path d="M24 6 41 17v14L24 42 7 31V17L24 6Z"/><path d="M7 17h34M7 31l17-25 17 25M24 42V6M15 31h18"/></symbol>
+    <symbol id="dash-icon-book" viewBox="0 0 48 48"><path d="M8 10h14a6 6 0 0 1 6 6v24a6 6 0 0 0-6-6H8V10ZM40 10H28a6 6 0 0 0-6 6v24a6 6 0 0 1 6-6h12V10Z"/><path d="M15 18h7M15 25h7M32 18h4M32 25h4"/></symbol>
+    <symbol id="dash-icon-sheet" viewBox="0 0 48 48"><path d="M14 6h14l8 8v28H14V6Z"/><path d="M28 6v9h8M20 23h10M20 30h12M20 36h8"/><path d="M18 16h5"/></symbol>
+    <symbol id="dash-icon-group" viewBox="0 0 48 48"><path d="M24 23a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM12 40a12 12 0 0 1 24 0"/><path d="M11 25a5 5 0 1 0 0-10M5 39a9 9 0 0 1 10-9M37 25a5 5 0 1 1 0-10M43 39a9 9 0 0 0-10-9"/></symbol>
+    <symbol id="dash-icon-key" viewBox="0 0 48 48"><path d="M19 27a10 10 0 1 1 7-7l14 14-5 5-4-4-4 4-5-5 4-4-3-3a10 10 0 0 1-4 0Z"/><path d="M16 18h.1"/></symbol>
+    <symbol id="dash-icon-gear" viewBox="0 0 48 48"><path d="M24 17a7 7 0 1 0 0 14 7 7 0 0 0 0-14Z"/><path d="M24 6v7M24 35v7M6 24h7M35 24h7M11 11l5 5M32 32l5 5M37 11l-5 5M16 32l-5 5"/></symbol>
+    <symbol id="dash-icon-power" viewBox="0 0 48 48"><path d="M24 7v15"/><path d="M14 14a17 17 0 1 0 20 0"/></symbol>
+    <symbol id="lib-icon-monster" viewBox="0 0 48 48"><path d="M13 18 8 7l12 6M35 18l5-11-12 6M13 18c-2 5-1 17 11 23 12-6 13-18 11-23-5-8-17-8-22 0Z"/><path d="m17 25 4 2M31 25l-4 2M20 34h8"/></symbol>
+    <symbol id="lib-icon-item" viewBox="0 0 48 48"><path d="m24 6 15 13-15 23L9 19 24 6Z"/><path d="M9 19h30M16 19l8 23 8-23M17 12l7 7 7-7"/></symbol>
+    <symbol id="lib-icon-map" viewBox="0 0 48 48"><path d="m7 11 11-4 12 5 11-4v29l-11 4-12-5-11 4V11Z"/><path d="M18 7v29M30 12v29M12 17l3-2M34 31l3-2"/></symbol>
+    <symbol id="lib-icon-magic" viewBox="0 0 48 48"><path d="M24 5v9M24 34v9M5 24h9M34 24h9M11 11l7 7M30 30l7 7M37 11l-7 7M18 30l-7 7"/><circle cx="24" cy="24" r="7"/></symbol>
+    <symbol id="lib-icon-note" viewBox="0 0 48 48"><path d="M11 7h26v34H11V7Z"/><path d="M17 16h14M17 23h14M17 30h9"/></symbol>
+    <symbol id="lib-icon-trap" viewBox="0 0 48 48"><path d="m7 37 8-20 9 20 9-20 8 20H7Z"/><path d="M8 10h32M14 7v6M24 7v6M34 7v6"/></symbol>
+    <symbol id="lib-icon-location" viewBox="0 0 48 48"><path d="M24 43s14-13 14-25a14 14 0 1 0-28 0c0 12 14 25 14 25Z"/><circle cx="24" cy="18" r="5"/></symbol>
+    <symbol id="lib-icon-reward" viewBox="0 0 48 48"><path d="M8 20h32v22H8V20ZM6 13h36v9H6v-9Z"/><path d="M24 13v29M16 13c-5-1-7-8-2-9 4-1 8 5 10 9M32 13c5-1 7-8 2-9-4-1-8 5-10 9"/></symbol>
+  </svg>
+
+  <aside class="master-sidebar library-sidebar">
+    <a class="master-brand" href="../index.html" aria-label="Apex Realms" title="Apex Realms"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
+    <nav class="master-nav library-icon-nav" aria-label="Navegacao do Mestre">
+      <a href="dashboard.html" aria-label="Dashboard" title="Dashboard" data-tooltip="Dashboard"><i><svg><use href="#dash-icon-castle"></use></svg></i></a>
+      <a href="campaigns.html" aria-label="Campanhas" title="Campanhas" data-tooltip="Campanhas"><i><svg><use href="#dash-icon-scroll"></use></svg></i></a>
+      <a href="table.html" aria-label="Mesa" title="Mesa" data-tooltip="Mesa"><i><svg><use href="#dash-icon-d20"></use></svg></i></a>
+      <a class="active" href="library.html" aria-label="Biblioteca" title="Biblioteca" data-tooltip="Biblioteca"><i><svg><use href="#dash-icon-book"></use></svg></i></a>
+      <a href="sheets.html" aria-label="Fichas" title="Fichas" data-tooltip="Fichas"><i><svg><use href="#dash-icon-sheet"></use></svg></i></a>
+      <a href="players.html" aria-label="Jogadores" title="Jogadores" data-tooltip="Jogadores"><i><svg><use href="#dash-icon-group"></use></svg></i></a>
+      <a href="invites.html" aria-label="Convites" title="Convites" data-tooltip="Convites"><i><svg><use href="#dash-icon-key"></use></svg></i></a>
+      <a href="settings.html" aria-label="Configuracoes" title="Configuracoes" data-tooltip="Configuracoes"><i><svg><use href="#dash-icon-gear"></use></svg></i></a>
     </nav>
-    <div class="master-sidebar-card">
-      <small>Biblioteca</small>
-      <b>Recursos de campanha</b>
-      <p>Organize tudo que pertence ao Mestre antes de levar para a mesa.</p>
+    <div class="master-profile dashboard-profile">
+      <button class="dashboard-profile-trigger" type="button" aria-label="Perfil do Mestre" title="Perfil do Mestre"><span class="master-avatar" data-user-initial>A</span></button>
+      <div class="dashboard-profile-menu">
+        <strong data-user-name>Mestre Apex</strong>
+        <small><span data-user-role>Mestre</span> ativo</small>
+        <button type="button" data-logout><svg><use href="#dash-icon-power"></use></svg><span>Sair</span></button>
+      </div>
     </div>
-    <div class="master-profile"><div class="master-avatar" data-user-initial>A</div><span><b data-user-name>Mestre Apex</b><small><span data-user-role>Mestre</span> ativo</small></span><button type="button" data-logout>Sair</button></div>
   </aside>
 
-  <main class="master-main">
-    <header class="master-topbar">
+  <main class="library-content">
+    <header class="master-topbar library-topbar">
       <div>
-        <small class="master-eyebrow">Recursos privados</small>
-        <h1>Biblioteca do Mestre</h1>
+        <small class="master-eyebrow">Arsenal do Mestre</small>
+        <h1>Biblioteca</h1>
+        <p>Organize monstros, NPCs, itens, mapas e recursos por campanha.</p>
       </div>
-      <div class="master-actions">
-        <a class="master-ghost" href="table.html">Abrir mesa</a>
-        <button class="master-btn" type="button" data-master-toast="Importacao em lote sera conectada ao backend.">Importar lote</button>
+      <div class="library-actions">
+        <button class="master-btn" type="button" data-library-new>Novo recurso</button>
+        <label class="master-ghost library-import-button">Importar<input type="file" accept="application/json,.json" data-library-import hidden></label>
+        <button class="master-ghost" type="button" data-library-export>Exportar</button>
       </div>
     </header>
 
-    <section class="master-panel">
-      <div class="master-panel-header">
-        <div>
-          <small class="master-panel-kicker">Categorias</small>
-          <h2>Organize mapas, tokens, NPCs e conteudo</h2>
-        </div>
-      </div>
-      <div class="master-category-grid" data-library-categories></div>
+    <section class="library-toolbar" aria-label="Filtros da biblioteca">
+      <label><span>Biblioteca de</span><select data-library-campaign-filter></select></label>
+      <label><span>Tipo de recurso</span><select data-library-type-filter></select></label>
+      <label><span>Sistema</span><select data-library-system-filter></select></label>
+      <label class="library-search"><span>Busca rapida</span><input type="search" data-library-search placeholder="Nome, tag ou descricao"></label>
+      <button type="button" data-library-clear-filters title="Limpar filtros">Limpar</button>
     </section>
 
-    <section class="master-two-col">
-      <form class="master-form-card" data-library-form>
-        <div class="master-panel-header">
-          <div>
-            <small class="master-panel-kicker">Novo recurso</small>
-            <h2>Adicionar item</h2>
-          </div>
-        </div>
-        <div class="master-form-grid">
-          <div class="master-field">
-            <label for="library-name">Nome</label>
-            <input id="library-name" name="name" required placeholder="Ex.: Mapa da cripta">
-          </div>
-          <div class="master-field">
-            <label for="library-type">Tipo</label>
-            <select id="library-type" name="type">
-              <option>Mapas</option>
-              <option>Tokens</option>
-              <option>NPCs</option>
-              <option>Monstros</option>
-              <option>Itens</option>
-              <option>Imagens</option>
-              <option>Documentos</option>
-              <option>Sons</option>
-              <option>Anotacoes</option>
-              <option>Handouts</option>
-            </select>
-          </div>
-          <div class="master-field">
-            <label for="library-campaign">Campanha vinculada</label>
-            <input id="library-campaign" name="campaign" placeholder="Opcional">
-          </div>
-          <div class="master-field">
-            <label for="library-visibility">Visibilidade</label>
-            <select id="library-visibility" name="visibility">
-              <option>Privado do Mestre</option>
-              <option>Compartilhavel na mesa</option>
-              <option>Liberado para jogadores</option>
-            </select>
-          </div>
-          <div class="master-field full">
-            <label class="master-upload">Enviar arquivo<input name="file" type="file"></label>
-          </div>
-          <div class="master-field full">
-            <label for="library-description">Descricao</label>
-            <textarea id="library-description" name="description" placeholder="Uso do recurso, segredo do mestre ou notas de cena."></textarea>
-          </div>
-          <div class="master-field full">
-            <label for="library-tags">Tags</label>
-            <input id="library-tags" name="tags" placeholder="ruina, chefe, puzzle, combate">
-          </div>
-        </div>
-        <div class="master-button-row">
-          <button class="master-btn" type="submit">Adicionar na biblioteca</button>
-          <button class="master-ghost" type="reset">Limpar</button>
-        </div>
-      </form>
+    <section class="library-summary" data-library-summary aria-label="Resumo da biblioteca"></section>
 
-      <article class="master-panel">
-        <div class="master-panel-header">
-          <div>
-            <small class="master-panel-kicker">Itens</small>
-            <h2>Conteudo salvo</h2>
-          </div>
-        </div>
-        <div class="master-list" data-library-list></div>
-      </article>
+    <section class="library-results">
+      <header>
+        <div><small class="master-panel-kicker">Recursos encontrados</small><h2 data-library-result-title>Toda a biblioteca</h2></div>
+        <div class="library-result-meta"><b data-library-result-count>0</b><span>recursos</span></div>
+      </header>
+      <div class="library-resource-grid" data-library-list></div>
     </section>
   </main>
 
-  <script src="../assets/js/app.js?v=invite-codes-v1"></script>
-  <script src="../assets/js/master.js?v=invite-codes-v1"></script>
+  <dialog class="library-dialog" data-library-dialog>
+    <form method="dialog" class="library-resource-form" data-library-form>
+      <input type="hidden" name="id">
+      <header>
+        <div><small class="master-eyebrow" data-library-form-kicker>Novo recurso</small><h2 data-library-form-title>Adicionar a biblioteca</h2><p>Prepare o conteudo para encontrar e usar durante a sessao.</p></div>
+        <button class="library-dialog-close" type="button" data-library-close aria-label="Fechar">&times;</button>
+      </header>
+      <div class="library-form-grid">
+        <label class="library-field library-field-wide"><span>Nome do recurso</span><input name="name" required maxlength="80" placeholder="Ex.: Guardiao da cripta"></label>
+        <label class="library-field"><span>Tipo</span><select name="type" data-library-form-type></select></label>
+        <label class="library-field"><span>Campanha</span><select name="campaignId" data-library-form-campaign></select><small>Global deixa o recurso disponivel em todas as campanhas.</small></label>
+        <label class="library-field"><span>Sistema</span><select name="system" data-library-form-system></select></label>
+        <label class="library-field"><span>Visibilidade</span><select name="visibility"><option value="Privado do Mestre">Privado do Mestre</option><option value="Disponivel na mesa">Disponivel na mesa</option><option value="Liberado para jogadores">Liberado para jogadores</option></select></label>
+        <label class="library-field library-field-wide"><span>Descricao e notas</span><textarea name="description" maxlength="600" placeholder="Estatisticas essenciais, segredo, uso em cena ou contexto do recurso."></textarea></label>
+        <label class="library-field"><span>Tags</span><input name="tags" maxlength="140" placeholder="chefe, ruina, nivel 5"></label>
+        <label class="library-field"><span>Arquivo de referencia</span><input name="file" type="file"><small data-library-current-file>Nenhum arquivo selecionado.</small></label>
+        <label class="library-favorite"><input name="favorite" type="checkbox"><span>Marcar como favorito para acesso rapido</span></label>
+      </div>
+      <footer>
+        <button class="master-ghost" type="button" data-library-close>Cancelar</button>
+        <button class="master-btn" type="submit">Salvar recurso</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <script src="../assets/js/app.js?v=campaign-banners-v1"></script>
+  <script src="../assets/js/master.js?v=master-library-v1"></script>
 </body>
 </html>
