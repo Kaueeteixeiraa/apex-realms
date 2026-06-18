@@ -3,118 +3,208 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apex Realms | Mesa do Mestre</title>
+  <title>Apex Realms | Mesa de RPG</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=master-stage-1">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css?v=vtt-core-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=vtt-core-v1">
 </head>
-<body class="master-area" data-master-page="table">
-  <aside class="master-sidebar">
-    <a class="master-brand" href="../index.html" aria-label="Apex Realms"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
-    <nav class="master-nav" aria-label="Navegacao do Mestre">
-      <small>Area do Mestre</small>
-      <a href="dashboard.html"><i>D</i>Dashboard</a>
-      <a href="campaigns.html"><i>C</i>Campanhas</a>
-      <a class="active" href="table.html"><i>M</i>Mesa</a>
-      <a href="library.html"><i>B</i>Biblioteca</a>
-      <a href="sheets.html"><i>F</i>Fichas</a>
-      <a href="players.html"><i>J</i>Jogadores</a>
-      <a href="profile.html"><i>P</i>Perfil</a>
-      <a href="settings.html"><i>A</i>Configuracoes</a>
-      <small>Atalhos</small>
-      <a href="../dashboard.html"><i>P</i>Area do jogador</a>
-    </nav>
-    <div class="master-sidebar-card">
-      <small>Mesa privada</small>
-      <b>Mapa em primeiro plano</b>
-      <p>Ferramentas de controle ficam em volta do mapa para nao competir com a aventura.</p>
-    </div>
-    <div class="master-profile"><div class="master-avatar" data-user-initial>A</div><span><b data-user-name>Mestre Apex</b><small><span data-user-role>Mestre</span> ativo</small></span><button type="button" data-logout>Sair</button></div>
-  </aside>
+<body class="vtt-page" data-master-page="table" data-table-version="2">
+  <svg class="vtt-symbols" aria-hidden="true">
+    <symbol id="vtt-d20" viewBox="0 0 48 48"><path d="M24 5 42 17v14L24 43 6 31V17L24 5Z"/><path d="M6 17h36M6 31 24 5l18 26M24 43V5M15 31h18"/></symbol>
+    <symbol id="vtt-users" viewBox="0 0 48 48"><circle cx="24" cy="15" r="7"/><path d="M11 40c1-10 6-16 13-16s12 6 13 16M10 24a5 5 0 1 1 0-10M4 38c0-7 3-11 9-12M38 24a5 5 0 1 0 0-10M44 38c0-7-3-11-9-12"/></symbol>
+    <symbol id="vtt-chat" viewBox="0 0 48 48"><path d="M7 9h34v25H20L10 41v-7H7V9Z"/><path d="M15 18h18M15 25h12"/></symbol>
+    <symbol id="vtt-sword" viewBox="0 0 48 48"><path d="m12 36 24-24M29 9l10-2-2 10M8 40l8-1-7-7-1 8ZM12 12l24 24M31 38l7-7"/></symbol>
+    <symbol id="vtt-scroll" viewBox="0 0 48 48"><path d="M13 8h24v26a6 6 0 0 1-6 6H13a6 6 0 0 0 6-6V14a5 5 0 0 0-10 0v3h10"/><path d="M23 18h9M23 25h9M23 32h6"/></symbol>
+    <symbol id="vtt-book" viewBox="0 0 48 48"><path d="M7 9h14a7 7 0 0 1 7 7v25a7 7 0 0 0-7-7H7V9ZM41 9H28a7 7 0 0 0-7 7v25a7 7 0 0 1 7-7h13V9Z"/></symbol>
+    <symbol id="vtt-select" viewBox="0 0 48 48"><path d="m11 7 25 19-12 2-6 11-7-32Z"/></symbol>
+    <symbol id="vtt-hand" viewBox="0 0 48 48"><path d="M13 24V13a3 3 0 0 1 6 0v9-12a3 3 0 0 1 6 0v12-10a3 3 0 0 1 6 0v11-7a3 3 0 0 1 6 0v13c0 9-5 14-14 14-8 0-11-4-15-11l-3-6a4 4 0 0 1 7-4l1 2Z"/></symbol>
+    <symbol id="vtt-ruler" viewBox="0 0 48 48"><path d="m8 33 25-25 8 8-25 25-8-8Z"/><path d="m28 13 4 4M23 18l3 3M18 23l4 4M13 28l3 3"/></symbol>
+    <symbol id="vtt-ping" viewBox="0 0 48 48"><circle cx="24" cy="24" r="7"/><circle cx="24" cy="24" r="15"/><path d="M24 3v6M24 39v6M3 24h6M39 24h6"/></symbol>
+    <symbol id="vtt-grid" viewBox="0 0 48 48"><path d="M7 7h34v34H7zM18 7v34M30 7v34M7 18h34M7 30h34"/></symbol>
+    <symbol id="vtt-eye" viewBox="0 0 48 48"><path d="M4 24s7-12 20-12 20 12 20 12-7 12-20 12S4 24 4 24Z"/><circle cx="24" cy="24" r="6"/></symbol>
+    <symbol id="vtt-image" viewBox="0 0 48 48"><rect x="6" y="8" width="36" height="32" rx="4"/><circle cx="16" cy="18" r="4"/><path d="m9 36 10-10 7 7 5-5 8 8"/></symbol>
+    <symbol id="vtt-settings" viewBox="0 0 48 48"><circle cx="24" cy="24" r="7"/><path d="M24 5v7M24 36v7M5 24h7M36 24h7M10 10l5 5M33 33l5 5M38 10l-5 5M15 33l-5 5"/></symbol>
+    <symbol id="vtt-fullscreen" viewBox="0 0 48 48"><path d="M8 19V8h11M29 8h11v11M40 29v11H29M19 40H8V29"/></symbol>
+    <symbol id="vtt-chevron" viewBox="0 0 48 48"><path d="m18 10 14 14-14 14"/></symbol>
+    <symbol id="vtt-close" viewBox="0 0 48 48"><path d="m10 10 28 28M38 10 10 38"/></symbol>
+    <symbol id="vtt-plus" viewBox="0 0 48 48"><path d="M24 8v32M8 24h32"/></symbol>
+    <symbol id="vtt-minus" viewBox="0 0 48 48"><path d="M8 24h32"/></symbol>
+  </svg>
 
-  <main class="master-main">
-    <section class="master-table-shell">
-      <header class="master-table-top">
-        <div>
-          <small class="master-eyebrow">Controle de sessao</small>
-          <h1>Ruinas do Portal Astral</h1>
+  <div class="vtt-shell">
+    <header class="vtt-topbar">
+      <div class="vtt-brand-group">
+        <a class="vtt-brand" href="dashboard.html" aria-label="Voltar ao dashboard">
+          <span class="vtt-brand-mark"><svg><use href="#vtt-d20"></use></svg></span>
+          <span><b>APEX</b><small>REALMS</small></span>
+        </a>
+        <span class="vtt-divider"></span>
+        <button class="vtt-icon-button vtt-mobile-roster" type="button" data-toggle-panel="roster" aria-label="Abrir elenco"><svg><use href="#vtt-users"></use></svg></button>
+      </div>
+
+      <div class="vtt-campaign-head">
+        <small>Mesa do Mestre</small>
+        <label>
+          <span class="sr-only">Campanha ativa</span>
+          <select data-campaign-select aria-label="Campanha ativa"></select>
+        </label>
+        <div class="vtt-campaign-meta">
+          <span data-campaign-system>D&amp;D 5e</span><i></i><span data-scene-name>Ruinas arcanas</span><i></i><span><b data-connected-count>0</b> conectados</span>
         </div>
-        <div class="master-actions">
-          <span class="master-pill">Sistema: D&D 5e</span>
-          <span class="master-pill">Cena: combate tatico</span>
-          <span class="master-pill">Jogadores: 0 conectados</span>
-          <button class="master-btn" type="button" data-session-toggle data-active="false">Iniciar sessao</button>
+      </div>
+
+      <div class="vtt-top-actions">
+        <button class="vtt-session-button" type="button" data-session-toggle><i></i><span>Iniciar sessao</span></button>
+        <button class="vtt-icon-button" type="button" data-open-library aria-label="Abrir arsenal" title="Arsenal da mesa"><svg><use href="#vtt-book"></use></svg></button>
+        <button class="vtt-icon-button" type="button" data-fullscreen aria-label="Tela cheia" title="Tela cheia"><svg><use href="#vtt-fullscreen"></use></svg></button>
+        <button class="vtt-icon-button vtt-mobile-session" type="button" data-toggle-panel="session" aria-label="Abrir central da sessao"><svg><use href="#vtt-chat"></use></svg></button>
+      </div>
+    </header>
+
+    <main class="vtt-workspace">
+      <aside class="vtt-roster-panel" data-panel="roster">
+        <header class="vtt-panel-title">
+          <div><small>Grupo da campanha</small><h2>Elenco</h2></div>
+          <span data-roster-count>0</span>
+          <button type="button" data-toggle-panel="roster" aria-label="Recolher elenco"><svg><use href="#vtt-chevron"></use></svg></button>
+        </header>
+        <div class="vtt-roster-tabs" role="tablist">
+          <button class="active" type="button" data-roster-tab="heroes">Heróis</button>
+          <button type="button" data-roster-tab="creatures">Criaturas</button>
         </div>
-      </header>
+        <div class="vtt-roster-list" data-roster-list></div>
+        <footer class="vtt-roster-footer">
+          <a href="players.html"><svg><use href="#vtt-users"></use></svg><span>Gerenciar jogadores</span></a>
+          <a href="sheets.html"><svg><use href="#vtt-scroll"></use></svg><span>Abrir fichas</span></a>
+        </footer>
+      </aside>
 
-      <div class="master-table-layout">
-        <aside class="master-toolbox">
-          <div class="master-panel-header">
-            <div>
-              <small class="master-panel-kicker">Ferramentas</small>
-              <h2>Mesa</h2>
-            </div>
+      <section class="vtt-map-area" data-map-area>
+        <div class="vtt-map-stage" data-map-stage>
+          <div class="vtt-map-world" data-map-world>
+            <div class="vtt-map-image" data-map-image></div>
+            <div class="vtt-map-grid" data-map-grid></div>
+            <div class="vtt-fog-layer" data-fog-layer></div>
+            <svg class="vtt-measure-layer" data-measure-layer aria-hidden="true"></svg>
+            <div class="vtt-token-layer" data-token-layer></div>
+            <div class="vtt-effect-layer" data-effect-layer></div>
           </div>
-          <div class="master-button-row">
-            <button class="master-ghost" type="button" data-zoom="-0.1">- Zoom</button>
-            <span class="master-pill" data-master-zoom-label>100%</span>
-            <button class="master-ghost" type="button" data-zoom="0.1">+ Zoom</button>
-          </div>
-          <button class="master-ghost" type="button" data-toggle-grid>Mostrar/ocultar grid</button>
-          <label class="master-upload">Enviar mapa<input data-map-upload type="file" accept="image/*"></label>
-          <div class="master-callout">
-            <b>Banco de cena</b>
-            <span>Mapas enviados pela biblioteca poderao aparecer aqui quando o backend for conectado.</span>
-          </div>
-          <div class="master-mini-list">
-            <button class="master-ghost" type="button" data-master-toast="Cena salva como rascunho.">Salvar cena</button>
-            <button class="master-ghost" type="button" data-master-toast="Tokens reposicionados.">Organizar tokens</button>
-            <button class="master-ghost" type="button" data-master-toast="Fog of war preparado para uma etapa futura.">Preparar neblina</button>
-          </div>
-        </aside>
+        </div>
 
-        <section class="master-map-stage" aria-label="Mapa da mesa">
-          <div class="master-map-board" data-master-map-board data-grid="on">
-            <div class="master-map-grid"></div>
-            <span class="master-token token-player">PJ</span>
-            <span class="master-token token-npc">NPC</span>
-            <span class="master-token token-monster">M</span>
+        <nav class="vtt-map-tools" aria-label="Ferramentas do mapa">
+          <button class="active" type="button" data-tool="select" aria-label="Selecionar" title="Selecionar (V)"><svg><use href="#vtt-select"></use></svg><span>Selecionar</span></button>
+          <button type="button" data-tool="pan" aria-label="Mover mapa" title="Mover mapa (Espaco)"><svg><use href="#vtt-hand"></use></svg><span>Mover</span></button>
+          <button type="button" data-tool="measure" aria-label="Medir distancia" title="Medir distancia (M)"><svg><use href="#vtt-ruler"></use></svg><span>Medir</span></button>
+          <button type="button" data-tool="ping" aria-label="Marcar local" title="Marcar local (P)"><svg><use href="#vtt-ping"></use></svg><span>Marcar</span></button>
+          <i></i>
+          <button class="active" type="button" data-grid-toggle aria-label="Alternar grade" title="Grade"><svg><use href="#vtt-grid"></use></svg><span>Grade</span></button>
+          <button type="button" data-snap-toggle aria-label="Encaixar na grade" title="Encaixar na grade"><svg><use href="#vtt-d20"></use></svg><span>Encaixe</span></button>
+          <button type="button" data-fog-toggle aria-label="Alternar neblina" title="Neblina"><svg><use href="#vtt-eye"></use></svg><span>Neblina</span></button>
+        </nav>
+
+        <div class="vtt-map-status">
+          <span><i class="online"></i><b data-map-status>Cena pronta</b></span>
+          <span data-map-scale>1 quadrado = 1,5 m</span>
+        </div>
+
+        <div class="vtt-zoom-controls">
+          <button type="button" data-zoom="-0.1" aria-label="Diminuir zoom"><svg><use href="#vtt-minus"></use></svg></button>
+          <button type="button" data-reset-view><span data-zoom-label>100%</span></button>
+          <button type="button" data-zoom="0.1" aria-label="Aumentar zoom"><svg><use href="#vtt-plus"></use></svg></button>
+        </div>
+
+        <section class="vtt-dice-dock" data-dice-dock>
+          <button class="vtt-dice-main" type="button" data-roll="1d20"><svg><use href="#vtt-d20"></use></svg><span><small>Rolagem rápida</small><b>Rolar D20</b></span></button>
+          <div class="vtt-dice-options">
+            <button type="button" data-roll="1d4">D4</button><button type="button" data-roll="1d6">D6</button><button type="button" data-roll="1d8">D8</button><button type="button" data-roll="1d10">D10</button><button type="button" data-roll="1d12">D12</button><button type="button" data-roll="1d20">D20</button><button type="button" data-roll="1d100">D100</button>
           </div>
+          <form class="vtt-custom-roll" data-roll-form><input name="formula" aria-label="Formula de dados" placeholder="2d6+3" autocomplete="off"><button type="submit">Rolar</button></form>
         </section>
 
-        <aside class="master-rightbar">
-          <div>
-            <small class="master-panel-kicker">Iniciativa</small>
-            <h2>Ordem da rodada</h2>
-            <div class="master-list">
-              <article class="master-list-item"><header><div><h3>Kael</h3><div class="master-list-meta"><span class="master-status">Pronto</span><span class="master-pill">18</span></div></div></header><p>Turno aguardando confirmacao de jogador.</p></article>
-              <article class="master-list-item"><header><div><h3>Guardiao Sombrio</h3><div class="master-list-meta"><span class="master-status danger">Hostil</span><span class="master-pill">14</span></div></div></header><p>Foco no portal central.</p></article>
-            </div>
-          </div>
-          <div>
-            <small class="master-panel-kicker">Rolagens</small>
-            <div class="master-stats-strip">
-              <span><small>Ultima</small><b>24</b></span>
-              <span><small>Dado</small><b>D20</b></span>
-              <span><small>CD</small><b>15</b></span>
-            </div>
-          </div>
-          <div class="master-field">
-            <label for="private-note">Notas privadas</label>
-            <textarea id="private-note" class="master-note-box" data-table-note="private" placeholder="Segredos, armadilhas e reacoes dos NPCs."></textarea>
-          </div>
-          <div class="master-field">
-            <label for="public-note">Anuncio para jogadores</label>
-            <textarea id="public-note" class="master-note-box" data-table-note="public" placeholder="Texto que sera compartilhado com o grupo futuramente."></textarea>
-          </div>
-        </aside>
-      </div>
-    </section>
-  </main>
+        <div class="vtt-roll-animation" data-roll-animation hidden><svg><use href="#vtt-d20"></use></svg><b></b><span></span></div>
 
-  <script src="../assets/js/app.js?v=invite-codes-v1"></script>
-  <script src="../assets/js/master.js?v=invite-codes-v1"></script>
+        <section class="vtt-empty-campaign" data-empty-campaign hidden>
+          <svg><use href="#vtt-scroll"></use></svg>
+          <h1>Prepare seu primeiro mundo</h1>
+          <p>A mesa usa campanhas, fichas, jogadores e mapas do seu painel.</p>
+          <a href="campaigns.html#new-campaign">Criar campanha</a>
+        </section>
+      </section>
+
+      <aside class="vtt-session-panel" data-panel="session">
+        <header class="vtt-panel-title">
+          <div><small>Controle em tempo real</small><h2>Central da sessão</h2></div>
+          <button type="button" data-toggle-panel="session" aria-label="Recolher central"><svg><use href="#vtt-chevron"></use></svg></button>
+        </header>
+        <nav class="vtt-session-tabs" role="tablist">
+          <button class="active" type="button" data-session-tab="chat" title="Chat"><svg><use href="#vtt-chat"></use></svg><span>Chat</span><i data-chat-badge hidden>0</i></button>
+          <button type="button" data-session-tab="initiative" title="Iniciativa"><svg><use href="#vtt-sword"></use></svg><span>Turnos</span></button>
+          <button type="button" data-session-tab="rolls" title="Rolagens"><svg><use href="#vtt-d20"></use></svg><span>Dados</span></button>
+          <button type="button" data-session-tab="events" title="Eventos"><svg><use href="#vtt-scroll"></use></svg><span>Eventos</span></button>
+          <button type="button" data-session-tab="notes" title="Notas"><svg><use href="#vtt-book"></use></svg><span>Notas</span></button>
+        </nav>
+
+        <div class="vtt-session-content">
+          <section class="vtt-tab-panel active" data-tab-panel="chat">
+            <div class="vtt-message-list" data-chat-list></div>
+            <form class="vtt-chat-form" data-chat-form>
+              <label><span class="sr-only">Mensagem</span><textarea name="message" rows="2" maxlength="500" placeholder="Escreva para a mesa..."></textarea></label>
+              <div><select name="scope" aria-label="Visibilidade"><option value="group">Todos</option><option value="master">Somente Mestre</option></select><button type="submit">Enviar</button></div>
+            </form>
+          </section>
+
+          <section class="vtt-tab-panel" data-tab-panel="initiative">
+            <header class="vtt-combat-header"><span><small>Rodada</small><b data-round>1</b></span><span><small>Turno</small><b data-turn-name>Nenhum</b></span><button type="button" data-next-turn>Próximo turno</button></header>
+            <div class="vtt-initiative-list" data-initiative-list></div>
+            <button class="vtt-secondary-action" type="button" data-roll-initiative>Rolar iniciativa do elenco</button>
+          </section>
+
+          <section class="vtt-tab-panel" data-tab-panel="rolls">
+            <header class="vtt-feed-heading"><div><small>Histórico da mesa</small><h3>Últimas rolagens</h3></div><button type="button" data-clear-rolls>Limpar</button></header>
+            <div class="vtt-roll-list" data-roll-list></div>
+          </section>
+
+          <section class="vtt-tab-panel" data-tab-panel="events">
+            <header class="vtt-feed-heading"><div><small>Registro da aventura</small><h3>Eventos recentes</h3></div><button type="button" data-clear-events>Limpar</button></header>
+            <div class="vtt-event-list" data-event-list></div>
+          </section>
+
+          <section class="vtt-tab-panel" data-tab-panel="notes">
+            <label class="vtt-note-field"><span>Notas privadas do Mestre</span><textarea data-table-note="private" placeholder="Segredos, armadilhas e reações dos NPCs."></textarea></label>
+            <label class="vtt-note-field"><span>Anúncio para os jogadores</span><textarea data-table-note="public" placeholder="Informação visível para todo o grupo."></textarea></label>
+            <button class="vtt-secondary-action" type="button" data-share-note>Publicar anúncio no chat</button>
+          </section>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <dialog class="vtt-resource-dialog" data-resource-dialog>
+    <div class="vtt-dialog-shell">
+      <header><div><small>Conteúdo integrado</small><h2>Arsenal da mesa</h2><p>Adicione mapas, personagens e criaturas preparados nas outras áreas.</p></div><button type="button" data-close-dialog aria-label="Fechar"><svg><use href="#vtt-close"></use></svg></button></header>
+      <nav><button class="active" type="button" data-resource-tab="maps">Mapas</button><button type="button" data-resource-tab="heroes">Personagens</button><button type="button" data-resource-tab="creatures">Criaturas</button><button type="button" data-resource-tab="library">Biblioteca</button></nav>
+      <div class="vtt-resource-grid" data-resource-grid></div>
+      <footer><label class="vtt-upload-map"><svg><use href="#vtt-image"></use></svg><span><b>Enviar mapa desta sessão</b><small>JPG, PNG ou WEBP</small></span><input type="file" accept="image/jpeg,image/png,image/webp" data-map-upload></label><a href="library.html">Gerenciar biblioteca</a></footer>
+    </div>
+  </dialog>
+
+  <dialog class="vtt-token-dialog" data-token-dialog>
+    <form class="vtt-token-form" data-token-form>
+      <input type="hidden" name="tokenId">
+      <header><div><small>Controle rápido</small><h2 data-token-dialog-title>Personagem</h2></div><button type="button" data-close-token aria-label="Fechar"><svg><use href="#vtt-close"></use></svg></button></header>
+      <div class="vtt-token-preview" data-token-preview></div>
+      <label><span>PV atual</span><input type="number" min="0" name="hpCurrent"></label>
+      <label><span>PV máximo</span><input type="number" min="0" name="hpMax"></label>
+      <label><span>Status</span><select name="status"><option>Pronto</option><option>Ferido</option><option>Inconsciente</option><option>Oculto</option><option>Hostil</option></select></label>
+      <label><span>Iniciativa</span><input type="number" name="initiative"></label>
+      <footer><button type="button" data-remove-token>Remover do mapa</button><button type="submit">Salvar alterações</button></footer>
+    </form>
+  </dialog>
+
+  <script src="../assets/js/app.js?v=vtt-core-v1"></script>
+  <script src="../assets/js/session-state.js?v=vtt-core-v1"></script>
+  <script src="../assets/js/master-table.js?v=vtt-core-v1"></script>
 </body>
 </html>
