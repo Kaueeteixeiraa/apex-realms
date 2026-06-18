@@ -3,77 +3,151 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apex Realms | Fichas dos Jogadores</title>
+  <title>Apex Realms | Fichas do Mestre</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=master-stage-1">
+  <link rel="stylesheet" href="../assets/css/style.css?v=global-toast-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=master-sheets-v1">
 </head>
-<body class="master-area" data-master-page="sheets">
-  <aside class="master-sidebar">
-    <a class="master-brand" href="../index.html" aria-label="Apex Realms"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
-    <nav class="master-nav" aria-label="Navegacao do Mestre">
-      <small>Area do Mestre</small>
-      <a href="dashboard.html"><i>D</i>Dashboard</a>
-      <a href="campaigns.html"><i>C</i>Campanhas</a>
-      <a href="table.html"><i>M</i>Mesa</a>
-      <a href="library.html"><i>B</i>Biblioteca</a>
-      <a class="active" href="sheets.html"><i>F</i>Fichas</a>
-      <a href="players.html"><i>J</i>Jogadores</a>
-      <a href="invites.html"><i>I</i>Convites</a>
-      <a href="settings.html"><i>A</i>Configuracoes</a>
-      <small>Atalhos</small>
-      <a href="../dashboard.html"><i>P</i>Area do jogador</a>
+<body class="master-area sheets-page" data-master-page="sheets">
+  <svg class="dashboard-symbols" aria-hidden="true">
+    <symbol id="dash-icon-castle" viewBox="0 0 48 48"><path d="M9 40V18l5 3 5-3 5 3 5-3 5 3 5-3v22M15 40V27h18v13M8 18V9h7v9M33 18V9h7v9M20 20V8h8v12"/><path d="M21 40v-8a3 3 0 0 1 6 0v8"/></symbol>
+    <symbol id="dash-icon-scroll" viewBox="0 0 48 48"><path d="M13 11h24v23a6 6 0 0 1-6 6H13a6 6 0 0 0 6-6V15a4 4 0 0 0-8 0v2h8"/><path d="M22 18h11M22 25h10M22 32h7"/></symbol>
+    <symbol id="dash-icon-d20" viewBox="0 0 48 48"><path d="M24 6 41 17v14L24 42 7 31V17L24 6Z"/><path d="M7 17h34M7 31l17-25 17 25M24 42V6M15 31h18"/></symbol>
+    <symbol id="dash-icon-book" viewBox="0 0 48 48"><path d="M8 10h14a6 6 0 0 1 6 6v24a6 6 0 0 0-6-6H8V10ZM40 10H28a6 6 0 0 0-6 6v24a6 6 0 0 1 6-6h12V10Z"/><path d="M15 18h7M15 25h7M32 18h4M32 25h4"/></symbol>
+    <symbol id="dash-icon-sheet" viewBox="0 0 48 48"><path d="M14 6h14l8 8v28H14V6Z"/><path d="M28 6v9h8M20 23h10M20 30h12M20 36h8"/><path d="M18 16h5"/></symbol>
+    <symbol id="dash-icon-group" viewBox="0 0 48 48"><path d="M24 23a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM12 40a12 12 0 0 1 24 0"/><path d="M11 25a5 5 0 1 0 0-10M5 39a9 9 0 0 1 10-9M37 25a5 5 0 1 1 0-10M43 39a9 9 0 0 0-10-9"/></symbol>
+    <symbol id="dash-icon-key" viewBox="0 0 48 48"><path d="M19 27a10 10 0 1 1 7-7l14 14-5 5-4-4-4 4-5-5 4-4-3-3a10 10 0 0 1-4 0Z"/><path d="M16 18h.1"/></symbol>
+    <symbol id="dash-icon-gear" viewBox="0 0 48 48"><path d="M24 17a7 7 0 1 0 0 14 7 7 0 0 0 0-14Z"/><path d="M24 6v7M24 35v7M6 24h7M35 24h7M11 11l5 5M32 32l5 5M37 11l-5 5M16 32l-5 5"/></symbol>
+    <symbol id="dash-icon-power" viewBox="0 0 48 48"><path d="M24 7v15"/><path d="M14 14a17 17 0 1 0 20 0"/></symbol>
+    <symbol id="sheet-icon-hero" viewBox="0 0 48 48"><circle cx="24" cy="15" r="8"/><path d="M10 41c1-11 7-17 14-17s13 6 14 17M18 12l6-6 6 6"/></symbol>
+    <symbol id="sheet-icon-monster" viewBox="0 0 48 48"><path d="M13 18 8 7l12 6M35 18l5-11-12 6M13 18c-2 5-1 17 11 23 12-6 13-18 11-23-5-8-17-8-22 0Z"/><path d="m17 25 4 2M31 25l-4 2M20 34h8"/></symbol>
+    <symbol id="sheet-icon-check" viewBox="0 0 48 48"><path d="m8 25 10 10L40 12"/></symbol>
+    <symbol id="sheet-icon-lock" viewBox="0 0 48 48"><rect x="9" y="20" width="30" height="22" rx="5"/><path d="M16 20v-7a8 8 0 0 1 16 0v7M24 29v6"/></symbol>
+    <symbol id="sheet-icon-clock" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M24 13v12l8 5"/></symbol>
+    <symbol id="sheet-icon-shield" viewBox="0 0 48 48"><path d="M24 5 39 11v11c0 10-6 17-15 21C15 39 9 32 9 22V11l15-6Z"/><path d="m17 24 5 5 10-11"/></symbol>
+  </svg>
+
+  <aside class="master-sidebar sheets-sidebar">
+    <a class="master-brand" href="../index.html" aria-label="Apex Realms" title="Apex Realms"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
+    <nav class="master-nav sheets-icon-nav" aria-label="Navegacao do Mestre">
+      <a href="dashboard.html" aria-label="Dashboard" title="Dashboard" data-tooltip="Dashboard"><i><svg><use href="#dash-icon-castle"></use></svg></i></a>
+      <a href="campaigns.html" aria-label="Campanhas" title="Campanhas" data-tooltip="Campanhas"><i><svg><use href="#dash-icon-scroll"></use></svg></i></a>
+      <a href="table.html" aria-label="Mesa" title="Mesa" data-tooltip="Mesa"><i><svg><use href="#dash-icon-d20"></use></svg></i></a>
+      <a href="library.html" aria-label="Biblioteca" title="Biblioteca" data-tooltip="Biblioteca"><i><svg><use href="#dash-icon-book"></use></svg></i></a>
+      <a class="active" href="sheets.html" aria-label="Fichas" title="Fichas" data-tooltip="Fichas"><i><svg><use href="#dash-icon-sheet"></use></svg></i></a>
+      <a href="players.html" aria-label="Jogadores" title="Jogadores" data-tooltip="Jogadores"><i><svg><use href="#dash-icon-group"></use></svg></i></a>
+      <a href="invites.html" aria-label="Convites" title="Convites" data-tooltip="Convites"><i><svg><use href="#dash-icon-key"></use></svg></i></a>
+      <a href="settings.html" aria-label="Configuracoes" title="Configuracoes" data-tooltip="Configuracoes"><i><svg><use href="#dash-icon-gear"></use></svg></i></a>
     </nav>
-    <div class="master-sidebar-card">
-      <small>Permissoes</small>
-      <b>Fichas sob controle</b>
-      <p>O Mestre visualiza fichas vinculadas e pode bloquear edicoes durante a sessao.</p>
+    <div class="master-profile dashboard-profile">
+      <button class="dashboard-profile-trigger" type="button" aria-label="Perfil do Mestre" title="Perfil do Mestre"><span class="master-avatar" data-user-initial>A</span></button>
+      <div class="dashboard-profile-menu"><strong data-user-name>Mestre Apex</strong><small><span data-user-role>Mestre</span> ativo</small><button type="button" data-logout><svg><use href="#dash-icon-power"></use></svg><span>Sair</span></button></div>
     </div>
-    <div class="master-profile"><div class="master-avatar" data-user-initial>A</div><span><b data-user-name>Mestre Apex</b><small><span data-user-role>Mestre</span> ativo</small></span><button type="button" data-logout>Sair</button></div>
   </aside>
 
-  <main class="master-main">
-    <header class="master-topbar">
-      <div>
-        <small class="master-eyebrow">Fichas vinculadas</small>
-        <h1>Fichas dos Jogadores</h1>
-      </div>
-      <div class="master-actions">
-        <a class="master-ghost" href="../fichas.html">Abrir minhas fichas</a>
-        <button class="master-btn" type="button" data-master-toast="Bloqueio global sera aplicado quando houver fichas vinculadas.">Bloquear edicao</button>
+  <main class="sheets-content">
+    <header class="master-topbar sheets-topbar">
+      <div><small class="master-eyebrow">Arquivo de personagens</small><h1>Fichas</h1><p>Gerencie personagens, NPCs e criaturas por campanha.</p></div>
+      <div class="sheets-actions">
+        <button class="master-btn" type="button" data-sheet-new>Nova ficha</button>
+        <label class="master-ghost sheets-import-button">Importar<input type="file" accept="application/json,.json" data-sheet-import hidden></label>
+        <button class="master-ghost" type="button" data-sheet-export>Exportar</button>
       </div>
     </header>
 
-    <section class="master-panel">
-      <div class="master-filter-grid three">
-        <label class="master-field"><span>Campanha</span><select><option>Todas as campanhas</option></select></label>
-        <label class="master-field"><span>Status</span><select><option>Todas</option><option>Aguardando aprovacao</option><option>Aprovada</option><option>Edicao bloqueada</option></select></label>
-        <label class="master-field"><span>Buscar ficha</span><input class="master-search" placeholder="Nome do personagem ou jogador"></label>
-      </div>
+    <section class="sheets-toolbar" aria-label="Filtros de fichas">
+      <label><span>Fichas de</span><select data-sheet-campaign-filter></select></label>
+      <label><span>Tipo de ficha</span><select data-sheet-type-filter></select></label>
+      <label><span>Sistema</span><select data-sheet-system-filter></select></label>
+      <label><span>Status</span><select data-sheet-status-filter></select></label>
+      <label class="sheets-search"><span>Busca rapida</span><input type="search" data-sheet-search placeholder="Personagem, jogador ou classe"></label>
+      <button type="button" data-sheet-clear-filters>Limpar</button>
     </section>
 
-    <section class="master-grid">
-      <article class="master-card"><span class="master-icon">A</span><div><strong>Aprovacao</strong><h2>0 pendentes</h2><p>Fichas enviadas por jogadores aguardarao sua liberacao aqui.</p></div></article>
-      <article class="master-card"><span class="master-icon">V</span><div><strong>Visibilidade</strong><h2>Compartilhamento claro</h2><p>Privada, mestre, grupo e bloqueada ficam com indicadores visuais.</p></div></article>
-      <article class="master-card"><span class="master-icon">L</span><div><strong>Durante a sessao</strong><h2>Bloqueio de edicao</h2><p>O Mestre pode impedir alteracoes enquanto a mesa estiver ativa.</p></div></article>
-      <article class="master-card"><span class="master-icon">O</span><div><strong>Notas</strong><h2>Observacoes privadas</h2><p>Espaco reservado para comentarios que jogadores nao veem.</p></div></article>
-    </section>
+    <section class="sheets-summary" data-sheets-summary aria-label="Resumo das fichas"></section>
 
-    <section class="master-panel">
-      <div class="master-panel-header">
-        <div>
-          <small class="master-panel-kicker">Lista</small>
-          <h2>Fichas enviadas para o Mestre</h2>
-        </div>
-        <button class="master-ghost" type="button" data-master-toast="Atualizacao feita localmente.">Atualizar</button>
-      </div>
-      <div class="master-list" data-master-sheets-list></div>
+    <section class="sheets-results">
+      <header><div><small class="master-panel-kicker">Arquivo de fichas</small><h2 data-sheet-result-title>Todas as fichas</h2></div><div class="sheets-result-meta"><b data-sheet-result-count>0</b><span>fichas</span></div></header>
+      <div class="sheets-grid" data-master-sheets-list></div>
     </section>
   </main>
 
-  <script src="../assets/js/app.js?v=invite-codes-v1"></script>
-  <script src="../assets/js/master.js?v=invite-codes-v1"></script>
+  <dialog class="sheet-editor-dialog" data-sheet-dialog>
+    <form method="dialog" data-sheet-form>
+      <input type="hidden" name="id">
+      <header class="sheet-editor-header">
+        <div class="sheet-editor-portrait" data-sheet-portrait-preview><svg><use href="#sheet-icon-hero"></use></svg></div>
+        <div><small class="master-eyebrow" data-sheet-form-kicker>Nova ficha</small><h2 data-sheet-form-title>Criar personagem</h2><p>Preencha apenas o necessario agora e complete as outras abas quando quiser.</p></div>
+        <label class="sheet-photo-button">Retrato<input type="file" name="portraitFile" accept="image/*"></label>
+        <button class="sheet-dialog-close" type="button" data-sheet-close aria-label="Fechar">&times;</button>
+      </header>
+
+      <div class="sheet-editor-core">
+        <label><span>Nome</span><input name="name" required maxlength="80" placeholder="Nome da ficha"></label>
+        <label><span>Tipo</span><select name="type"><option>Personagem</option><option>NPC</option><option>Monstro</option></select></label>
+        <label><span>Campanha</span><select name="campaignId" data-sheet-form-campaign></select></label>
+        <label><span>Sistema</span><select name="system" data-sheet-form-system></select></label>
+        <label><span>Dono/Jogador</span><input name="owner" maxlength="80" placeholder="Mestre ou nome do jogador"></label>
+        <label><span>Status</span><select name="status"><option>Pendente</option><option>Aprovada</option><option>Bloqueada</option></select></label>
+      </div>
+
+      <nav class="sheet-editor-tabs" aria-label="Secoes da ficha">
+        <button class="active" type="button" data-sheet-tab="summary">Resumo</button>
+        <button type="button" data-sheet-tab="attributes">Atributos</button>
+        <button type="button" data-sheet-tab="combat">Combate</button>
+        <button type="button" data-sheet-tab="skills">Pericias</button>
+        <button type="button" data-sheet-tab="spells">Magias</button>
+        <button type="button" data-sheet-tab="inventory">Inventario</button>
+        <button type="button" data-sheet-tab="story">Historia</button>
+        <button type="button" data-sheet-tab="notes">Notas</button>
+      </nav>
+
+      <div class="sheet-editor-panels">
+        <section class="sheet-editor-panel active" data-sheet-panel="summary">
+          <div class="sheet-form-grid">
+            <label><span>Classe</span><input name="className" placeholder="Ex.: Guerreiro"></label>
+            <label><span>Nivel / ND</span><input name="level" type="number" min="0" max="30" value="1"></label>
+            <label><span>Raca / Especie</span><input name="race" placeholder="Ex.: Humano"></label>
+            <label><span>Antecedente</span><input name="background" placeholder="Ex.: Soldado"></label>
+            <label><span>Tendencia</span><input name="alignment" placeholder="Ex.: Neutro e bom"></label>
+            <label><span>Experiencia</span><input name="experience" type="number" min="0" value="0"></label>
+            <label class="wide"><span>Conceito rapido</span><textarea name="concept" placeholder="Papel na aventura, motivacao e informacoes essenciais."></textarea></label>
+          </div>
+        </section>
+
+        <section class="sheet-editor-panel" data-sheet-panel="attributes">
+          <div class="sheet-abilities">
+            <label data-ability="str"><span>Forca</span><input name="str" type="number" min="1" max="30" value="10"><b>+0</b></label>
+            <label data-ability="dex"><span>Destreza</span><input name="dex" type="number" min="1" max="30" value="10"><b>+0</b></label>
+            <label data-ability="con"><span>Constituicao</span><input name="con" type="number" min="1" max="30" value="10"><b>+0</b></label>
+            <label data-ability="int"><span>Inteligencia</span><input name="int" type="number" min="1" max="30" value="10"><b>+0</b></label>
+            <label data-ability="wis"><span>Sabedoria</span><input name="wis" type="number" min="1" max="30" value="10"><b>+0</b></label>
+            <label data-ability="cha"><span>Carisma</span><input name="cha" type="number" min="1" max="30" value="10"><b>+0</b></label>
+          </div>
+          <div class="sheet-form-grid compact"><label><span>Bonus de proficiencia</span><input name="proficiency" type="number" value="2"></label><label><span>Inspiracao</span><input name="inspiration" type="number" min="0" value="0"></label><label class="wide"><span>Testes de resistencia</span><input name="savingThrows" placeholder="Forca, Constituicao..."></label></div>
+        </section>
+
+        <section class="sheet-editor-panel" data-sheet-panel="combat">
+          <div class="sheet-combat-grid">
+            <label><span>PV atual</span><input name="hpCurrent" type="number" min="0" value="0"></label><label><span>PV maximo</span><input name="hpMax" type="number" min="0" value="0"></label><label><span>PV temporario</span><input name="hpTemp" type="number" min="0" value="0"></label><label><span>Classe de armadura</span><input name="armorClass" type="number" min="0" value="10"></label><label><span>Iniciativa</span><input name="initiative" type="number" value="0"></label><label><span>Deslocamento</span><input name="speed" value="9 m"></label><label><span>Dado de vida</span><input name="hitDice" placeholder="1d10"></label><label><span>Percepcao passiva</span><input name="passivePerception" type="number" value="10"></label>
+          </div>
+          <div class="sheet-form-grid"><label class="wide"><span>Ataques e acoes</span><textarea name="attacks" placeholder="Nome, bonus, dano/tipo e observacoes."></textarea></label><label class="wide"><span>Condicoes e recursos</span><textarea name="conditions" placeholder="Condicoes, resistencias, imunidades e recursos atuais."></textarea></label></div>
+        </section>
+
+        <section class="sheet-editor-panel" data-sheet-panel="skills"><div class="sheet-form-grid"><label class="wide"><span>Pericias e bonus</span><textarea name="skills" placeholder="Acrobacia +5, Furtividade +5, Percepcao +3..."></textarea></label><label class="wide"><span>Proficiencias e idiomas</span><textarea name="proficiencies" placeholder="Armaduras, armas, ferramentas e idiomas."></textarea></label></div></section>
+        <section class="sheet-editor-panel" data-sheet-panel="spells"><div class="sheet-form-grid compact"><label><span>Atributo de conjuracao</span><select name="spellAbility"><option>Nenhum</option><option>Inteligencia</option><option>Sabedoria</option><option>Carisma</option></select></label><label><span>CD das magias</span><input name="spellSaveDc" type="number" value="10"></label><label><span>Bonus de ataque</span><input name="spellAttack" type="number" value="0"></label><label class="wide"><span>Espacos de magia</span><input name="spellSlots" placeholder="1o: 4/4, 2o: 2/2..."></label><label class="wide"><span>Magias por nivel</span><textarea name="spells" placeholder="Truques, nivel 1, nivel 2 e assim por diante."></textarea></label></div></section>
+        <section class="sheet-editor-panel" data-sheet-panel="inventory"><div class="sheet-currency"><label>PC<input name="cp" type="number" min="0" value="0"></label><label>PP<input name="sp" type="number" min="0" value="0"></label><label>PE<input name="ep" type="number" min="0" value="0"></label><label>PO<input name="gp" type="number" min="0" value="0"></label><label>PL<input name="pp" type="number" min="0" value="0"></label></div><div class="sheet-form-grid"><label class="wide"><span>Equipamentos e tesouros</span><textarea name="inventory" placeholder="Armas, armaduras, consumiveis, itens magicos e carga."></textarea></label></div></section>
+        <section class="sheet-editor-panel" data-sheet-panel="story"><div class="sheet-form-grid"><label><span>Tracos de personalidade</span><textarea name="traits"></textarea></label><label><span>Ideais</span><textarea name="ideals"></textarea></label><label><span>Vinculos</span><textarea name="bonds"></textarea></label><label><span>Fraquezas</span><textarea name="flaws"></textarea></label><label class="wide"><span>Historia e aparencia</span><textarea name="story"></textarea></label></div></section>
+        <section class="sheet-editor-panel" data-sheet-panel="notes"><div class="sheet-form-grid"><label><span>Anotacoes compartilhadas</span><textarea name="notes" placeholder="Informacoes visiveis na ficha."></textarea></label><label><span>Observacoes privadas do Mestre</span><textarea name="masterNotes" placeholder="Somente o Mestre ve estas anotacoes."></textarea></label></div></section>
+      </div>
+
+      <footer class="sheet-editor-footer"><span data-sheet-save-hint>D&D 5e - ficha completa</span><div><button class="master-ghost" type="button" data-sheet-close>Cancelar</button><button class="master-btn" type="submit">Salvar ficha</button></div></footer>
+    </form>
+  </dialog>
+
+  <script src="../assets/js/app.js?v=global-toast-v1"></script>
+  <script src="../assets/js/master.js?v=master-sheets-v1"></script>
 </body>
 </html>

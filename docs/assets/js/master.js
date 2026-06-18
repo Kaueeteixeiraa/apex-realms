@@ -811,6 +811,349 @@ function bindLibraryPage() {
   renderLibrary();
 }
 
+function bindSheetsPage() {
+  if (!document.body.matches("[data-master-page='sheets']")) return;
+  const dialog = document.querySelector("[data-sheet-dialog]");
+  const form = document.querySelector("[data-sheet-form]");
+  const list = document.querySelector("[data-master-sheets-list]");
+  const summary = document.querySelector("[data-sheets-summary]");
+  const campaignFilter = document.querySelector("[data-sheet-campaign-filter]");
+  const typeFilter = document.querySelector("[data-sheet-type-filter]");
+  const systemFilter = document.querySelector("[data-sheet-system-filter]");
+  const statusFilter = document.querySelector("[data-sheet-status-filter]");
+  const searchInput = document.querySelector("[data-sheet-search]");
+  const campaigns = readCampaigns().filter(campaign => !campaign.archived);
+  const sheetTypes = ["Personagem", "NPC", "Monstro"];
+  const sheetStatuses = ["Pendente", "Aprovada", "Bloqueada"];
+  const numericFields = new Set(["level", "experience", "str", "dex", "con", "int", "wis", "cha", "proficiency", "inspiration", "hpCurrent", "hpMax", "hpTemp", "armorClass", "initiative", "passivePerception", "spellSaveDc", "spellAttack", "cp", "sp", "ep", "gp", "pp"]);
+  const sheetDefaults = {
+    name: "Ficha sem nome", type: "Personagem", campaignId: "", system: "D&D 5e", owner: "Mestre", status: "Pendente",
+    className: "", level: 1, race: "", background: "", alignment: "", experience: 0, concept: "",
+    str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, proficiency: 2, inspiration: 0, savingThrows: "",
+    hpCurrent: 0, hpMax: 0, hpTemp: 0, armorClass: 10, initiative: 0, speed: "9 m", hitDice: "", passivePerception: 10,
+    attacks: "", conditions: "", skills: "", proficiencies: "", spellAbility: "Nenhum", spellSaveDc: 10, spellAttack: 0,
+    spellSlots: "", spells: "", cp: 0, sp: 0, ep: 0, gp: 0, pp: 0, inventory: "", traits: "", ideals: "", bonds: "", flaws: "", story: "", notes: "", masterNotes: "", portrait: ""
+  };
+  const summaryCards = [
+    {label: "Personagens", field: "type", value: "Personagem", icon: "sheet-icon-hero"},
+    {label: "NPCs", field: "type", value: "NPC", icon: "dash-icon-group"},
+    {label: "Monstros", field: "type", value: "Monstro", icon: "sheet-icon-monster"},
+    {label: "Pendentes", field: "status", value: "Pendente", icon: "sheet-icon-clock"},
+    {label: "Aprovadas", field: "status", value: "Aprovada", icon: "sheet-icon-check"},
+    {label: "Bloqueadas", field: "status", value: "Bloqueada", icon: "sheet-icon-lock"}
+  ];
+  let portraitProcessing = Promise.resolve("");
+
+  const field = name => form.elements.namedItem(name);
+  const campaignById = id => campaigns.find(campaign => campaign.id === id);
+  const normalizeSheet = (raw = {}) => {
+    const matchedCampaign = campaignById(raw.campaignId) || campaigns.find(campaign => campaign.name === raw.campaign);
+    const createdAt = raw.createdAt || new Date().toISOString();
+    const normalized = {...sheetDefaults, ...raw};
+    numericFields.forEach(name => { normalized[name] = Number(normalized[name] ?? sheetDefaults[name] ?? 0); });
+    return {
+      ...normalized,
+      id: raw.id || `sheet-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: String(raw.name || sheetDefaults.name),
+      type: sheetTypes.includes(raw.type) ? raw.type : "Personagem",
+      campaignId: matchedCampaign?.id || "",
+      system: raw.system || matchedCampaign?.system || "D&D 5e",
+      owner: String(raw.owner || "Mestre"),
+      status: sheetStatuses.includes(raw.status) ? raw.status : "Pendente",
+      portrait: String(raw.portrait || "").startsWith("data:image/") ? raw.portrait : "",
+      createdAt,
+      updatedAt: raw.updatedAt || createdAt
+    };
+  };
+  const readSheets = () => readStore(MASTER_SHEETS_KEY, []).map(normalizeSheet);
+  const saveSheets = sheets => writeStore(MASTER_SHEETS_KEY, sheets.map(normalizeSheet));
+  const addOption = (select, label, value) => select.add(new Option(label, value));
+  const populateControls = () => {
+    campaignFilter.replaceChildren();
+    addOption(campaignFilter, "Todas as campanhas", "all");
+    addOption(campaignFilter, "Modelos globais", "global");
+    campaigns.forEach(campaign => addOption(campaignFilter, `Campanha: ${campaign.name}`, campaign.id));
+    typeFilter.replaceChildren();
+    addOption(typeFilter, "Todos os tipos", "all");
+    sheetTypes.forEach(type => addOption(typeFilter, type, type));
+    systemFilter.replaceChildren();
+    addOption(systemFilter, "Todos os sistemas", "all");
+    masterSystems.forEach(system => addOption(systemFilter, system, system));
+    statusFilter.replaceChildren();
+    addOption(statusFilter, "Todos os status", "all");
+    sheetStatuses.forEach(status => addOption(statusFilter, status, status));
+    field("campaignId").replaceChildren();
+    addOption(field("campaignId"), "Modelo global", "");
+    campaigns.forEach(campaign => addOption(field("campaignId"), campaign.name, campaign.id));
+    field("system").replaceChildren();
+    masterSystems.forEach(system => addOption(field("system"), system, system));
+  };
+
+  const matchesCampaign = sheet => {
+    if (campaignFilter.value === "global") return !sheet.campaignId;
+    if (campaignFilter.value !== "all") return !sheet.campaignId || sheet.campaignId === campaignFilter.value;
+    return true;
+  };
+  const matchesSystem = sheet => systemFilter.value === "all" || sheet.system === systemFilter.value;
+  const matchesSearch = sheet => {
+    const term = searchInput.value.trim().toLocaleLowerCase("pt-BR");
+    if (!term) return true;
+    return [sheet.name, sheet.owner, sheet.className, sheet.race, sheet.type, campaignById(sheet.campaignId)?.name].some(value => String(value || "").toLocaleLowerCase("pt-BR").includes(term));
+  };
+  const visibleBeforeTypeAndStatus = sheets => sheets.filter(sheet => matchesCampaign(sheet) && matchesSystem(sheet) && matchesSearch(sheet));
+
+  const renderSummary = sheets => {
+    const scoped = visibleBeforeTypeAndStatus(sheets);
+    summary.replaceChildren();
+    summaryCards.forEach(card => {
+      const button = document.createElement("button");
+      const control = card.field === "type" ? typeFilter : statusFilter;
+      button.type = "button";
+      button.className = control.value === card.value ? "active" : "";
+      button.innerHTML = `<i><svg><use href="#${card.icon}"></use></svg></i><span><small>${card.label}</small><b>${scoped.filter(sheet => sheet[card.field] === card.value).length}</b></span>`;
+      button.addEventListener("click", () => {
+        control.value = control.value === card.value ? "all" : card.value;
+        renderSheets();
+      });
+      summary.append(button);
+    });
+  };
+
+  const statusClass = status => status === "Aprovada" ? "approved" : status === "Bloqueada" ? "locked" : "pending";
+  const cardIcon = type => type === "Monstro" ? "sheet-icon-monster" : type === "NPC" ? "dash-icon-group" : "sheet-icon-hero";
+  const createSheetCard = sheet => {
+    const campaign = campaignById(sheet.campaignId);
+    const article = document.createElement("article");
+    article.className = "master-sheet-card";
+    article.dataset.sheetId = sheet.id;
+    article.innerHTML = `
+      <div class="sheet-card-art">
+        <div class="sheet-card-fallback"><svg><use href="#${cardIcon(sheet.type)}"></use></svg></div>
+        <span data-type></span><mark class="sheet-card-status"></mark>
+      </div>
+      <div class="sheet-card-body">
+        <header><div><h3></h3><p data-identity></p></div><small data-owner></small></header>
+        <div class="sheet-card-context"><span data-campaign></span><span data-system></span></div>
+        <div class="sheet-card-vitals"><span><small>Nivel/ND</small><b data-level></b></span><span><small>PV</small><b data-hp></b></span><span><small>CA</small><b data-ac></b></span></div>
+        <footer>
+          <button type="button" data-sheet-action="open">Abrir ficha</button>
+          <button type="button" data-sheet-action="approve">Aprovar</button>
+          <button type="button" data-sheet-action="lock"></button>
+          <button type="button" data-sheet-action="duplicate">Duplicar</button>
+          <button class="danger" type="button" data-sheet-action="delete">Excluir</button>
+        </footer>
+      </div>`;
+    if (sheet.portrait) {
+      const image = document.createElement("img");
+      image.src = sheet.portrait;
+      image.alt = `Retrato de ${sheet.name}`;
+      article.querySelector(".sheet-card-art").prepend(image);
+      article.classList.add("has-portrait");
+    }
+    article.querySelector("[data-type]").textContent = sheet.type;
+    const status = article.querySelector(".sheet-card-status");
+    status.textContent = sheet.status;
+    status.classList.add(statusClass(sheet.status));
+    article.querySelector("h3").textContent = sheet.name;
+    article.querySelector("[data-identity]").textContent = [sheet.race, sheet.className].filter(Boolean).join(" - ") || "Identidade em construcao";
+    article.querySelector("[data-owner]").textContent = sheet.owner;
+    article.querySelector("[data-campaign]").textContent = campaign?.name || "Modelo global";
+    article.querySelector("[data-system]").textContent = sheet.system;
+    article.querySelector("[data-level]").textContent = sheet.level;
+    article.querySelector("[data-hp]").textContent = `${sheet.hpCurrent}/${sheet.hpMax}`;
+    article.querySelector("[data-ac]").textContent = sheet.armorClass;
+    const approve = article.querySelector("[data-sheet-action='approve']");
+    approve.hidden = sheet.status === "Aprovada";
+    article.querySelector("[data-sheet-action='lock']").textContent = sheet.status === "Bloqueada" ? "Liberar" : "Bloquear";
+    return article;
+  };
+
+  const resultTitle = () => {
+    if (campaignFilter.value === "global") return "Modelos globais";
+    if (campaignFilter.value !== "all") return `Campanha: ${campaignById(campaignFilter.value)?.name || "Campanha"}`;
+    return "Todas as fichas";
+  };
+  const renderSheets = () => {
+    const sheets = readSheets();
+    renderSummary(sheets);
+    const filtered = visibleBeforeTypeAndStatus(sheets)
+      .filter(sheet => typeFilter.value === "all" || sheet.type === typeFilter.value)
+      .filter(sheet => statusFilter.value === "all" || sheet.status === statusFilter.value)
+      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    list.replaceChildren();
+    document.querySelector("[data-sheet-result-count]").textContent = filtered.length;
+    document.querySelector("[data-sheet-result-title]").textContent = resultTitle();
+    if (!filtered.length) {
+      const empty = document.createElement("div");
+      empty.className = "sheets-empty";
+      empty.innerHTML = `<i><svg><use href="#dash-icon-sheet"></use></svg></i><div><b>Nenhuma ficha encontrada</b><span>Crie uma ficha ou ajuste os filtros para visualizar outros personagens.</span></div><button class="master-btn" type="button">Criar ficha</button>`;
+      empty.querySelector("button").addEventListener("click", () => openSheetDialog());
+      list.append(empty);
+      return;
+    }
+    filtered.forEach(sheet => list.append(createSheetCard(sheet)));
+  };
+
+  const updatePortraitPreview = source => {
+    const preview = document.querySelector("[data-sheet-portrait-preview]");
+    preview.classList.toggle("has-image", Boolean(source));
+    preview.style.backgroundImage = source ? `url("${source}")` : "";
+  };
+  const updateAbilityModifiers = () => {
+    document.querySelectorAll("[data-ability]").forEach(label => {
+      const score = Number(field(label.dataset.ability).value || 10);
+      const modifier = Math.floor((score - 10) / 2);
+      label.querySelector("b").textContent = modifier >= 0 ? `+${modifier}` : String(modifier);
+    });
+  };
+  const activateSheetTab = name => {
+    document.querySelectorAll("[data-sheet-tab]").forEach(button => button.classList.toggle("active", button.dataset.sheetTab === name));
+    document.querySelectorAll("[data-sheet-panel]").forEach(panel => panel.classList.toggle("active", panel.dataset.sheetPanel === name));
+  };
+  const openSheetDialog = (sheet = null) => {
+    const value = sheet ? normalizeSheet(sheet) : normalizeSheet({
+      id: `new-${Date.now()}`,
+      name: "",
+      campaignId: campaignFilter.value !== "all" && campaignFilter.value !== "global" ? campaignFilter.value : "",
+      system: systemFilter.value !== "all" ? systemFilter.value : (campaignById(campaignFilter.value)?.system || "D&D 5e")
+    });
+    if (!sheet) value.name = "";
+    form.reset();
+    Object.entries(value).forEach(([name, fieldValue]) => {
+      const input = field(name);
+      if (input && input.type !== "file") input.value = fieldValue ?? "";
+    });
+    field("id").value = sheet?.id || "";
+    form.dataset.portraitData = value.portrait || "";
+    portraitProcessing = Promise.resolve(value.portrait || "");
+    updatePortraitPreview(value.portrait);
+    document.querySelector("[data-sheet-form-kicker]").textContent = sheet ? "Editar ficha" : "Nova ficha";
+    document.querySelector("[data-sheet-form-title]").textContent = sheet?.name || "Criar personagem";
+    document.querySelector("[data-sheet-save-hint]").textContent = `${value.system} - ${value.type}`;
+    updateAbilityModifiers();
+    activateSheetTab("summary");
+    dialog.showModal();
+  };
+
+  document.querySelector("[data-sheet-new]")?.addEventListener("click", () => openSheetDialog());
+  document.querySelectorAll("[data-sheet-close]").forEach(button => button.addEventListener("click", () => dialog.close()));
+  dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
+  document.querySelectorAll("[data-sheet-tab]").forEach(button => button.addEventListener("click", () => activateSheetTab(button.dataset.sheetTab)));
+  document.querySelectorAll("[data-ability] input").forEach(input => input.addEventListener("input", updateAbilityModifiers));
+  field("campaignId").addEventListener("change", () => {
+    const campaign = campaignById(field("campaignId").value);
+    if (campaign) field("system").value = campaign.system;
+    document.querySelector("[data-sheet-save-hint]").textContent = `${field("system").value} - ${field("type").value}`;
+  });
+  [field("system"), field("type")].forEach(input => input.addEventListener("change", () => {
+    if (!field("id").value) field("status").value = field("type").value === "Personagem" ? "Pendente" : "Aprovada";
+    document.querySelector("[data-sheet-save-hint]").textContent = `${field("system").value} - ${field("type").value}`;
+  }));
+  field("portraitFile").addEventListener("change", () => {
+    const file = field("portraitFile").files?.[0];
+    if (!file) return;
+    portraitProcessing = prepareLibraryImage(file)
+      .then(source => {
+        form.dataset.portraitData = source;
+        updatePortraitPreview(source);
+        return source;
+      })
+      .catch(error => {
+        masterToast(error.message);
+        return form.dataset.portraitData || "";
+      });
+  });
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    await portraitProcessing;
+    const data = Object.fromEntries(new FormData(form).entries());
+    const sheets = readSheets();
+    const existing = sheets.find(sheet => sheet.id === data.id);
+    numericFields.forEach(name => { data[name] = Number(data[name] || 0); });
+    delete data.portraitFile;
+    const sheet = normalizeSheet({
+      ...existing,
+      ...data,
+      id: existing?.id || undefined,
+      portrait: form.dataset.portraitData || "",
+      createdAt: existing?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    saveSheets(existing ? sheets.map(saved => saved.id === sheet.id ? sheet : saved) : [sheet, ...sheets]);
+    dialog.close();
+    renderSheets();
+  });
+
+  list.addEventListener("click", event => {
+    const button = event.target.closest("[data-sheet-action]");
+    const card = event.target.closest("[data-sheet-id]");
+    if (!button || !card) return;
+    const sheets = readSheets();
+    const sheet = sheets.find(saved => saved.id === card.dataset.sheetId);
+    if (!sheet) return;
+    const action = button.dataset.sheetAction;
+    if (action === "open") openSheetDialog(sheet);
+    if (action === "approve") {
+      saveSheets(sheets.map(saved => saved.id === sheet.id ? {...saved, status: "Aprovada", updatedAt: new Date().toISOString()} : saved));
+      renderSheets();
+    }
+    if (action === "lock") {
+      saveSheets(sheets.map(saved => saved.id === sheet.id ? {...saved, status: sheet.status === "Bloqueada" ? "Aprovada" : "Bloqueada", updatedAt: new Date().toISOString()} : saved));
+      renderSheets();
+    }
+    if (action === "duplicate") {
+      saveSheets([{...sheet, id: undefined, name: `${sheet.name} (copia)`, status: sheet.type === "Personagem" ? "Pendente" : "Aprovada", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()}, ...sheets]);
+      renderSheets();
+    }
+    if (action === "delete") {
+      if (!confirm(`Excluir a ficha ${sheet.name}?`)) return;
+      saveSheets(sheets.filter(saved => saved.id !== sheet.id));
+      renderSheets();
+    }
+  });
+
+  [campaignFilter, typeFilter, systemFilter, statusFilter].forEach(control => control.addEventListener("change", renderSheets));
+  searchInput.addEventListener("input", renderSheets);
+  document.querySelector("[data-sheet-clear-filters]")?.addEventListener("click", () => {
+    campaignFilter.value = "all";
+    typeFilter.value = "all";
+    systemFilter.value = "all";
+    statusFilter.value = "all";
+    searchInput.value = "";
+    renderSheets();
+  });
+  document.querySelector("[data-sheet-export]")?.addEventListener("click", () => {
+    const payload = JSON.stringify({version: 1, exportedAt: new Date().toISOString(), sheets: readSheets()}, null, 2);
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([payload], {type: "application/json"}));
+    link.download = `apex-realms-fichas-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  });
+  document.querySelector("[data-sheet-import]")?.addEventListener("change", async event => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const parsed = JSON.parse(await file.text());
+      const imported = Array.isArray(parsed) ? parsed : parsed.sheets;
+      if (!Array.isArray(imported)) throw new Error("Formato invalido");
+      const existing = readSheets();
+      const ids = new Set(existing.map(sheet => sheet.id));
+      const normalized = imported.filter(sheet => sheet?.name).map(sheet => normalizeSheet({...sheet, id: ids.has(sheet.id) ? undefined : sheet.id}));
+      saveSheets([...normalized, ...existing]);
+      renderSheets();
+    } catch {
+      masterToast("Arquivo de fichas invalido.");
+    } finally {
+      event.target.value = "";
+    }
+  });
+
+  populateControls();
+  renderSheets();
+}
+
 function renderSimpleCollection(page, key, listSelector, emptyTitle, emptyText) {
   if (!document.body.matches(`[data-master-page='${page}']`)) return;
   const list = document.querySelector(listSelector);
@@ -904,7 +1247,7 @@ bindCampaignActions();
 renderCampaignsPage();
 bindTablePage();
 bindLibraryPage();
-renderSimpleCollection("sheets", MASTER_SHEETS_KEY, "[data-master-sheets-list]", "Nenhuma ficha enviada", "Quando jogadores enviarem fichas para aprovacao, elas aparecerao aqui.");
+bindSheetsPage();
 renderSimpleCollection("players", MASTER_PLAYERS_KEY, "[data-master-players-list]", "Nenhum jogador aguardando", "Solicitacoes, aprovados e bloqueados ficarao separados nesta area.");
 bindInvitesPage();
 bindSettingsPage();
