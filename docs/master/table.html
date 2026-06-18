@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=vtt-core-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=vtt-core-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=vtt-dice-3d-v1">
 </head>
 <body class="vtt-page" data-master-page="table" data-table-version="2">
   <svg class="vtt-symbols" aria-hidden="true">
@@ -123,7 +123,11 @@
           <form class="vtt-custom-roll" data-roll-form><input name="formula" aria-label="Formula de dados" placeholder="2d6+3" autocomplete="off"><button type="submit">Rolar</button></form>
         </section>
 
-        <div class="vtt-roll-animation" data-roll-animation hidden><svg><use href="#vtt-d20"></use></svg><b></b><span></span></div>
+        <div class="vtt-roll-animation" data-roll-animation hidden>
+          <div class="vtt-roll-aura"></div>
+          <canvas data-roll-canvas width="440" height="340" aria-hidden="true"></canvas>
+          <div class="vtt-roll-result"><small>Resultado</small><b></b><span></span></div>
+        </div>
 
         <section class="vtt-empty-campaign" data-empty-campaign hidden>
           <svg><use href="#vtt-scroll"></use></svg>
@@ -205,6 +209,6 @@
 
   <script src="../assets/js/app.js?v=vtt-core-v1"></script>
   <script src="../assets/js/session-state.js?v=vtt-core-v1"></script>
-  <script src="../assets/js/master-table.js?v=vtt-core-v1"></script>
+  <script src="../assets/js/master-table.js?v=vtt-dice-3d-v1"></script>
 </body>
 </html>

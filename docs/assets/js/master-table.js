@@ -789,14 +789,195 @@
   }
 
   function showRollAnimation(roll) {
+    cancelAnimationFrame(showRollAnimation.frame);
+    clearTimeout(showRollAnimation.timer);
     elements.rollAnimation.hidden = false;
+    elements.rollAnimation.classList.remove("landed", "critical");
+    elements.rollAnimation.classList.toggle("critical", roll.critical);
     elements.rollAnimation.querySelector("b").textContent = roll.total;
     elements.rollAnimation.querySelector("span").textContent = `${roll.formula} · ${roll.values.join(" + ")}${roll.modifier ? ` ${roll.modifier > 0 ? "+" : "-"} ${Math.abs(roll.modifier)}` : ""}`;
-    elements.rollAnimation.querySelector("svg").style.animation = "none";
-    void elements.rollAnimation.offsetWidth;
-    elements.rollAnimation.querySelector("svg").style.animation = "";
-    clearTimeout(showRollAnimation.timer);
-    showRollAnimation.timer = setTimeout(() => { elements.rollAnimation.hidden = true; }, 1350);
+    const canvas = elements.rollAnimation.querySelector("[data-roll-canvas]");
+    const context = canvas.getContext("2d");
+    const width = 440;
+    const height = 340;
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const duration = reducedMotion ? 420 : 2100;
+    canvas.width = width * pixelRatio;
+    canvas.height = height * pixelRatio;
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+    const goldenRatio = (1 + Math.sqrt(5)) / 2;
+    const vertices = [
+      [-1, goldenRatio, 0], [1, goldenRatio, 0], [-1, -goldenRatio, 0], [1, -goldenRatio, 0],
+      [0, -1, goldenRatio], [0, 1, goldenRatio], [0, -1, -goldenRatio], [0, 1, -goldenRatio],
+      [goldenRatio, 0, -1], [goldenRatio, 0, 1], [-goldenRatio, 0, -1], [-goldenRatio, 0, 1]
+    ].map(vertex => {
+      const length = Math.hypot(...vertex);
+      return vertex.map(value => value / length);
+    });
+    const faces = [
+      [0,11,5], [0,5,1], [0,1,7], [0,7,10], [0,10,11],
+      [1,5,9], [5,11,4], [11,10,2], [10,7,6], [7,1,8],
+      [3,9,4], [3,4,2], [3,2,6], [3,6,8], [3,8,9],
+      [4,9,5], [2,4,11], [6,2,10], [8,6,7], [9,8,1]
+    ];
+    const sparks = Array.from({length: 24}, (_, index) => ({
+      angle: index / 24 * Math.PI * 2 + Math.random() * .25,
+      distance: 45 + Math.random() * 105,
+      size: 1 + Math.random() * 2.3,
+      delay: Math.random() * .18
+    }));
+    const startedAt = performance.now();
+    let landed = false;
+
+    const rotateVertex = (vertex, rotationX, rotationY, rotationZ) => {
+      let [x, y, z] = vertex;
+      const cosX = Math.cos(rotationX), sinX = Math.sin(rotationX);
+      [y, z] = [y * cosX - z * sinX, y * sinX + z * cosX];
+      const cosY = Math.cos(rotationY), sinY = Math.sin(rotationY);
+      [x, z] = [x * cosY + z * sinY, -x * sinY + z * cosY];
+      const cosZ = Math.cos(rotationZ), sinZ = Math.sin(rotationZ);
+      [x, y] = [x * cosZ - y * sinZ, x * sinZ + y * cosZ];
+      return [x, y, z];
+    };
+    const easeOut = value => 1 - Math.pow(1 - value, 3);
+    const bezier = (start, control, end, value) => {
+      const inverse = 1 - value;
+      return inverse * inverse * start + 2 * inverse * value * control + value * value * end;
+    };
+
+    const drawFrame = timestamp => {
+      const progress = clamp((timestamp - startedAt) / duration, 0, 1);
+      const flightEnd = .62;
+      const flight = clamp(progress / flightEnd, 0, 1);
+      const bounce = clamp((progress - flightEnd) / (1 - flightEnd), 0, 1);
+      const floorY = 226;
+      const centerX = progress < flightEnd ? bezier(45, 165, 220, easeOut(flight)) : 220;
+      const centerY = progress < flightEnd
+        ? bezier(45, -35, 188, flight)
+        : 188 - Math.abs(Math.sin(bounce * Math.PI * 3)) * (1 - bounce) * 38;
+      const radius = 36 + easeOut(flight) * 28;
+      const spinDecay = progress < flightEnd ? progress : flightEnd + easeOut(bounce) * .19;
+      const rotationX = .55 + spinDecay * 19.5 + roll.total * .013;
+      const rotationY = -.35 + spinDecay * 16.7 + roll.values[0] * .021;
+      const rotationZ = .2 + spinDecay * 12.3;
+      context.clearRect(0, 0, width, height);
+
+      const landingEnergy = clamp((progress - .48) / .52, 0, 1);
+      context.save();
+      context.translate(220, floorY + 3);
+      context.scale(1, .27);
+      const ringGradient = context.createRadialGradient(0, 0, 8, 0, 0, 118);
+      ringGradient.addColorStop(0, roll.critical ? "rgba(255,211,105,.24)" : "rgba(178,104,255,.25)");
+      ringGradient.addColorStop(.5, "rgba(105,84,224,.08)");
+      ringGradient.addColorStop(1, "rgba(70,205,255,0)");
+      context.fillStyle = ringGradient;
+      context.beginPath();
+      context.arc(0, 0, 118 * landingEnergy, 0, Math.PI * 2);
+      context.fill();
+      context.strokeStyle = roll.critical ? "rgba(255,214,123,.55)" : "rgba(170,107,255,.5)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.arc(0, 0, 72 + Math.sin(timestamp / 180) * 5, 0, Math.PI * 2);
+      context.stroke();
+      context.restore();
+
+      const heightAboveFloor = Math.max(0, floorY - centerY - radius * .55);
+      const shadowWidth = 24 + (1 - clamp(heightAboveFloor / 180, 0, 1)) * 48;
+      const shadow = context.createRadialGradient(centerX, floorY, 2, centerX, floorY, shadowWidth);
+      shadow.addColorStop(0, "rgba(0,0,0,.55)");
+      shadow.addColorStop(1, "rgba(0,0,0,0)");
+      context.fillStyle = shadow;
+      context.beginPath();
+      context.ellipse(centerX, floorY, shadowWidth, shadowWidth * .22, 0, 0, Math.PI * 2);
+      context.fill();
+
+      if (progress > .48) {
+        sparks.forEach(spark => {
+          const sparkProgress = clamp((landingEnergy - spark.delay) / Math.max(.1, 1 - spark.delay), 0, 1);
+          if (!sparkProgress || sparkProgress === 1) return;
+          const distance = spark.distance * easeOut(sparkProgress);
+          const x = 220 + Math.cos(spark.angle) * distance;
+          const y = floorY + Math.sin(spark.angle) * distance * .3 - Math.sin(sparkProgress * Math.PI) * 28;
+          context.globalAlpha = (1 - sparkProgress) * .9;
+          context.fillStyle = roll.critical ? "#ffe09a" : (spark.angle > Math.PI ? "#65dfff" : "#c187ff");
+          context.beginPath();
+          context.arc(x, y, spark.size, 0, Math.PI * 2);
+          context.fill();
+        });
+        context.globalAlpha = 1;
+      }
+
+      const rotated = vertices.map(vertex => rotateVertex(vertex, rotationX, rotationY, rotationZ));
+      const focalLength = 360;
+      const projected = rotated.map(([x, y, z]) => {
+        const depthScale = focalLength / (focalLength - z * radius);
+        return {x: centerX + x * radius * depthScale, y: centerY + y * radius * depthScale, z};
+      });
+      const sortedFaces = faces.map(indices => ({
+        indices,
+        depth: indices.reduce((sum, index) => sum + rotated[index][2], 0) / 3
+      })).sort((left, right) => left.depth - right.depth);
+
+      sortedFaces.forEach(({indices, depth}, faceIndex) => {
+        const [a, b, c] = indices.map(index => projected[index]);
+        const area = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+        const front = area < 0;
+        const light = clamp((depth + 1) / 2, 0, 1);
+        context.beginPath();
+        context.moveTo(a.x, a.y);
+        context.lineTo(b.x, b.y);
+        context.lineTo(c.x, c.y);
+        context.closePath();
+        const hue = roll.critical ? 39 : 258 + faceIndex % 3 * 9;
+        const saturation = roll.critical ? 82 : 75;
+        const luminosity = front ? 14 + light * 22 : 8 + light * 8;
+        context.fillStyle = `hsla(${hue}, ${saturation}%, ${luminosity}%, ${front ? .96 : .28})`;
+        context.fill();
+        context.strokeStyle = roll.critical
+          ? `rgba(255, ${190 + Math.round(light * 50)}, 100, ${front ? .85 : .24})`
+          : `rgba(${110 + Math.round(light * 75)}, ${95 + Math.round(light * 80)}, 255, ${front ? .82 : .22})`;
+        context.lineWidth = front ? 1.6 : .7;
+        context.stroke();
+      });
+
+      const glow = context.createRadialGradient(centerX, centerY, 4, centerX, centerY, radius * 1.25);
+      glow.addColorStop(0, roll.critical ? "rgba(255,231,157,.42)" : "rgba(219,164,255,.36)");
+      glow.addColorStop(1, "rgba(106,80,219,0)");
+      context.globalCompositeOperation = "screen";
+      context.fillStyle = glow;
+      context.beginPath();
+      context.arc(centerX, centerY, radius * 1.25, 0, Math.PI * 2);
+      context.fill();
+      context.globalCompositeOperation = "source-over";
+
+      if (progress > .84) {
+        const reveal = clamp((progress - .84) / .12, 0, 1);
+        context.globalAlpha = reveal;
+        context.fillStyle = roll.critical ? "#fff0bd" : "#ffffff";
+        context.font = `800 ${Math.round(25 + reveal * 7)}px Cinzel, serif`;
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.shadowColor = roll.critical ? "#ffc95e" : "#b36fff";
+        context.shadowBlur = 16;
+        context.fillText(String(roll.total), centerX, centerY + 1);
+        context.shadowBlur = 0;
+        context.globalAlpha = 1;
+      }
+
+      if (progress >= .78 && !landed) {
+        landed = true;
+        elements.rollAnimation.classList.add("landed");
+      }
+      if (progress < 1) showRollAnimation.frame = requestAnimationFrame(drawFrame);
+    };
+
+    showRollAnimation.frame = requestAnimationFrame(drawFrame);
+    showRollAnimation.timer = setTimeout(() => {
+      elements.rollAnimation.hidden = true;
+      elements.rollAnimation.classList.remove("landed", "critical");
+    }, duration + 1450);
   }
 
   function renderRolls() {

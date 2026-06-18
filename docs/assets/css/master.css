@@ -184,10 +184,19 @@
 .vtt-custom-roll { display: flex; overflow: hidden; border: 1px solid rgba(169, 132, 227, .2); border-radius: 8px; }
 .vtt-custom-roll input { width: 68px; height: 30px; padding: 0 7px; border: 0; outline: 0; color: #fff; background: rgba(255,255,255,.025); font-size: 9px; }
 .vtt-custom-roll button { padding: 0 8px; border: 0; color: #d9c5f5; background: rgba(133, 78, 216, .2); font-size: 8px; font-weight: 800; cursor: pointer; }
-.vtt-roll-animation { position: absolute; z-index: 30; left: 50%; top: 50%; display: grid; justify-items: center; pointer-events: none; transform: translate(-50%, -50%); }
-.vtt-roll-animation svg { width: 108px; height: 108px; color: #b879ff; filter: drop-shadow(0 0 20px rgba(161, 87, 255, .8)); animation: vtt-dice-spin .7s cubic-bezier(.18,.7,.25,1); }
-.vtt-roll-animation b { position: absolute; top: 39px; color: #fff; font-family: "Cinzel", serif; font-size: 24px; }
-.vtt-roll-animation span { margin-top: 4px; padding: 5px 10px; border-radius: 7px; color: #eee5f8; background: rgba(8,7,13,.85); font-size: 10px; font-weight: 800; }
+.vtt-roll-animation { position: absolute; z-index: 30; inset: 0; display: grid; place-items: center; overflow: hidden; pointer-events: none; background: radial-gradient(circle at 50% 52%, rgba(105, 54, 181, .14), transparent 34%); perspective: 900px; }
+.vtt-roll-animation[hidden] { display: none; }
+.vtt-roll-animation::before { content: ""; position: absolute; left: 50%; top: 57%; width: 250px; height: 76px; border: 1px solid rgba(163, 103, 255, .42); border-radius: 50%; opacity: .72; box-shadow: 0 0 34px rgba(137, 76, 234, .3), inset 0 0 30px rgba(86, 199, 255, .08); transform: translate(-50%, -50%); animation: vtt-roll-rune 1.5s ease-in-out infinite; }
+.vtt-roll-animation::after { content: ""; position: absolute; left: 50%; top: 57%; width: 165px; height: 48px; border: 1px dashed rgba(91, 213, 255, .42); border-radius: 50%; opacity: .5; transform: translate(-50%, -50%); animation: vtt-roll-rune 1.5s .18s ease-in-out infinite reverse; }
+.vtt-roll-aura { position: absolute; left: 50%; top: 49%; width: 280px; height: 280px; border-radius: 50%; opacity: .7; background: radial-gradient(circle, rgba(187, 108, 255, .18), rgba(82, 54, 196, .07) 45%, transparent 70%); filter: blur(5px); transform: translate(-50%, -50%); animation: vtt-roll-aura 1.1s ease-in-out infinite; }
+.vtt-roll-animation canvas { position: relative; z-index: 2; width: min(440px, 92%); height: auto; filter: drop-shadow(0 22px 22px rgba(0,0,0,.42)); }
+.vtt-roll-result { position: absolute; z-index: 4; left: 50%; top: calc(50% + 112px); display: grid; min-width: 160px; justify-items: center; padding: 7px 16px 9px; border: 1px solid rgba(174, 123, 247, .35); border-radius: 12px; opacity: 0; color: #f8f3ff; background: linear-gradient(135deg, rgba(18, 13, 29, .94), rgba(8, 8, 14, .92)); box-shadow: 0 15px 35px rgba(0,0,0,.45), 0 0 24px rgba(153, 87, 239, .13); transform: translate(-50%, 12px) scale(.88); transition: opacity .25s ease, transform .35s cubic-bezier(.2,.85,.25,1.2); }
+.vtt-roll-animation.landed .vtt-roll-result { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.vtt-roll-result small { color: var(--vtt-gold); font-size: 7px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+.vtt-roll-result b { margin-top: 1px; color: #fff; font-family: "Cinzel", serif; font-size: 30px; line-height: 1; text-shadow: 0 0 16px rgba(191, 130, 255, .85); }
+.vtt-roll-result span { margin-top: 3px; color: #aca3b8; font-size: 8px; font-weight: 800; }
+.vtt-roll-animation.critical .vtt-roll-result { border-color: rgba(244, 198, 100, .58); box-shadow: 0 15px 35px rgba(0,0,0,.45), 0 0 30px rgba(243, 194, 107, .2); }
+.vtt-roll-animation.critical .vtt-roll-result b { color: #ffe7a9; text-shadow: 0 0 18px rgba(255, 201, 85, .9); }
 .vtt-empty-campaign { position: absolute; z-index: 35; inset: 0; display: grid; align-content: center; justify-items: center; padding: 30px; text-align: center; background: radial-gradient(circle, rgba(48, 29, 78, .75), rgba(6,6,10,.98) 62%); }
 .vtt-empty-campaign[hidden] { display: none; }
 .vtt-empty-campaign svg { width: 64px; height: 64px; color: #a66ff4; }
@@ -311,7 +320,8 @@
 .vtt-token-form > footer button:last-child { border-color: transparent; color: #fff; background: linear-gradient(135deg, #7450ef, #aa4de8); }
 
 @keyframes vtt-ping { from { opacity: 1; transform: translate(-50%, -50%) scale(.25); } to { opacity: 0; transform: translate(-50%, -50%) scale(3.2); } }
-@keyframes vtt-dice-spin { 0% { opacity: 0; transform: scale(.3) rotate(-160deg); } 65% { opacity: 1; transform: scale(1.12) rotate(28deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes vtt-roll-rune { 50% { opacity: .3; transform: translate(-50%, -50%) scale(1.08); } }
+@keyframes vtt-roll-aura { 50% { opacity: .36; transform: translate(-50%, -50%) scale(1.13); } }
 @keyframes vtt-live { 50% { opacity: .35; } }
 
 @media (max-width: 1180px) {
