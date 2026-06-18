@@ -7,73 +7,109 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=master-stage-1">
+  <link rel="stylesheet" href="../assets/css/style.css?v=global-toast-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=master-players-v1">
 </head>
-<body class="master-area" data-master-page="players">
-  <aside class="master-sidebar">
-    <a class="master-brand" href="../index.html" aria-label="Apex Realms"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
-    <nav class="master-nav" aria-label="Navegacao do Mestre">
-      <small>Area do Mestre</small>
-      <a href="dashboard.html"><i>D</i>Dashboard</a>
-      <a href="campaigns.html"><i>C</i>Campanhas</a>
-      <a href="table.html"><i>M</i>Mesa</a>
-      <a href="library.html"><i>B</i>Biblioteca</a>
-      <a href="sheets.html"><i>F</i>Fichas</a>
-      <a class="active" href="players.html"><i>J</i>Jogadores</a>
-      <a href="invites.html"><i>I</i>Convites</a>
-      <a href="settings.html"><i>A</i>Configuracoes</a>
-      <small>Atalhos</small>
-      <a href="../dashboard.html"><i>P</i>Area do jogador</a>
+<body class="master-area players-page" data-master-page="players">
+  <svg class="dashboard-symbols" aria-hidden="true">
+    <symbol id="dash-icon-castle" viewBox="0 0 48 48"><path d="M9 40V18l5 3 5-3 5 3 5-3 5 3 5-3v22M15 40V27h18v13M8 18V9h7v9M33 18V9h7v9M20 20V8h8v12"/><path d="M21 40v-8a3 3 0 0 1 6 0v8"/></symbol>
+    <symbol id="dash-icon-scroll" viewBox="0 0 48 48"><path d="M13 11h24v23a6 6 0 0 1-6 6H13a6 6 0 0 0 6-6V15a4 4 0 0 0-8 0v2h8"/><path d="M22 18h11M22 25h10M22 32h7"/></symbol>
+    <symbol id="dash-icon-d20" viewBox="0 0 48 48"><path d="M24 6 41 17v14L24 42 7 31V17L24 6Z"/><path d="M7 17h34M7 31l17-25 17 25M24 42V6M15 31h18"/></symbol>
+    <symbol id="dash-icon-book" viewBox="0 0 48 48"><path d="M8 10h14a6 6 0 0 1 6 6v24a6 6 0 0 0-6-6H8V10ZM40 10H28a6 6 0 0 0-6 6v24a6 6 0 0 1 6-6h12V10Z"/><path d="M15 18h7M15 25h7M32 18h4M32 25h4"/></symbol>
+    <symbol id="dash-icon-sheet" viewBox="0 0 48 48"><path d="M14 6h14l8 8v28H14V6Z"/><path d="M28 6v9h8M20 23h10M20 30h12M20 36h8"/><path d="M18 16h5"/></symbol>
+    <symbol id="dash-icon-group" viewBox="0 0 48 48"><path d="M24 23a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM12 40a12 12 0 0 1 24 0"/><path d="M11 25a5 5 0 1 0 0-10M5 39a9 9 0 0 1 10-9M37 25a5 5 0 1 1 0-10M43 39a9 9 0 0 0-10-9"/></symbol>
+    <symbol id="dash-icon-key" viewBox="0 0 48 48"><path d="M19 27a10 10 0 1 1 7-7l14 14-5 5-4-4-4 4-5-5 4-4-3-3a10 10 0 0 1-4 0Z"/><path d="M16 18h.1"/></symbol>
+    <symbol id="dash-icon-gear" viewBox="0 0 48 48"><path d="M24 17a7 7 0 1 0 0 14 7 7 0 0 0 0-14Z"/><path d="M24 6v7M24 35v7M6 24h7M35 24h7M11 11l5 5M32 32l5 5M37 11l-5 5M16 32l-5 5"/></symbol>
+    <symbol id="dash-icon-power" viewBox="0 0 48 48"><path d="M24 7v15"/><path d="M14 14a17 17 0 1 0 20 0"/></symbol>
+    <symbol id="players-icon-profile" viewBox="0 0 48 48"><circle cx="24" cy="16" r="9"/><path d="M8 42c1-11 7-17 16-17s15 6 16 17"/></symbol>
+    <symbol id="players-icon-clock" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M24 13v12l8 5"/></symbol>
+    <symbol id="players-icon-check" viewBox="0 0 48 48"><path d="m8 25 10 10L40 12"/></symbol>
+    <symbol id="players-icon-lock" viewBox="0 0 48 48"><rect x="9" y="20" width="30" height="22" rx="5"/><path d="M16 20v-7a8 8 0 0 1 16 0v7M24 29v6"/></symbol>
+  </svg>
+
+  <aside class="master-sidebar players-sidebar">
+    <a class="master-brand" href="../index.html" aria-label="Apex Realms" title="Apex Realms"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
+    <nav class="master-nav players-icon-nav" aria-label="Navegacao do Mestre">
+      <a href="dashboard.html" aria-label="Dashboard" title="Dashboard" data-tooltip="Dashboard"><i><svg><use href="#dash-icon-castle"></use></svg></i></a>
+      <a href="campaigns.html" aria-label="Campanhas" title="Campanhas" data-tooltip="Campanhas"><i><svg><use href="#dash-icon-scroll"></use></svg></i></a>
+      <a href="table.html" aria-label="Mesa" title="Mesa" data-tooltip="Mesa"><i><svg><use href="#dash-icon-d20"></use></svg></i></a>
+      <a href="library.html" aria-label="Biblioteca" title="Biblioteca" data-tooltip="Biblioteca"><i><svg><use href="#dash-icon-book"></use></svg></i></a>
+      <a href="sheets.html" aria-label="Fichas" title="Fichas" data-tooltip="Fichas"><i><svg><use href="#dash-icon-sheet"></use></svg></i></a>
+      <a class="active" href="players.html" aria-label="Jogadores" title="Jogadores" data-tooltip="Jogadores"><i><svg><use href="#dash-icon-group"></use></svg></i></a>
+      <a href="profile.html" aria-label="Perfil" title="Perfil" data-tooltip="Perfil"><i><svg><use href="#players-icon-profile"></use></svg></i></a>
+      <a href="settings.html" aria-label="Configuracoes" title="Configuracoes" data-tooltip="Configuracoes"><i><svg><use href="#dash-icon-gear"></use></svg></i></a>
     </nav>
-    <div class="master-sidebar-card">
-      <small>Grupo</small>
-      <b>Jogadores e papeis</b>
-      <p>Controle quem entra, quem esta aprovado e quais permissoes cada pessoa possui.</p>
-    </div>
-    <div class="master-profile"><div class="master-avatar" data-user-initial>A</div><span><b data-user-name>Mestre Apex</b><small><span data-user-role>Mestre</span> ativo</small></span><button type="button" data-logout>Sair</button></div>
+    <div class="master-profile dashboard-profile"><button class="dashboard-profile-trigger" type="button" aria-label="Perfil do Mestre"><span class="master-avatar" data-user-initial>A</span></button><div class="dashboard-profile-menu"><strong data-user-name>Mestre Apex</strong><small><span data-user-role>Mestre</span> ativo</small><button type="button" data-logout><svg><use href="#dash-icon-power"></use></svg><span>Sair</span></button></div></div>
   </aside>
 
-  <main class="master-main">
-    <header class="master-topbar">
-      <div>
-        <small class="master-eyebrow">Controle de acesso</small>
-        <h1>Jogadores</h1>
-      </div>
-      <div class="master-actions">
-        <a class="master-ghost" href="invites.html">Enviar convite</a>
-        <button class="master-btn" type="button" data-master-toast="Lista sincronizada localmente.">Atualizar lista</button>
-      </div>
+  <main class="players-content">
+    <header class="master-topbar players-topbar">
+      <div><small class="master-eyebrow">Controle do grupo</small><h1>Jogadores</h1><p>Gerencie acessos, permissoes, personagens e solicitacoes da campanha.</p></div>
+      <div class="players-actions"><button class="master-ghost" type="button" data-players-invites>Convites</button><button class="master-btn" type="button" data-player-add>Adicionar jogador</button></div>
     </header>
 
-    <section class="master-grid">
-      <article class="master-card"><span class="master-icon">E</span><div><strong>Entradas</strong><h2>Aprovar solicitacoes</h2><p>Pedidos de entrada por convite privado aparecerao aqui.</p></div></article>
-      <article class="master-card"><span class="master-icon">P</span><div><strong>Permissoes</strong><h2>Papel por jogador</h2><p>Jogador, assistente, espectador e bloqueado ficam separados.</p></div></article>
-      <article class="master-card"><span class="master-icon">F</span><div><strong>Fichas</strong><h2>Vinculo visivel</h2><p>Veja qual personagem cada jogador esta usando na campanha.</p></div></article>
-      <article class="master-card"><span class="master-icon">S</span><div><strong>Sessao</strong><h2>Controle de mesa</h2><p>Permita ou negue chat, rolagens, edicao e movimentacao.</p></div></article>
+    <section class="players-toolbar">
+      <label><span>Campanha</span><select data-player-campaign-filter></select></label>
+      <label><span>Status</span><select data-player-status-filter></select></label>
+      <label><span>Ficha vinculada</span><select data-player-sheet-filter></select></label>
+      <label class="players-search"><span>Buscar jogador</span><input type="search" data-player-search placeholder="Nome, apelido ou e-mail"></label>
+      <button type="button" data-player-clear-filters>Limpar</button>
     </section>
 
-    <section class="master-panel">
-      <div class="master-filter-grid three">
-        <label class="master-field"><span>Campanha</span><select><option>Todas as campanhas</option></select></label>
-        <label class="master-field"><span>Situacao</span><select><option>Todos</option><option>Aguardando</option><option>Aprovados</option><option>Bloqueados</option></select></label>
-        <label class="master-field"><span>Buscar jogador</span><input class="master-search" placeholder="Nome, apelido ou e-mail"></label>
-      </div>
-    </section>
+    <section class="players-summary" data-players-summary></section>
 
-    <section class="master-panel">
-      <div class="master-panel-header">
-        <div>
-          <small class="master-panel-kicker">Grupo</small>
-          <h2>Jogadores da campanha</h2>
-        </div>
-        <button class="master-ghost" type="button" data-master-toast="Exportacao de lista preparada para etapa futura.">Exportar lista</button>
-      </div>
-      <div class="master-list" data-master-players-list></div>
+    <section class="players-workspace">
+      <article class="players-panel pending-panel">
+        <header><div><small class="master-panel-kicker">Solicitacoes</small><h2>Aguardando aprovacao</h2></div><b data-pending-count>0</b></header>
+        <div class="pending-players-list" data-pending-players></div>
+      </article>
+      <article class="players-panel managed-panel">
+        <header><div><small class="master-panel-kicker">Membros da campanha</small><h2>Jogadores gerenciados</h2></div><b data-managed-count>0</b></header>
+        <div class="managed-players-grid" data-managed-players></div>
+      </article>
     </section>
   </main>
 
-  <script src="../assets/js/app.js?v=invite-codes-v1"></script>
-  <script src="../assets/js/master.js?v=invite-codes-v1"></script>
+  <dialog class="players-dialog invite-dialog" data-invite-dialog>
+    <form method="dialog">
+      <header><div><small class="master-eyebrow">Convites da campanha</small><h2>Compartilhar acesso</h2><p>O jogador usa o codigo e aparece nesta central aguardando aprovacao.</p></div><button type="button" data-player-dialog-close>&times;</button></header>
+      <div class="players-dialog-fields"><label><span>Campanha</span><select data-player-invite-campaign></select></label><label><span>Codigo</span><input data-player-invite-code readonly></label><label class="wide"><span>Link</span><input data-player-invite-link readonly></label></div>
+      <footer><button class="master-ghost" type="button" data-copy-player-code>Copiar codigo</button><button class="master-ghost" type="button" data-copy-player-link>Copiar link</button><button class="master-btn" type="button" data-regenerate-player-code>Gerar novo codigo</button></footer>
+    </form>
+  </dialog>
+
+  <dialog class="players-dialog" data-add-player-dialog>
+    <form method="dialog" data-add-player-form>
+      <header><div><small class="master-eyebrow">Novo membro</small><h2>Adicionar jogador</h2><p>Cadastre manualmente e defina a campanha inicial.</p></div><button type="button" data-player-dialog-close>&times;</button></header>
+      <div class="players-dialog-fields"><label><span>Nome</span><input name="name" required maxlength="80"></label><label><span>E-mail</span><input name="email" type="email" required></label><label><span>Campanha</span><select name="campaignId" data-add-player-campaign></select></label><label><span>Status</span><select name="status"><option>Aprovado</option><option>Pendente</option><option>Bloqueado</option></select></label><label class="wide"><span>Ficha vinculada</span><select name="sheetId" data-add-player-sheet></select></label></div>
+      <footer><button class="master-ghost" type="button" data-player-dialog-close>Cancelar</button><button class="master-btn" type="submit">Adicionar jogador</button></footer>
+    </form>
+  </dialog>
+
+  <dialog class="players-dialog permissions-dialog" data-permissions-dialog>
+    <form method="dialog" data-permissions-form>
+      <input type="hidden" name="playerId">
+      <header><div><small class="master-eyebrow">Permissoes individuais</small><h2 data-permissions-player>Jogador</h2><p>Defina exatamente o que este jogador pode fazer na campanha.</p></div><button type="button" data-player-dialog-close>&times;</button></header>
+      <div class="player-permissions-grid">
+        <label><span><b>Editar ficha</b><small>Alterar a ficha vinculada.</small></span><input type="checkbox" name="editSheet"><i></i></label>
+        <label><span><b>Enviar para aprovacao</b><small>Submeter novas versoes da ficha.</small></span><input type="checkbox" name="submitSheet"><i></i></label>
+        <label><span><b>Ver biblioteca</b><small>Acessar recursos liberados.</small></span><input type="checkbox" name="viewLibrary"><i></i></label>
+        <label><span><b>Rolar dados</b><small>Usar os dados da mesa.</small></span><input type="checkbox" name="rollDice"><i></i></label>
+        <label><span><b>Mover proprio token</b><small>Controlar apenas seu personagem.</small></span><input type="checkbox" name="moveToken"><i></i></label>
+        <label><span><b>Usar chat</b><small>Participar do chat da sessao.</small></span><input type="checkbox" name="useChat"><i></i></label>
+        <label><span><b>Enviar arquivos</b><small>Compartilhar arquivos autorizados.</small></span><input type="checkbox" name="uploadFiles"><i></i></label>
+        <label><span><b>Ver anotacoes</b><small>Ler notas liberadas pelo Mestre.</small></span><input type="checkbox" name="viewNotes"><i></i></label>
+      </div>
+      <footer><button class="master-ghost" type="button" data-player-dialog-close>Cancelar</button><button class="master-btn" type="submit">Salvar permissoes</button></footer>
+    </form>
+  </dialog>
+
+  <dialog class="players-dialog player-profile-dialog" data-player-profile-dialog>
+    <div><header><div><small class="master-eyebrow">Perfil do jogador</small><h2 data-profile-player-name>Jogador</h2><p data-profile-player-email></p></div><button type="button" data-player-dialog-close>&times;</button></header><div class="player-profile-details" data-player-profile-details></div><footer><button class="master-btn" type="button" data-player-dialog-close>Fechar</button></footer></div>
+  </dialog>
+
+  <script src="../assets/js/app.js?v=global-toast-v1"></script>
+  <script src="../assets/js/master.js?v=master-players-v1"></script>
+  <script src="../assets/js/master-players.js?v=master-players-v1"></script>
 </body>
 </html>

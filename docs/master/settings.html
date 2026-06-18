@@ -1,82 +1,14 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apex Realms | Configuracoes do Mestre</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/style.css?v=portal-brand-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=master-stage-1">
-</head>
-<body class="master-area" data-master-page="settings">
-  <aside class="master-sidebar">
-    <a class="master-brand" href="../index.html" aria-label="Apex Realms"><i class="realm-mark"></i><span><b>APEX</b><em>REALMS</em></span></a>
-    <nav class="master-nav" aria-label="Navegacao do Mestre">
-      <small>Area do Mestre</small>
-      <a href="dashboard.html"><i>D</i>Dashboard</a>
-      <a href="campaigns.html"><i>C</i>Campanhas</a>
-      <a href="table.html"><i>M</i>Mesa</a>
-      <a href="library.html"><i>B</i>Biblioteca</a>
-      <a href="sheets.html"><i>F</i>Fichas</a>
-      <a href="players.html"><i>J</i>Jogadores</a>
-      <a href="invites.html"><i>I</i>Convites</a>
-      <a class="active" href="settings.html"><i>A</i>Configuracoes</a>
-      <small>Atalhos</small>
-      <a href="../dashboard.html"><i>P</i>Area do jogador</a>
-    </nav>
-    <div class="master-sidebar-card">
-      <small>Preferencias</small>
-      <b>Regras da mesa</b>
-      <p>Defina padroes do Mestre para campanhas, permissoes e comportamento da sessao.</p>
-    </div>
-    <div class="master-profile"><div class="master-avatar" data-user-initial>A</div><span><b data-user-name>Mestre Apex</b><small><span data-user-role>Mestre</span> ativo</small></span><button type="button" data-logout>Sair</button></div>
-  </aside>
-
-  <main class="master-main">
-    <header class="master-topbar">
-      <div>
-        <small class="master-eyebrow">Preferencias</small>
-        <h1>Configuracoes</h1>
-      </div>
-      <div class="master-actions">
-        <a class="master-ghost" href="dashboard.html">Voltar ao dashboard</a>
-      </div>
-    </header>
-
-    <form class="master-form-card" data-master-settings-form>
-      <div class="master-panel-header">
-        <div>
-          <small class="master-panel-kicker">Mesa e permissoes</small>
-          <h2>Configuracoes do Mestre</h2>
-          <p>Salvo localmente nesta primeira entrega. Depois esses dados migram para backend real.</p>
-        </div>
-      </div>
-      <div class="master-form-grid three">
-        <label class="master-field"><span>Nome publico do Mestre</span><input name="masterName" placeholder="Mestre Apex"></label>
-        <label class="master-field"><span>Sistema padrao</span><select name="defaultSystem"><option>D&D 5e</option><option>Tormenta 20</option><option>Pathfinder</option><option>Ordem Paranormal</option><option>Outro</option></select></label>
-        <label class="master-field"><span>Tema visual</span><select name="theme"><option>Dark fantasy neon</option><option>Arcano classico</option><option>Alta fantasia</option></select></label>
-        <label class="master-field"><span>Densidade da interface</span><select name="visualDensity"><option>Confortavel</option><option>Compacta</option><option>Ampla</option></select></label>
-        <label class="master-field"><span>Notificacoes</span><select name="notifications"><option>Eventos importantes</option><option>Tudo</option><option>Silencioso</option></select></label>
-        <label class="master-field"><span>Seguranca de convite</span><select name="securityMode"><option>Aprovacao manual</option><option>Entrada automatica</option><option>Somente convite direto</option></select></label>
-        <label class="master-field full"><span>Politica de permissoes</span><textarea name="permissionsPolicy" placeholder="Ex.: jogadores podem editar fichas fora da sessao; durante a sessao a edicao fica bloqueada."></textarea></label>
-      </div>
-      <div class="master-button-row">
-        <button class="master-btn" type="submit">Salvar configuracoes</button>
-        <button class="master-ghost" type="reset">Restaurar formulario</button>
-      </div>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Apex Realms | Configuracoes</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/style.css?v=global-toast-v1"><link rel="stylesheet" href="../assets/css/master.css?v=master-settings-v1"></head>
+<body class="master-area master-preferences-page settings-page" data-master-page="settings">
+  <svg class="dashboard-symbols" aria-hidden="true"><symbol id="dash-icon-castle" viewBox="0 0 48 48"><path d="M9 40V18l5 3 5-3 5 3 5-3 5 3 5-3v22M15 40V27h18v13M8 18V9h7v9M33 18V9h7v9M20 20V8h8v12"/></symbol><symbol id="dash-icon-scroll" viewBox="0 0 48 48"><path d="M13 11h24v29H13M22 18h11M22 25h10"/></symbol><symbol id="dash-icon-d20" viewBox="0 0 48 48"><path d="M24 6 41 17v14L24 42 7 31V17L24 6ZM7 17h34M24 42V6"/></symbol><symbol id="dash-icon-book" viewBox="0 0 48 48"><path d="M8 10h14a6 6 0 0 1 6 6v24a6 6 0 0 0-6-6H8V10ZM40 10H28a6 6 0 0 0-6 6v24a6 6 0 0 1 6-6h12V10Z"/></symbol><symbol id="dash-icon-sheet" viewBox="0 0 48 48"><path d="M14 6h14l8 8v28H14V6ZM28 6v9h8"/></symbol><symbol id="dash-icon-group" viewBox="0 0 48 48"><path d="M24 23a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM12 40a12 12 0 0 1 24 0"/></symbol><symbol id="profile-icon" viewBox="0 0 48 48"><circle cx="24" cy="16" r="9"/><path d="M8 42c1-11 7-17 16-17s15 6 16 17"/></symbol><symbol id="dash-icon-gear" viewBox="0 0 48 48"><path d="M24 17a7 7 0 1 0 0 14 7 7 0 0 0 0-14ZM24 6v7M24 35v7M6 24h7M35 24h7"/></symbol><symbol id="dash-icon-power" viewBox="0 0 48 48"><path d="M24 7v15M14 14a17 17 0 1 0 20 0"/></symbol></svg>
+  <aside class="master-sidebar preferences-sidebar"><a class="master-brand" href="../index.html"><i class="realm-mark"></i></a><nav class="master-nav preferences-icon-nav"><a href="dashboard.html" data-tooltip="Dashboard"><i><svg><use href="#dash-icon-castle"></use></svg></i></a><a href="campaigns.html" data-tooltip="Campanhas"><i><svg><use href="#dash-icon-scroll"></use></svg></i></a><a href="table.html" data-tooltip="Mesa"><i><svg><use href="#dash-icon-d20"></use></svg></i></a><a href="library.html" data-tooltip="Biblioteca"><i><svg><use href="#dash-icon-book"></use></svg></i></a><a href="sheets.html" data-tooltip="Fichas"><i><svg><use href="#dash-icon-sheet"></use></svg></i></a><a href="players.html" data-tooltip="Jogadores"><i><svg><use href="#dash-icon-group"></use></svg></i></a><a href="profile.html" data-tooltip="Perfil"><i><svg><use href="#profile-icon"></use></svg></i></a><a class="active" href="settings.html" data-tooltip="Configuracoes"><i><svg><use href="#dash-icon-gear"></use></svg></i></a></nav><div class="master-profile dashboard-profile"><button class="dashboard-profile-trigger" type="button"><span class="master-avatar" data-user-initial>A</span></button><div class="dashboard-profile-menu"><strong data-user-name>Mestre Apex</strong><small>Mestre ativo</small><button type="button" data-logout><svg><use href="#dash-icon-power"></use></svg><span>Sair</span></button></div></div></aside>
+  <main class="preferences-content"><header class="preferences-topbar"><div><small class="master-eyebrow">Padroes da plataforma</small><h1>Configuracoes</h1><p>Defina apenas o comportamento inicial das suas campanhas e jogadores.</p></div></header>
+    <form class="settings-essential-form" data-master-settings-form>
+      <section><div class="preferences-section-heading"><div><small class="master-panel-kicker">Campanhas</small><h2>Padroes de criacao</h2></div></div><div class="settings-fields"><label><span>Sistema padrao</span><select name="defaultSystem"><option>D&D 5e</option><option>Tormenta 20</option><option>Pathfinder</option><option>Ordem Paranormal</option><option>Outro</option></select></label><label><span>Entrada por convite</span><select name="approvalMode"><option value="manual">Aprovacao manual</option><option value="automatic">Entrada automatica</option></select></label><label><span>Ficha inicial</span><select name="defaultSheetStatus"><option>Pendente</option><option>Aprovada</option></select></label></div></section>
+      <section><div class="preferences-section-heading"><div><small class="master-panel-kicker">Durante a sessao</small><h2>Controle da mesa</h2></div></div><div class="settings-toggles"><label><span><b>Bloquear edicao de fichas</b><small>Impede alteracoes enquanto a sessao estiver ativa.</small></span><input type="checkbox" name="lockSheetsDuringSession"><i></i></label><label><span><b>Confirmar exclusoes importantes</b><small>Solicita confirmacao para campanhas e fichas.</small></span><input type="checkbox" name="confirmDestructive" checked><i></i></label></div></section>
+      <section><div class="preferences-section-heading"><div><small class="master-panel-kicker">Novos jogadores</small><h2>Permissoes iniciais</h2></div></div><div class="settings-toggles two-columns"><label><span><b>Rolar dados</b><small>Acesso aos dados da mesa.</small></span><input type="checkbox" name="defaultRollDice" checked><i></i></label><label><span><b>Usar chat</b><small>Participar do chat da sessao.</small></span><input type="checkbox" name="defaultUseChat" checked><i></i></label><label><span><b>Mover proprio token</b><small>Controlar apenas o personagem vinculado.</small></span><input type="checkbox" name="defaultMoveToken" checked><i></i></label><label><span><b>Ver biblioteca liberada</b><small>Acessar conteudo compartilhado.</small></span><input type="checkbox" name="defaultViewLibrary" checked><i></i></label></div></section>
+      <footer><button class="master-btn" type="submit">Salvar configuracoes</button></footer>
     </form>
-
-    <section class="master-grid">
-      <article class="master-card"><span class="master-icon">1</span><div><strong>Acesso</strong><h2>Mestre separado</h2><p>Jogadores nao entram nesta area pelo controle de rotas estatico.</p></div></article>
-      <article class="master-card"><span class="master-icon">2</span><div><strong>Dados</strong><h2>LocalStorage</h2><p>A simulacao funciona no Vercel/GitHub Pages ate o banco real entrar.</p></div></article>
-      <article class="master-card"><span class="master-icon">3</span><div><strong>Mesa</strong><h2>Experiencia limpa</h2><p>Gerenciamento fora da mesa, jogo dentro da mesa.</p></div></article>
-      <article class="master-card"><span class="master-icon">4</span><div><strong>Futuro</strong><h2>Player area preparada</h2><p>A estrutura esta pronta para criar o dashboard do jogador depois.</p></div></article>
-    </section>
-  </main>
-
-  <script src="../assets/js/app.js?v=invite-codes-v1"></script>
-  <script src="../assets/js/master.js?v=invite-codes-v1"></script>
-</body>
-</html>
+  </main><script src="../assets/js/app.js?v=global-toast-v1"></script><script src="../assets/js/master.js?v=master-settings-v1"></script>
+</body></html>

@@ -105,6 +105,7 @@ const APEX_MASTER_ROUTES = new Set([
   "master/invites.html",
   "master/library.html",
   "master/players.html",
+  "master/profile.html",
   "master/settings.html",
   "master/sheets.html",
   "master/table.html",
@@ -361,6 +362,8 @@ function joinCampaignByInviteCode(code, user = getStaticUser()) {
   if (user.role !== "player") return {ok: false, reason: "role", message: "Use uma conta de jogador para entrar por convite."};
   const campaign = findStaticCampaignByInviteCode(normalizedCode);
   if (!campaign) return {ok: false, reason: "missing", message: "Convite nao encontrado ou expirado."};
+  const masterSettings = readStaticJsonStore("apex-realms-master-settings", {});
+  const joinStatus = masterSettings.approvalMode === "automatic" ? "Aprovado" : "Pendente";
 
   const entries = readJoinedCampaignEntries(user);
   const alreadyJoined = entries.some(entry => entry.campaignId === campaign.id || compactInviteCode(entry.inviteCode) === compactInviteCode(campaign.inviteCode));
@@ -370,7 +373,7 @@ function joinCampaignByInviteCode(code, user = getStaticUser()) {
       campaignName: campaign.name || "Campanha sem nome",
       inviteCode: campaign.inviteCode,
       joinedAt: new Date().toISOString(),
-      status: "Ativo"
+      status: joinStatus
     }, ...entries]);
   }
 
@@ -380,7 +383,7 @@ function joinCampaignByInviteCode(code, user = getStaticUser()) {
     name: user.name || user.nickname || "Jogador Apex",
     nickname: user.nickname || "",
     joinedAt: new Date().toISOString(),
-    status: "Ativo"
+    status: joinStatus
   };
   saveStaticCampaignsWithInvites(campaigns.map(item => {
     if (item.id !== campaign.id) return item;
@@ -388,7 +391,8 @@ function joinCampaignByInviteCode(code, user = getStaticUser()) {
     return {...item, players: [player, ...players]};
   }));
 
-  return {ok: true, campaign, alreadyJoined, message: alreadyJoined ? `Voce ja esta em ${campaign.name}.` : `Voce entrou em ${campaign.name}.`};
+  const message = joinStatus === "Aprovado" ? `Voce entrou em ${campaign.name}.` : `Solicitacao enviada para ${campaign.name}. Aguarde a aprovacao do Mestre.`;
+  return {ok: true, campaign, alreadyJoined, message: alreadyJoined ? `Seu acesso a ${campaign.name} ja foi registrado.` : message};
 }
 
 function inviteLinkForCode(code) {

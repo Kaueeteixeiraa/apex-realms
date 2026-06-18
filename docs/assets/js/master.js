@@ -2,7 +2,10 @@
 const MASTER_CAMPAIGNS_KEY = "apex-realms-campaigns";
 const MASTER_LIBRARY_KEY = "apex-realms-master-library";
 const MASTER_SHEETS_KEY = "apex-realms-master-sheets";
-const MASTER_PLAYERS_KEY = "apex-realms-master-players";
+const MASTER_PLAYERS_KEY = "apex_players";
+const MASTER_LEGACY_PLAYERS_KEY = "apex-realms-master-players";
+const MASTER_CAMPAIGNS_ALIAS_KEY = "apex_campaigns";
+const MASTER_SHEETS_ALIAS_KEY = "apex_character_sheets";
 const MASTER_SETTINGS_KEY = "apex-realms-master-settings";
 const MASTER_NOTES_KEY = "apex-realms-master-notes";
 
@@ -72,6 +75,7 @@ function readCampaigns() {
 
 function saveCampaigns(campaigns) {
   const normalizedCampaigns = campaigns.map(normalizeCampaign);
+  writeStore(MASTER_CAMPAIGNS_ALIAS_KEY, normalizedCampaigns);
   if (window.ApexInvites?.saveCampaigns) {
     window.ApexInvites.saveCampaigns(normalizedCampaigns);
     return;
@@ -433,7 +437,8 @@ function bindCampaignActions() {
       masterToast(campaign.archived ? "Campanha reativada." : "Campanha arquivada.");
     }
     if (action === "delete") {
-      if (!confirm("Excluir esta campanha?")) return;
+      const settings = readStore(MASTER_SETTINGS_KEY, {});
+      if (settings.confirmDestructive !== false && !confirm("Excluir esta campanha?")) return;
       saveCampaigns(campaigns.filter(item => item.id !== id));
       masterToast("Campanha excluida.");
     }
@@ -865,8 +870,15 @@ function bindSheetsPage() {
       updatedAt: raw.updatedAt || createdAt
     };
   };
-  const readSheets = () => readStore(MASTER_SHEETS_KEY, []).map(normalizeSheet);
-  const saveSheets = sheets => writeStore(MASTER_SHEETS_KEY, sheets.map(normalizeSheet));
+  const readSheets = () => {
+    const primary = readStore(MASTER_SHEETS_KEY, []);
+    return (primary.length ? primary : readStore(MASTER_SHEETS_ALIAS_KEY, [])).map(normalizeSheet);
+  };
+  const saveSheets = sheets => {
+    const normalized = sheets.map(normalizeSheet);
+    writeStore(MASTER_SHEETS_KEY, normalized);
+    writeStore(MASTER_SHEETS_ALIAS_KEY, normalized);
+  };
   const addOption = (select, label, value) => select.add(new Option(label, value));
   const populateControls = () => {
     campaignFilter.replaceChildren();
@@ -1107,7 +1119,8 @@ function bindSheetsPage() {
       renderSheets();
     }
     if (action === "delete") {
-      if (!confirm(`Excluir a ficha ${sheet.name}?`)) return;
+      const settings = readStore(MASTER_SETTINGS_KEY, {});
+      if (settings.confirmDestructive !== false && !confirm(`Excluir a ficha ${sheet.name}?`)) return;
       saveSheets(sheets.filter(saved => saved.id !== sheet.id));
       renderSheets();
     }
@@ -1152,6 +1165,9 @@ function bindSheetsPage() {
 
   populateControls();
   renderSheets();
+  const requestedSheetId = new URLSearchParams(window.location.search).get("sheet");
+  const requestedSheet = requestedSheetId ? readSheets().find(sheet => sheet.id === requestedSheetId) : null;
+  if (requestedSheet) openSheetDialog(requestedSheet);
 }
 
 function renderSimpleCollection(page, key, listSelector, emptyTitle, emptyText) {
@@ -1224,13 +1240,15 @@ function bindSettingsPage() {
   if (!form) return;
   const settings = readStore(MASTER_SETTINGS_KEY, {});
   Object.entries(settings).forEach(([name, value]) => {
-    if (form.elements[name]) form.elements[name].value = value;
+    if (!form.elements[name]) return;
+    if (form.elements[name].type === "checkbox") form.elements[name].checked = Boolean(value);
+    else form.elements[name].value = value;
   });
   form.addEventListener("submit", event => {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(form).entries());
+    form.querySelectorAll("input[type='checkbox'][name]").forEach(input => { data[input.name] = input.checked; });
     writeStore(MASTER_SETTINGS_KEY, data);
-    masterToast("Configuracoes do mestre salvas.");
   });
 }
 
@@ -1248,7 +1266,6 @@ renderCampaignsPage();
 bindTablePage();
 bindLibraryPage();
 bindSheetsPage();
-renderSimpleCollection("players", MASTER_PLAYERS_KEY, "[data-master-players-list]", "Nenhum jogador aguardando", "Solicitacoes, aprovados e bloqueados ficarao separados nesta area.");
 bindInvitesPage();
 bindSettingsPage();
 bindGenericMasterActions();
