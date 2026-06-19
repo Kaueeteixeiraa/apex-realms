@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=vtt-core-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=vtt-dice-3d-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=card-tokens-v1">
 </head>
 <body class="vtt-page" data-master-page="table" data-table-version="2">
   <svg class="vtt-symbols" aria-hidden="true">
@@ -58,6 +58,7 @@
       <div class="vtt-top-actions">
         <button class="vtt-session-button" type="button" data-session-toggle><i></i><span>Iniciar sessao</span></button>
         <button class="vtt-icon-button" type="button" data-open-library aria-label="Abrir arsenal" title="Arsenal da mesa"><svg><use href="#vtt-book"></use></svg></button>
+        <button class="vtt-icon-button" type="button" data-card-settings aria-label="Configurar cartas" title="Configurar cartas"><svg><use href="#vtt-settings"></use></svg></button>
         <button class="vtt-icon-button" type="button" data-fullscreen aria-label="Tela cheia" title="Tela cheia"><svg><use href="#vtt-fullscreen"></use></svg></button>
         <button class="vtt-icon-button vtt-mobile-session" type="button" data-toggle-panel="session" aria-label="Abrir central da sessao"><svg><use href="#vtt-chat"></use></svg></button>
       </div>
@@ -197,19 +198,38 @@
   <dialog class="vtt-token-dialog" data-token-dialog>
     <form class="vtt-token-form" data-token-form>
       <input type="hidden" name="tokenId">
-      <header><div><small>Controle rápido</small><h2 data-token-dialog-title>Personagem</h2></div><button type="button" data-close-token aria-label="Fechar"><svg><use href="#vtt-close"></use></svg></button></header>
+      <header><div><small>Controle da carta</small><h2 data-token-dialog-title>Personagem</h2><p data-token-identity></p></div><button type="button" data-close-token aria-label="Fechar"><svg><use href="#vtt-close"></use></svg></button></header>
       <div class="vtt-token-preview" data-token-preview></div>
-      <label><span>PV atual</span><input type="number" min="0" name="hpCurrent"></label>
-      <label><span>PV máximo</span><input type="number" min="0" name="hpMax"></label>
-      <label><span>Status</span><select name="status"><option>Pronto</option><option>Ferido</option><option>Inconsciente</option><option>Oculto</option><option>Hostil</option></select></label>
-      <label><span>Iniciativa</span><input type="number" name="initiative"></label>
-      <footer><button type="button" data-remove-token>Remover do mapa</button><button type="submit">Salvar alterações</button></footer>
+      <section class="vtt-token-public" data-token-public hidden><b data-token-public-name></b><span data-token-public-type></span><p data-token-public-state></p></section>
+      <div class="vtt-token-editor-fields" data-token-editor>
+        <label><span>PV atual</span><input type="number" min="0" name="hpCurrent"></label><label><span>PV máximo</span><input type="number" min="0" name="hpMax"></label>
+        <label><span>Recurso atual</span><input type="number" min="0" name="resourceCurrent"></label><label><span>Recurso máximo</span><input type="number" min="0" name="resourceMax"></label>
+        <label><span>CA / Defesa</span><input type="number" min="0" name="armorClass"></label><label><span>Iniciativa</span><input type="number" name="initiative"></label>
+        <label><span>Status</span><select name="status"><option>Pronto</option><option>Ferido</option><option>Inconsciente</option><option>Oculto</option><option>Hostil</option><option>Derrotado</option></select></label><label><span>Condições</span><input name="conditions"></label>
+        <label><span>Buffs</span><input name="buffs"></label><label><span>Debuffs</span><input name="debuffs"></label>
+        <label data-master-only><span>Nome público</span><input name="publicName" placeholder="Criatura Desconhecida"></label><label data-master-only><span>Tipo de carta</span><select name="cardKind"><option value="player">Personagem</option><option value="npc-ally">NPC aliado</option><option value="npc-neutral">NPC neutro</option><option value="npc-hostile">NPC hostil</option><option value="monster">Monstro</option><option value="elite">Elite</option><option value="boss">Chefe</option></select></label>
+        <label data-master-only><span>Visibilidade</span><select name="visibility"><option value="public">Público</option><option value="partial">Parcial</option><option value="secret">Secreto</option></select></label><label data-master-only><span>Imagem para jogadores</span><select name="imageVisibility"><option value="real">Imagem real</option><option value="silhouette">Silhueta</option><option value="hidden">Oculta</option></select></label>
+        <label class="wide" data-master-only><span>Observações privadas do Mestre</span><textarea name="masterNotes"></textarea></label>
+        <div class="vtt-token-switches wide" data-master-only><label><input type="checkbox" name="showLifeState"> Mostrar vida narrativa</label><label><input type="checkbox" name="shareClassRace"> Compartilhar classe/raça</label><label><input type="checkbox" name="locked"> Travar movimento</label></div>
+      </div>
+      <footer><a href="sheets.html" class="vtt-token-sheet-link">Abrir ficha completa</a><button type="button" data-remove-token>Remover do mapa</button><button type="submit">Salvar alterações</button></footer>
+    </form>
+  </dialog>
+
+  <dialog class="vtt-token-dialog" data-card-settings-dialog>
+    <form class="vtt-card-settings-form" data-card-settings-form>
+      <header><div><small>Identidade da mesa</small><h2>Cartas e visibilidade</h2><p>Defina o que o grupo pode conhecer durante a sessão.</p></div><button type="button" data-close-card-settings aria-label="Fechar"><svg><use href="#vtt-close"></use></svg></button></header>
+      <label><span>Visual padrão</span><select name="displayMode"><option value="card">Cartas Apex</option><option value="token">Token tradicional</option></select></label>
+      <label><span>Nomes de monstros</span><select name="monsterNameMode"><option value="real">Nome real</option><option value="generic">Nome genérico</option><option value="hidden">Ocultar nome</option></select></label>
+      <label><span>Imagens de monstros</span><select name="monsterImageMode"><option value="real">Imagem real</option><option value="silhouette">Silhueta</option><option value="hidden">Oculta</option></select></label>
+      <div class="vtt-token-switches wide"><label><input type="checkbox" name="showNarrativeHealth"> Mostrar vida narrativa</label><label><input type="checkbox" name="showAllyHp"> Mostrar HP de aliados</label></div>
+      <footer><button type="button" data-close-card-settings>Cancelar</button><button type="submit">Salvar configuração</button></footer>
     </form>
   </dialog>
 
   <script src="../assets/js/mvp-storage.js?v=mvp-core-v1"></script>
   <script src="../assets/js/app.js?v=mvp-core-v1"></script>
   <script src="../assets/js/session-state.js?v=vtt-core-v1"></script>
-  <script src="../assets/js/master-table.js?v=vtt-dice-3d-v1"></script>
+  <script src="../assets/js/master-table.js?v=card-tokens-v1"></script>
 </body>
 </html>

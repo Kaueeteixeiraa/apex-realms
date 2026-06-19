@@ -26,6 +26,11 @@ CREATE TABLE IF NOT EXISTS campaigns (
     last_summary TEXT DEFAULT '',
     last_session TEXT DEFAULT CURRENT_TIMESTAMP,
     quick_session INTEGER DEFAULT 0,
+    token_display_mode TEXT NOT NULL DEFAULT 'card' CHECK (token_display_mode IN ('card', 'token')),
+    show_narrative_health INTEGER NOT NULL DEFAULT 1,
+    monster_name_mode TEXT NOT NULL DEFAULT 'real' CHECK (monster_name_mode IN ('real', 'generic', 'hidden')),
+    monster_image_mode TEXT NOT NULL DEFAULT 'real' CHECK (monster_image_mode IN ('real', 'silhouette', 'hidden')),
+    show_ally_hp INTEGER NOT NULL DEFAULT 0,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
@@ -75,7 +80,19 @@ CREATE TABLE IF NOT EXISTS tokens (
     color TEXT DEFAULT '#6f5cff',
     conditions TEXT DEFAULT '',
     size INTEGER DEFAULT 1,
-    hidden INTEGER DEFAULT 0
+    hidden INTEGER DEFAULT 0,
+    public_name TEXT DEFAULT '',
+    card_kind TEXT NOT NULL DEFAULT 'monster',
+    visibility TEXT NOT NULL DEFAULT 'partial' CHECK (visibility IN ('public', 'partial', 'secret')),
+    image_visibility TEXT NOT NULL DEFAULT 'real' CHECK (image_visibility IN ('real', 'silhouette', 'hidden')),
+    show_life_state INTEGER NOT NULL DEFAULT 1,
+    share_class_race INTEGER NOT NULL DEFAULT 0,
+    resource INTEGER NOT NULL DEFAULT 0,
+    max_resource INTEGER NOT NULL DEFAULT 0,
+    buffs TEXT DEFAULT '',
+    debuffs TEXT DEFAULT '',
+    master_notes TEXT DEFAULT '',
+    locked INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS maps (

@@ -16,13 +16,18 @@ from services.security import ROLES, admin_required, campaign_access, can_manage
 from services.mvp import (
     CAMPAIGN_VISIBILITIES,
     LIBRARY_TYPES,
+    TOKEN_CARD_KINDS,
+    TOKEN_IMAGE_VISIBILITIES,
+    TOKEN_VISIBILITIES,
     campaign_to_dict,
+    campaign_card_settings,
     clean_sheet_data,
     clean_text,
     generate_invite_code,
     invite_value_for_visibility,
     library_item_to_dict,
     sheet_to_dict,
+    token_to_view,
     validate_image_upload,
 )
 
@@ -373,15 +378,23 @@ def create_app():
         if not can_manage_campaign(campaign, user) and token_type != "player":
             abort(403)
         owner_id = user["id"] if token_type == "player" else None
+        default_kind = {"player": "player", "npc": "npc-neutral", "monster": "monster"}.get(token_type, "monster")
+        card_kind = request.form.get("card_kind", default_kind)
+        visibility = request.form.get("visibility", "public" if token_type == "player" else "partial")
+        if card_kind not in TOKEN_CARD_KINDS or visibility not in TOKEN_VISIBILITIES:
+            abort(400)
         image_url = save_upload(request.files.get("image"), image_only=True)
         token_id = execute(
             """INSERT INTO tokens
-               (campaign_id, owner_id, name, token_type, class_name, race, level, image_url, notes, hp, max_hp, color, x, y)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (campaign_id, owner_id, request.form["name"], token_type, request.form.get("class_name", ""),
-             request.form.get("race", ""), int(request.form.get("level", 1)), image_url, request.form.get("notes", ""),
-             int(request.form.get("hp", 10)), int(request.form.get("max_hp", 10)), request.form.get("color", "#765cff"),
-             random.randint(30, 70), random.randint(30, 70)),
+               (campaign_id, owner_id, name, public_name, token_type, card_kind, visibility, class_name, race, level,
+                image_url, notes, master_notes, hp, max_hp, resource, max_resource, color, x, y)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (campaign_id, owner_id, request.form["name"], request.form.get("public_name", ""), token_type,
+             card_kind, visibility, request.form.get("class_name", ""), request.form.get("race", ""),
+             int(request.form.get("level", 1)), image_url, "", request.form.get("notes", ""),
+             int(request.form.get("hp", 10)), int(request.form.get("max_hp", 10)),
+             int(request.form.get("resource", 0)), int(request.form.get("max_resource", 0)),
+             request.form.get("color", "#765cff"), random.randint(30, 70), random.randint(30, 70)),
         )
         execute("INSERT INTO assets (campaign_id, name, kind, file_url) VALUES (?, ?, 'token', ?)", (campaign_id, request.form["name"], image_url))
         if request.form.get("initiative"):
@@ -773,18 +786,46 @@ def create_app():
     def game_room(campaign_id):
         campaign = campaign_access(campaign_id)
         is_owner = can_manage_campaign(campaign)
-        tokens = query("SELECT * FROM tokens WHERE campaign_id = ?" + ("" if is_owner else " AND hidden = 0"), (campaign_id,))
+        user = current_user()
+        token_rows = query("SELECT * FROM tokens WHERE campaign_id = ?", (campaign_id,))
+        tokens = [token_to_view(token, campaign, user) for token in token_rows]
+        token_by_id = {token["id"]: token for token in tokens}
         messages = query("SELECT * FROM chat_messages WHERE campaign_id = ? ORDER BY id DESC LIMIT 30", (campaign_id,))
-        initiative = query(
-            """SELECT i.*, t.name, t.color, t.hp, t.max_hp, t.conditions
-               FROM initiative i JOIN tokens t ON t.id = i.token_id
-               WHERE i.campaign_id = ?""" + ("" if is_owner else " AND t.hidden = 0") + " ORDER BY i.score DESC",
-            (campaign_id,),
-        )
+        initiative = []
+        for entry in query("SELECT * FROM initiative WHERE campaign_id = ? ORDER BY score DESC", (campaign_id,)):
+            token = token_by_id.get(entry["token_id"])
+            if token:
+                initiative.append({**dict(entry), **token})
         active_map = query("SELECT * FROM maps WHERE campaign_id = ? AND active = 1 LIMIT 1", (campaign_id,), one=True)
         maps = query("SELECT * FROM maps WHERE campaign_id = ? ORDER BY active DESC, id DESC", (campaign_id,))
         combat = query("SELECT * FROM combat_state WHERE campaign_id = ?", (campaign_id,), one=True)
         return render_template("game.html", campaign=campaign, tokens=tokens, messages=reversed(messages), initiative=initiative, active_map=active_map, maps=maps, is_owner=is_owner, combat=combat)
+
+    @app.get("/api/campaign/<int:campaign_id>/table")
+    @login_required
+    def api_table_state(campaign_id):
+        campaign = campaign_access(campaign_id)
+        user = current_user()
+        tokens = [token_to_view(token, campaign, user) for token in query("SELECT * FROM tokens WHERE campaign_id=?", (campaign_id,))]
+        return jsonify({"campaign_id": campaign_id, "settings": campaign_card_settings(campaign), "tokens": tokens})
+
+    @app.patch("/api/campaign/<int:campaign_id>/card-settings")
+    @master_required
+    def api_card_settings(campaign_id):
+        campaign = campaign_access(campaign_id, owner_only=True)
+        data = request.get_json() or {}
+        display_mode = data.get("display_mode", campaign["token_display_mode"])
+        name_mode = data.get("monster_name_mode", campaign["monster_name_mode"])
+        image_mode = data.get("monster_image_mode", campaign["monster_image_mode"])
+        if display_mode not in {"card", "token"} or name_mode not in {"real", "generic", "hidden"} or image_mode not in TOKEN_IMAGE_VISIBILITIES:
+            return jsonify({"error": "Configuracao de cartas invalida."}), 400
+        execute(
+            """UPDATE campaigns SET token_display_mode=?,show_narrative_health=?,monster_name_mode=?,
+               monster_image_mode=?,show_ally_hp=?,updated_at=CURRENT_TIMESTAMP WHERE id=?""",
+            (display_mode, 1 if data.get("show_narrative_health", campaign["show_narrative_health"]) else 0,
+             name_mode, image_mode, 1 if data.get("show_ally_hp", campaign["show_ally_hp"]) else 0, campaign_id),
+        )
+        return jsonify(campaign_card_settings(query("SELECT * FROM campaigns WHERE id=?", (campaign_id,), one=True)))
 
     @app.post("/api/campaign/<int:campaign_id>/chat")
     @login_required
@@ -818,28 +859,48 @@ def create_app():
         campaign = campaign_access(campaign_id)
         token = query("SELECT * FROM tokens WHERE id = ? AND campaign_id = ?", (token_id, campaign_id), one=True)
         user = current_user()
-        if not token or (not can_manage_campaign(campaign, user) and token["owner_id"] != user["id"]):
+        is_master = can_manage_campaign(campaign, user)
+        if not token or (not is_master and token["owner_id"] != user["id"]):
             return jsonify({"error": "Sem permissão para controlar este token."}), 403
-        data = request.get_json()
+        if not is_master and token["locked"]:
+            return jsonify({"error": "Esta carta foi travada pelo Mestre."}), 403
+        data = request.get_json() or {}
+        visibility = data.get("visibility", token["visibility"]) if is_master else token["visibility"]
+        card_kind = data.get("card_kind", token["card_kind"]) if is_master else token["card_kind"]
+        image_visibility = data.get("image_visibility", token["image_visibility"]) if is_master else token["image_visibility"]
+        if visibility not in TOKEN_VISIBILITIES or card_kind not in TOKEN_CARD_KINDS or image_visibility not in TOKEN_IMAGE_VISIBILITIES:
+            return jsonify({"error": "Configuracao de visibilidade invalida."}), 400
         fields = {
             "x": float(data.get("x", token["x"])), "y": float(data.get("y", token["y"])),
             "hp": max(0, int(data.get("hp", token["hp"]))), "max_hp": max(1, int(data.get("max_hp", token["max_hp"]))),
             "name": str(data.get("name", token["name"]))[:100], "class_name": str(data.get("class_name", token["class_name"]))[:100],
             "conditions": str(data.get("conditions", token["conditions"]))[:300], "notes": str(data.get("notes", token["notes"]))[:2000],
             "color": str(data.get("color", token["color"]))[:20], "size": max(1, min(4, int(data.get("size", token["size"])))),
-            "hidden": 1 if data.get("hidden", token["hidden"]) else 0,
+            "hidden": 0 if is_master and "visibility" in data else (1 if (data.get("hidden", token["hidden"]) if is_master else token["hidden"]) else 0),
             "temp_hp": max(0, int(data.get("temp_hp", token["temp_hp"]))), "defense": max(0, int(data.get("defense", token["defense"]))),
             "speed": max(0, int(data.get("speed", token["speed"]))), "race": str(data.get("race", token["race"]))[:100],
             "level": max(1, int(data.get("level", token["level"]))), "attributes": json.dumps(data.get("attributes", json.loads(token["attributes"] or "{}"))),
             "skills": str(data.get("skills", token["skills"]))[:5000], "inventory": str(data.get("inventory", token["inventory"]))[:5000],
             "abilities": str(data.get("abilities", token["abilities"]))[:5000], "spells": str(data.get("spells", token["spells"]))[:5000],
             "story": str(data.get("story", token["story"]))[:10000], "custom_fields": str(data.get("custom_fields", token["custom_fields"]))[:5000],
+            "resource": max(0, int(data.get("resource", token["resource"]))), "max_resource": max(0, int(data.get("max_resource", token["max_resource"]))),
+            "buffs": str(data.get("buffs", token["buffs"]))[:1000], "debuffs": str(data.get("debuffs", token["debuffs"]))[:1000],
+            "public_name": str(data.get("public_name", token["public_name"]))[:100] if is_master else token["public_name"],
+            "card_kind": card_kind, "visibility": visibility, "image_visibility": image_visibility,
+            "show_life_state": 1 if (data.get("show_life_state", token["show_life_state"]) if is_master else token["show_life_state"]) else 0,
+            "share_class_race": 1 if (data.get("share_class_race", token["share_class_race"]) if is_master else token["share_class_race"]) else 0,
+            "master_notes": str(data.get("master_notes", token["master_notes"]))[:3000] if is_master else token["master_notes"],
+            "locked": 1 if (data.get("locked", token["locked"]) if is_master else token["locked"]) else 0,
         }
         execute("""UPDATE tokens SET x=:x,y=:y,hp=:hp,max_hp=:max_hp,name=:name,class_name=:class_name,
                    conditions=:conditions,notes=:notes,color=:color,size=:size,hidden=:hidden,temp_hp=:temp_hp,
                    defense=:defense,speed=:speed,race=:race,level=:level,attributes=:attributes,skills=:skills,
-                   inventory=:inventory,abilities=:abilities,spells=:spells,story=:story,custom_fields=:custom_fields WHERE id=:id""", {**fields, "id": token_id})
-        return jsonify({"ok": True})
+                   inventory=:inventory,abilities=:abilities,spells=:spells,story=:story,custom_fields=:custom_fields,
+                   resource=:resource,max_resource=:max_resource,buffs=:buffs,debuffs=:debuffs,public_name=:public_name,
+                   card_kind=:card_kind,visibility=:visibility,image_visibility=:image_visibility,
+                   show_life_state=:show_life_state,share_class_race=:share_class_race,master_notes=:master_notes,locked=:locked
+                   WHERE id=:id""", {**fields, "id": token_id})
+        return jsonify(token_to_view(query("SELECT * FROM tokens WHERE id=?", (token_id,), one=True), campaign, user))
 
     @app.get("/api/campaign/<int:campaign_id>/token/<int:token_id>/sheet")
     @login_required
@@ -848,11 +909,10 @@ def create_app():
         token = query("SELECT * FROM tokens WHERE id=? AND campaign_id=?", (token_id, campaign_id), one=True)
         if not token:
             abort(404)
-        if not can_manage_campaign(campaign) and token["owner_id"] != current_user()["id"]:
+        user = current_user()
+        if not can_manage_campaign(campaign) and token["owner_id"] != user["id"]:
             abort(403)
-        result = dict(token)
-        result["attributes"] = json.loads(result["attributes"] or "{}")
-        return jsonify(result)
+        return jsonify(token_to_view(token, campaign, user))
 
     @app.delete("/api/campaign/<int:campaign_id>/token/<int:token_id>")
     @login_required
@@ -1006,9 +1066,24 @@ def init_database(app):
         get_db().executescript(schema)
         # Lightweight migrations keep existing local databases compatible.
         columns = {row["name"] for row in query("PRAGMA table_info(tokens)")}
-        for name, definition in [("race", "TEXT DEFAULT ''"), ("level", "INTEGER DEFAULT 1"), ("image_url", "TEXT DEFAULT ''"), ("notes", "TEXT DEFAULT ''"), ("size", "INTEGER DEFAULT 1"), ("hidden", "INTEGER DEFAULT 0"), ("temp_hp", "INTEGER DEFAULT 0"), ("defense", "INTEGER DEFAULT 10"), ("speed", "INTEGER DEFAULT 9"), ("attributes", "TEXT DEFAULT '{}'"), ("skills", "TEXT DEFAULT ''"), ("inventory", "TEXT DEFAULT ''"), ("abilities", "TEXT DEFAULT ''"), ("spells", "TEXT DEFAULT ''"), ("story", "TEXT DEFAULT ''"), ("custom_fields", "TEXT DEFAULT ''")]:
+        for name, definition in [
+            ("race", "TEXT DEFAULT ''"), ("level", "INTEGER DEFAULT 1"), ("image_url", "TEXT DEFAULT ''"),
+            ("notes", "TEXT DEFAULT ''"), ("size", "INTEGER DEFAULT 1"), ("hidden", "INTEGER DEFAULT 0"),
+            ("temp_hp", "INTEGER DEFAULT 0"), ("defense", "INTEGER DEFAULT 10"), ("speed", "INTEGER DEFAULT 9"),
+            ("attributes", "TEXT DEFAULT '{}'"), ("skills", "TEXT DEFAULT ''"), ("inventory", "TEXT DEFAULT ''"),
+            ("abilities", "TEXT DEFAULT ''"), ("spells", "TEXT DEFAULT ''"), ("story", "TEXT DEFAULT ''"),
+            ("custom_fields", "TEXT DEFAULT ''"), ("public_name", "TEXT DEFAULT ''"),
+            ("card_kind", "TEXT NOT NULL DEFAULT 'monster'"), ("visibility", "TEXT NOT NULL DEFAULT 'partial'"),
+            ("image_visibility", "TEXT NOT NULL DEFAULT 'real'"), ("show_life_state", "INTEGER NOT NULL DEFAULT 1"),
+            ("share_class_race", "INTEGER NOT NULL DEFAULT 0"), ("resource", "INTEGER NOT NULL DEFAULT 0"),
+            ("max_resource", "INTEGER NOT NULL DEFAULT 0"), ("buffs", "TEXT DEFAULT ''"),
+            ("debuffs", "TEXT DEFAULT ''"), ("master_notes", "TEXT DEFAULT ''"), ("locked", "INTEGER NOT NULL DEFAULT 0"),
+        ]:
             if name not in columns:
                 get_db().execute(f"ALTER TABLE tokens ADD COLUMN {name} {definition}")
+        get_db().execute("UPDATE tokens SET card_kind=CASE WHEN token_type='player' THEN 'player' WHEN token_type='npc' THEN 'npc-neutral' ELSE card_kind END WHERE card_kind='monster'")
+        get_db().execute("UPDATE tokens SET card_kind=REPLACE(card_kind, '_', '-') WHERE card_kind IN ('npc_ally','npc_neutral','npc_hostile')")
+        get_db().execute("UPDATE tokens SET visibility='secret', hidden=0 WHERE hidden=1")
         map_columns = {row["name"] for row in query("PRAGMA table_info(maps)")}
         if "fog_enabled" not in map_columns:
             get_db().execute("ALTER TABLE maps ADD COLUMN fog_enabled INTEGER DEFAULT 0")
@@ -1017,6 +1092,11 @@ def init_database(app):
             ("visibility", "TEXT NOT NULL DEFAULT 'private'"),
             ("created_at", "TEXT"),
             ("updated_at", "TEXT"),
+            ("token_display_mode", "TEXT NOT NULL DEFAULT 'card'"),
+            ("show_narrative_health", "INTEGER NOT NULL DEFAULT 1"),
+            ("monster_name_mode", "TEXT NOT NULL DEFAULT 'real'"),
+            ("monster_image_mode", "TEXT NOT NULL DEFAULT 'real'"),
+            ("show_ally_hp", "INTEGER NOT NULL DEFAULT 0"),
         ]:
             if name not in campaign_columns:
                 get_db().execute(f"ALTER TABLE campaigns ADD COLUMN {name} {definition}")

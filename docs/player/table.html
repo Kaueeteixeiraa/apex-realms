@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=vtt-core-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=vtt-dice-3d-v1">
-  <link rel="stylesheet" href="../assets/css/player.css?v=player-area-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=card-tokens-v1">
+  <link rel="stylesheet" href="../assets/css/player.css?v=card-tokens-v1">
 </head>
 <body class="vtt-page player-table-mode" data-master-page="table" data-player-page="table" data-table-version="2">
   <svg class="vtt-symbols" aria-hidden="true">
@@ -198,13 +198,21 @@
   <dialog class="vtt-token-dialog" data-token-dialog>
     <form class="vtt-token-form" data-token-form>
       <input type="hidden" name="tokenId">
-      <header><div><small>Controle rápido</small><h2 data-token-dialog-title>Personagem</h2></div><button type="button" data-close-token aria-label="Fechar"><svg><use href="#vtt-close"></use></svg></button></header>
+      <header><div><small>Informações da carta</small><h2 data-token-dialog-title>Personagem</h2><p data-token-identity></p></div><button type="button" data-close-token aria-label="Fechar"><svg><use href="#vtt-close"></use></svg></button></header>
       <div class="vtt-token-preview" data-token-preview></div>
-      <label><span>PV atual</span><input type="number" min="0" name="hpCurrent"></label>
-      <label><span>PV máximo</span><input type="number" min="0" name="hpMax"></label>
-      <label><span>Status</span><select name="status"><option>Pronto</option><option>Ferido</option><option>Inconsciente</option><option>Oculto</option><option>Hostil</option></select></label>
-      <label><span>Iniciativa</span><input type="number" name="initiative"></label>
-      <footer><button type="button" data-remove-token>Remover do mapa</button><button type="submit">Salvar alterações</button></footer>
+      <section class="vtt-token-public" data-token-public hidden><b data-token-public-name></b><span data-token-public-type></span><p data-token-public-state></p></section>
+      <div class="vtt-token-editor-fields" data-token-editor>
+        <label><span>PV atual</span><input type="number" min="0" name="hpCurrent"></label><label><span>PV máximo</span><input type="number" min="0" name="hpMax"></label>
+        <label><span>Recurso atual</span><input type="number" min="0" name="resourceCurrent"></label><label><span>Recurso máximo</span><input type="number" min="0" name="resourceMax"></label>
+        <label><span>CA / Defesa</span><input type="number" min="0" name="armorClass"></label><label><span>Iniciativa</span><input type="number" name="initiative"></label>
+        <label><span>Status</span><select name="status"><option>Pronto</option><option>Ferido</option><option>Inconsciente</option><option>Oculto</option><option>Hostil</option><option>Derrotado</option></select></label><label><span>Condições</span><input name="conditions"></label>
+        <label><span>Buffs</span><input name="buffs"></label><label><span>Debuffs</span><input name="debuffs"></label>
+        <label data-master-only><span>Nome público</span><input name="publicName"></label><label data-master-only><span>Tipo</span><select name="cardKind"><option value="player">Personagem</option></select></label>
+        <label data-master-only><span>Visibilidade</span><select name="visibility"><option value="public">Público</option></select></label><label data-master-only><span>Imagem</span><select name="imageVisibility"><option value="real">Real</option></select></label>
+        <label class="wide" data-master-only><span>Notas</span><textarea name="masterNotes"></textarea></label>
+        <div class="vtt-token-switches wide" data-master-only><label><input type="checkbox" name="showLifeState"> Vida narrativa</label><label><input type="checkbox" name="shareClassRace"> Classe/raça</label><label><input type="checkbox" name="locked"> Travado</label></div>
+      </div>
+      <footer><a href="sheet.html" class="vtt-token-sheet-link">Abrir minha ficha</a><button type="button" data-remove-token>Remover do mapa</button><button type="submit">Salvar alterações</button></footer>
     </form>
   </dialog>
 
@@ -212,6 +220,6 @@
   <script src="../assets/js/app.js?v=mvp-core-v2"></script>
   <script src="../assets/js/session-state.js?v=vtt-core-v1"></script>
   <script src="../assets/js/player.js?v=mvp-functional-v2"></script>
-  <script src="../assets/js/master-table.js?v=mvp-functional-v2"></script>
+  <script src="../assets/js/master-table.js?v=card-tokens-v1"></script>
 </body>
 </html>

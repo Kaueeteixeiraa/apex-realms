@@ -70,6 +70,15 @@ Tambem sao aceitas `PORT` e `HOST`. O upload HTTP e limitado a 8 MB; avatares e 
 - O comentario fica visivel para o jogador.
 - Alterar uma ficha aprovada cria nova revisao e exige aprovacao novamente.
 
+### Cartas da mesa
+
+- Cartas verticais sao o modo padrao; tokens circulares continuam disponiveis nas configuracoes da mesa.
+- Mestre ve atributos completos, condicoes e notas privadas; dono da ficha ve os dados do proprio personagem.
+- Jogadores comuns recebem apenas nome/imagem publicos, classe/raca liberadas e vida narrativa quando autorizada.
+- Visibilidade `public`, `partial` e `secret`, com imagem real, silhueta ou oculta.
+- Selecao multipla, movimento em grupo, encaixe opcional na grade e posicoes persistidas.
+- No site estatico a filtragem protege a interface, mas o estado continua no navegador. Isolamento real entre usuarios depende das APIs autenticadas do Flask.
+
 ## APIs do MVP
 
 - `/api/campaigns` e `/api/campaigns/<id>`
@@ -78,6 +87,8 @@ Tambem sao aceitas `PORT` e `HOST`. O upload HTTP e limitado a 8 MB; avatares e 
 - `/api/library/<id>/duplicate` e `/api/library/<id>/image`
 - `/api/sheets` e `/api/sheets/<id>`
 - `/api/sheets/<id>/submit`, `/review` e `/avatar`
+- `/api/campaign/<id>/table` e `/api/campaign/<id>/card-settings`
+- `/api/campaign/<id>/token/<token_id>` e `/api/campaign/<id>/token/<token_id>/sheet`
 
 As APIs exigem sessao valida, verificam o papel do usuario e impedem que um mestre altere dados de outro mestre. Escritas vindas de outra origem sao rejeitadas e os cookies usam `HttpOnly` e `SameSite=Lax`.
 
@@ -100,6 +111,7 @@ A suite cobre:
 - CRUD, filtros e duplicacao da biblioteca;
 - envio, comentario, ajuste, aprovacao e nova revisao de ficha;
 - rejeicao de upload falso e revisao por mestre incorreto.
+- serializacao de cartas por Mestre, dono da ficha e jogador comum, sem envio de campos secretos.
 
 ## Estrutura principal
 

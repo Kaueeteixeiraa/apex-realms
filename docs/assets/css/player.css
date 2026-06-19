@@ -455,9 +455,9 @@
 }
 
 .player-table-mode .vtt-token.locked {
-  opacity: .56;
+  opacity: .82;
   cursor: not-allowed;
-  filter: grayscale(.28);
+  filter: grayscale(.12);
 }
 
 .player-table-mode .vtt-roster-card.locked {

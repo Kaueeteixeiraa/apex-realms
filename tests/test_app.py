@@ -203,6 +203,86 @@ class ApexRealmsTestCase(unittest.TestCase):
         self.login("mestre2@example.com")
         self.assertEqual(self.client.post(f"/api/sheets/{sheet['id']}/review", json={"status": "approved"}).status_code, 403)
 
+    def test_token_card_api_filters_secret_fields_by_viewer(self):
+        self.login("mestre1@example.com")
+        campaign = self.create_campaign()
+        with self.app.app_context():
+            execute("INSERT INTO memberships (campaign_id,user_id) VALUES (?,?)", (campaign["id"], self.player_id))
+            hero_id = execute(
+                """INSERT INTO tokens
+                   (campaign_id,owner_id,name,token_type,card_kind,visibility,hp,max_hp,resource,max_resource,
+                    defense,attributes,notes,master_notes,class_name,race,image_url)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (campaign["id"], self.player_id, "Lyra", "player", "player", "public", 24, 30, 6, 10,
+                 15, '{"for": 10}', "nota privada", "segredo do mestre", "Maga", "Elfa", "/uploads/lyra.png"),
+            )
+            ally_id = execute(
+                """INSERT INTO tokens
+                   (campaign_id,owner_id,name,token_type,card_kind,visibility,hp,max_hp,resource,max_resource,
+                    defense,class_name,race,share_class_race,image_url)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (campaign["id"], self.master_id, "Rogar", "player", "player", "public", 32, 40, 4, 8,
+                 17, "Guerreiro", "Humano", 1, "/uploads/rogar.png"),
+            )
+            monster_id = execute(
+                """INSERT INTO tokens
+                   (campaign_id,name,public_name,token_type,card_kind,visibility,hp,max_hp,resource,max_resource,
+                    defense,attributes,notes,master_notes,class_name,image_url,show_life_state)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (campaign["id"], "Goblin Xama", "Xama Mascarado", "monster", "elite", "partial", 18, 30, 8, 10,
+                 14, '{"des": 16}', "fraqueza ao fogo", "protege o portal", "Xama", "/uploads/goblin.png", 1),
+            )
+            secret_id = execute(
+                """INSERT INTO tokens
+                   (campaign_id,name,public_name,token_type,card_kind,visibility,hp,max_hp,defense,notes,image_url)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+                (campaign["id"], "Devorador Astral", "Criatura Velada", "monster", "boss", "secret", 200, 200,
+                 22, "verdadeiro nome secreto", "/uploads/boss.png"),
+            )
+
+        master_view = self.client.get(f"/api/campaign/{campaign['id']}/table").json
+        self.assertEqual(master_view["settings"]["display_mode"], "card")
+        self.assertFalse(master_view["settings"]["show_ally_hp"])
+        self.assertEqual(next(token for token in master_view["tokens"] if token["id"] == monster_id)["hp"], 18)
+        self.assertIn("master_notes", next(token for token in master_view["tokens"] if token["id"] == monster_id))
+
+        changed = self.client.patch(f"/api/campaign/{campaign['id']}/card-settings", json={
+            "display_mode": "token",
+            "show_narrative_health": True,
+            "monster_name_mode": "real",
+            "monster_image_mode": "silhouette",
+            "show_ally_hp": True,
+        })
+        self.assertEqual(changed.status_code, 200)
+        self.assertEqual(changed.json["display_mode"], "token")
+
+        self.logout()
+        self.login("player@example.com")
+        player_view = self.client.get(f"/api/campaign/{campaign['id']}/table").json
+        hero = next(token for token in player_view["tokens"] if token["id"] == hero_id)
+        ally = next(token for token in player_view["tokens"] if token["id"] == ally_id)
+        monster = next(token for token in player_view["tokens"] if token["id"] == monster_id)
+        secret = next(token for token in player_view["tokens"] if token["id"] == secret_id)
+        self.assertEqual(hero["viewer_scope"], "owner")
+        self.assertEqual(hero["hp"], 24)
+        self.assertNotIn("notes", hero)
+        self.assertNotIn("master_notes", hero)
+        self.assertEqual(ally["viewer_scope"], "player")
+        self.assertEqual(ally["hp"], 32)
+        self.assertEqual(ally["class_name"], "Guerreiro")
+        for private_field in ("resource", "max_resource", "defense", "attributes", "notes", "master_notes"):
+            self.assertNotIn(private_field, ally)
+        self.assertEqual(monster["health_state"], "Ferido")
+        self.assertEqual(monster["image_mode"], "silhouette")
+        self.assertEqual(monster["image_url"], "")
+        for private_field in ("hp", "max_hp", "resource", "defense", "attributes", "notes", "master_notes"):
+            self.assertNotIn(private_field, monster)
+        self.assertEqual(secret["name"], "Criatura Velada")
+        self.assertEqual(secret["card_kind"], "monster")
+        self.assertEqual(secret["image_url"], "")
+        self.assertNotIn("hp", secret)
+        self.assertEqual(self.client.get(f"/api/campaign/{campaign['id']}/token/{monster_id}/sheet").status_code, 403)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
