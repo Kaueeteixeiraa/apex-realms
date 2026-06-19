@@ -184,6 +184,25 @@
 .vtt-map-area.token-mode .vtt-card-art { width: 100%; height: 100%; border-radius: 50%; }
 .vtt-map-area.token-mode .vtt-card-art > i, .vtt-map-area.token-mode .vtt-card-identity, .vtt-map-area.token-mode .vtt-card-footer { display: none; }
 .vtt-map-area.token-mode .vtt-token::before { border-radius: 50%; }
+.vtt-token.summoning { opacity: 0 !important; }
+.vtt-token.arrived { animation: vtt-card-arrived .58s cubic-bezier(.16,.82,.24,1.28); }
+.vtt-card-summon { position: absolute; z-index: 34; inset: 0; overflow: hidden; pointer-events: none; perspective: 1400px; transform-style: preserve-3d; }
+.vtt-summon-veil { position: absolute; inset: 0; opacity: .78; background: radial-gradient(circle at var(--portal-x) var(--portal-y), rgba(146,75,255,.22), rgba(40,20,74,.08) 18%, transparent 44%); animation: vtt-summon-veil 1.72s ease both; }
+.vtt-summon-portal { position: absolute; left: var(--portal-x); top: var(--portal-y); width: 250px; height: 250px; border-radius: 50%; transform: translate(-50%, -50%) rotateX(68deg); filter: drop-shadow(0 0 18px rgba(172,96,255,.78)); animation: vtt-summon-portal 1.72s cubic-bezier(.2,.74,.28,1) both; transform-style: preserve-3d; }
+.vtt-summon-portal::before, .vtt-summon-portal::after, .vtt-summon-portal > i, .vtt-summon-portal > b, .vtt-summon-portal > em { content: ""; position: absolute; border-radius: 50%; }
+.vtt-summon-portal::before { inset: 7%; border: 2px solid rgba(196,135,255,.74); box-shadow: 0 0 22px rgba(143,69,255,.8), inset 0 0 28px rgba(71,186,255,.18); animation: vtt-summon-ring 2.2s linear infinite; }
+.vtt-summon-portal::after { inset: 19%; border: 1px dashed rgba(95,217,255,.85); box-shadow: 0 0 16px rgba(79,199,255,.42); animation: vtt-summon-ring 1.55s linear infinite reverse; }
+.vtt-summon-portal > i { inset: 31%; border: 1px solid rgba(229,194,255,.9); box-shadow: 0 0 20px rgba(205,121,255,.65); animation: vtt-summon-ring 1.1s linear infinite; }
+.vtt-summon-portal > b { inset: 39%; background: radial-gradient(circle, #fff 0 8%, #c46cff 20%, rgba(95,51,194,.68) 48%, transparent 72%); box-shadow: 0 0 38px 12px rgba(157,80,255,.58); animation: vtt-summon-core .75s ease-in-out infinite alternate; }
+.vtt-summon-portal > em { inset: 2%; border: 1px solid rgba(234,199,255,.17); box-shadow: 0 0 46px rgba(124,74,255,.34); }
+.vtt-summon-particles { position: absolute; inset: 0; }
+.vtt-summon-particles > i { position: absolute; left: var(--portal-x); top: var(--portal-y); width: var(--spark-size); height: var(--spark-size); border-radius: 50%; opacity: 0; background: #e7c6ff; box-shadow: 0 0 7px 2px #a85fff; transform: rotate(var(--angle)) translateX(22px); animation: vtt-summon-spark 1.35s var(--delay) cubic-bezier(.16,.72,.23,1) both; }
+.vtt-card-impact { position: absolute; left: var(--impact-x); top: var(--impact-y); width: 38px; height: 16px; border: 2px solid rgba(202,146,255,.9); border-radius: 50%; opacity: 0; box-shadow: 0 0 20px #a856ff, inset 0 0 14px rgba(86,206,255,.35); transform: translate(-50%, -50%) scale(.2); }
+.vtt-card-summon.landing .vtt-card-impact { animation: vtt-card-impact .66s cubic-bezier(.12,.75,.2,1) both; }
+.vtt-summon-card { z-index: 4 !important; margin: 0 !important; pointer-events: none !important; transform-style: preserve-3d; backface-visibility: visible; will-change: transform, opacity, filter; }
+.vtt-summon-card::after { display: none !important; }
+.vtt-card-summon.landed .vtt-summon-card { opacity: 0; filter: brightness(1.75) blur(2px); transition: opacity .22s ease, filter .22s ease; }
+.vtt-card-summon.landed .vtt-summon-portal, .vtt-card-summon.landed .vtt-summon-particles { opacity: 0; transition: opacity .28s ease; }
 .vtt-effect-layer { z-index: 7; pointer-events: none; }
 .vtt-ping-effect { position: absolute; width: 34px; height: 34px; border: 3px solid #d592ff; border-radius: 50%; transform: translate(-50%, -50%); animation: vtt-ping .9s ease-out forwards; box-shadow: 0 0 20px #a75cff; }
 .vtt-map-tools { position: absolute; z-index: 15; left: 50%; top: 14px; display: flex; align-items: center; gap: 4px; padding: 5px; border: 1px solid var(--vtt-line); border-radius: 14px; background: rgba(10,9,17,.91); box-shadow: 0 10px 28px rgba(0,0,0,.35), inset 0 1px rgba(255,255,255,.03); backdrop-filter: blur(14px); transform: translateX(-50%); }
@@ -434,6 +453,14 @@
 @media (prefers-reduced-motion: reduce) {
   .vtt-page *, .vtt-page *::before, .vtt-page *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+@keyframes vtt-summon-veil { 0% { opacity: 0; } 18%, 68% { opacity: .78; } 100% { opacity: 0; } }
+@keyframes vtt-summon-portal { 0% { opacity: 0; transform: translate(-50%, -50%) rotateX(78deg) scale(.08); } 18% { opacity: 1; transform: translate(-50%, -50%) rotateX(68deg) scale(1.08); } 58% { opacity: 1; transform: translate(-50%, -50%) rotateX(68deg) scale(.92); } 100% { opacity: 0; transform: translate(-50%, -50%) rotateX(68deg) scale(1.42); filter: blur(6px) drop-shadow(0 0 22px rgba(172,96,255,.6)); } }
+@keyframes vtt-summon-ring { to { transform: rotate(360deg); } }
+@keyframes vtt-summon-core { from { transform: scale(.82); opacity: .72; } to { transform: scale(1.18); opacity: 1; } }
+@keyframes vtt-summon-spark { 0% { opacity: 0; transform: rotate(var(--angle)) translateX(22px) scale(.2); } 22% { opacity: 1; } 74% { opacity: .9; } 100% { opacity: 0; transform: rotate(var(--angle)) translateX(var(--distance)) scale(1.15); } }
+@keyframes vtt-card-impact { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); } 22% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(5.4); border-width: 1px; } }
+@keyframes vtt-card-arrived { 0% { opacity: 0; filter: brightness(2.2); transform: translate(-50%, -50%) translateY(-11px) scale(.78); } 55% { opacity: 1; filter: brightness(1.25); transform: translate(-50%, -50%) translateY(2px) scale(1.08); } 100% { opacity: 1; filter: brightness(1); transform: translate(-50%, -50%) scale(1); } }
 
 body.master-area {
   min-height: 100vh;

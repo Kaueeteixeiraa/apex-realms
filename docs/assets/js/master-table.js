@@ -697,7 +697,9 @@
     renderRoster();
     renderInitiative();
     saveState();
-    if (openAfter) openTokenDialog(token.id);
+    animateCardArrival(token.id).then(() => {
+      if (openAfter) openTokenDialog(token.id);
+    });
   }
 
   function removeToken(tokenId) {
@@ -783,6 +785,96 @@
       }
       button.append(art, identity, footer);
       elements.tokenLayer.append(button);
+    });
+  }
+
+  function animateCardArrival(tokenId) {
+    const target = elements.tokenLayer.querySelector(`[data-token-id="${tokenId}"]`);
+    if (!target) return Promise.resolve();
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    target.classList.add("summoning");
+
+    if (reducedMotion || typeof target.animate !== "function") {
+      target.classList.remove("summoning");
+      target.classList.add("arrived");
+      setTimeout(() => target.classList.remove("arrived"), 420);
+      return Promise.resolve();
+    }
+
+    const mapRect = elements.mapArea.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const startX = mapRect.width / 2;
+    const startY = Math.max(120, mapRect.height * .42);
+    const targetX = targetRect.left + targetRect.width / 2 - mapRect.left;
+    const targetY = targetRect.top + targetRect.height / 2 - mapRect.top;
+    const deltaX = targetX - startX;
+    const deltaY = targetY - startY;
+    const duration = 1720;
+
+    const overlay = document.createElement("div");
+    overlay.className = "vtt-card-summon";
+    overlay.setAttribute("aria-hidden", "true");
+    overlay.style.setProperty("--portal-x", `${startX}px`);
+    overlay.style.setProperty("--portal-y", `${startY}px`);
+    overlay.style.setProperty("--impact-x", `${targetX}px`);
+    overlay.style.setProperty("--impact-y", `${targetY}px`);
+
+    const veil = document.createElement("span");
+    veil.className = "vtt-summon-veil";
+    const portal = document.createElement("span");
+    portal.className = "vtt-summon-portal";
+    portal.innerHTML = "<i></i><b></b><em></em>";
+    const particles = document.createElement("span");
+    particles.className = "vtt-summon-particles";
+    for (let index = 0; index < 26; index += 1) {
+      const spark = document.createElement("i");
+      spark.style.setProperty("--angle", `${index / 26 * 360 + Math.random() * 12}deg`);
+      spark.style.setProperty("--distance", `${70 + Math.random() * 150}px`);
+      spark.style.setProperty("--delay", `${Math.random() * .34}s`);
+      spark.style.setProperty("--spark-size", `${1 + Math.random() * 3}px`);
+      particles.append(spark);
+    }
+    const impact = document.createElement("span");
+    impact.className = "vtt-card-impact";
+
+    const flyingCard = target.cloneNode(true);
+    flyingCard.classList.remove("selected", "locked", "summoning", "arrived", "moving", "low-life");
+    flyingCard.classList.add("vtt-summon-card");
+    flyingCard.removeAttribute("data-token-id");
+    flyingCard.removeAttribute("data-card-hover");
+    flyingCard.removeAttribute("aria-label");
+    flyingCard.disabled = true;
+    flyingCard.style.left = `${startX}px`;
+    flyingCard.style.top = `${startY}px`;
+
+    overlay.append(veil, portal, particles, impact, flyingCard);
+    elements.mapArea.append(overlay);
+    setMapStatus(`Invocando ${target.querySelector("strong")?.textContent || "carta"}...`, true);
+
+    const landingTransform = `translate(-50%, -50%) translate3d(${deltaX}px, ${deltaY}px, 0) rotateX(0) rotateY(0) rotateZ(0) scale(1)`;
+    const flight = flyingCard.animate([
+      {offset: 0, opacity: 0, filter: "blur(10px) brightness(2.2)", transform: "translate(-50%, -50%) translate3d(0, 70px, -240px) rotateX(76deg) rotateY(-760deg) rotateZ(-20deg) scale(.28)"},
+      {offset: .16, opacity: 1, filter: "blur(0) brightness(1.7)", transform: "translate(-50%, -50%) translate3d(0, -34px, 250px) rotateX(34deg) rotateY(-510deg) rotateZ(13deg) scale(1.62)"},
+      {offset: .42, opacity: 1, filter: "brightness(1.25)", transform: "translate(-50%, -50%) translate3d(0, -14px, 155px) rotateX(-11deg) rotateY(-245deg) rotateZ(-8deg) scale(1.46)"},
+      {offset: .68, opacity: 1, filter: "brightness(1.12)", transform: `translate(-50%, -50%) translate3d(${deltaX * .48}px, ${deltaY * .3 - 30}px, 100px) rotateX(12deg) rotateY(-72deg) rotateZ(5deg) scale(1.3)`},
+      {offset: .88, opacity: 1, filter: "brightness(1.05)", transform: `translate(-50%, -50%) translate3d(${deltaX * .9}px, ${deltaY * .82 - 12}px, 28px) rotateX(-5deg) rotateY(18deg) rotateZ(-2deg) scale(1.09)`},
+      {offset: 1, opacity: 1, filter: "brightness(1)", transform: landingTransform}
+    ], {duration, easing: "cubic-bezier(.18,.76,.22,1)", fill: "forwards"});
+
+    const landingTimer = setTimeout(() => overlay.classList.add("landing"), duration * .78);
+    return flight.finished.catch(() => undefined).then(() => {
+      clearTimeout(landingTimer);
+      flight.cancel();
+      flyingCard.style.transform = landingTransform;
+      target.classList.remove("summoning");
+      target.classList.add("arrived");
+      setMapStatus(`${target.querySelector("strong")?.textContent || "Carta"} entrou na cena.`, true);
+      requestAnimationFrame(() => overlay.classList.add("landed"));
+      return new Promise(resolve => setTimeout(() => {
+        target.classList.remove("arrived");
+        overlay.remove();
+        resolve();
+      }, 520));
     });
   }
 
