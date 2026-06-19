@@ -1,4 +1,21 @@
-{% extends "base.html" %}{% block title %}Nova campanha · Apex Realms{% endblock %}
-{% block content %}<section class="narrow-page"><a class="back" href="{{ url_for('dashboard') }}">← Voltar</a><div class="panel campaign-form"><span class="eyebrow"><span></span> NOVO UNIVERSO</span><h1>Criar campanha</h1><p class="muted">Dê forma ao lugar onde a próxima lenda será contada.</p>
-<form method="post"><label>Nome da campanha<input name="name" placeholder="Nome da sua campanha" required></label><label>Sistema<select name="system"><option>D&D 5e</option><option>Tormenta 20</option><option>Ordem Paranormal</option><option>Sistema próprio</option><option>Outro</option></select></label><label>Descrição<textarea name="description" rows="5" placeholder="Sobre o que é esta aventura?"></textarea></label><label>Imagem de capa (URL)<input name="cover" placeholder="https://..."></label><button class="btn btn-primary btn-xl">Criar meu universo →</button></form></div></section>{% endblock %}
-
+{% extends "base.html" %}
+{% set editing = campaign is defined and campaign %}
+{% block title %}{{ 'Editar campanha' if editing else 'Nova campanha' }} · Apex Realms{% endblock %}
+{% block content %}
+<section class="narrow-page">
+  <a class="back" href="{{ url_for('campaign_detail', campaign_id=campaign.id) if editing else url_for('dashboard') }}">← Voltar</a>
+  <div class="panel campaign-form">
+    <span class="eyebrow"><span></span> {{ 'AJUSTAR UNIVERSO' if editing else 'NOVO UNIVERSO' }}</span>
+    <h1>{{ 'Editar campanha' if editing else 'Criar campanha' }}</h1>
+    <p class="muted">Campanhas privadas recebem um código único. Campanhas públicas não usam convite.</p>
+    <form method="post">
+      <label>Nome da campanha<input name="name" value="{{ campaign.name if editing else '' }}" maxlength="100" required></label>
+      <label>Sistema<select name="system">{% for system in ['D&D 5e','Tormenta 20','Ordem Paranormal','Sistema próprio','Outro'] %}<option {% if editing and campaign.system == system %}selected{% endif %}>{{ system }}</option>{% endfor %}</select></label>
+      <label>Acesso<select name="visibility"><option value="private" {% if not editing or campaign.visibility == 'private' %}selected{% endif %}>Privada - gerar código</option><option value="public" {% if editing and campaign.visibility == 'public' %}selected{% endif %}>Pública - sem código</option></select></label>
+      <label>Descrição<textarea name="description" rows="5" maxlength="2000">{{ campaign.description if editing else '' }}</textarea></label>
+      <label>Imagem de capa (URL)<input name="cover" value="{{ campaign.cover if editing else '' }}" maxlength="500" placeholder="https://..."></label>
+      <button class="btn btn-primary btn-xl">{{ 'Salvar alterações' if editing else 'Criar campanha' }} →</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

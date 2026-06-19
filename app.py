@@ -13,6 +13,18 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from config import Config
 from database import execute, get_db, init_app, query
 from services.security import ROLES, admin_required, campaign_access, can_manage_campaign, current_user, login_required, master_required, role_label
+from services.mvp import (
+    CAMPAIGN_VISIBILITIES,
+    LIBRARY_TYPES,
+    campaign_to_dict,
+    clean_sheet_data,
+    clean_text,
+    generate_invite_code,
+    invite_value_for_visibility,
+    library_item_to_dict,
+    sheet_to_dict,
+    validate_image_upload,
+)
 
 
 def roll_formula(formula):
@@ -28,9 +40,29 @@ def roll_formula(formula):
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    if app.config["ENVIRONMENT"] == "production" and app.config["SECRET_KEY"] == "dev-change-this-secret":
+        raise RuntimeError("Defina SECRET_KEY por variavel de ambiente antes de iniciar em producao.")
+    if app.config["ENVIRONMENT"] == "production" and app.config["ADMIN_INITIAL_PASSWORD"] == "apex123":
+        raise RuntimeError("Defina ADMIN_INITIAL_PASSWORD antes de iniciar em producao.")
     Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
     Path(app.config["DATABASE"]).parent.mkdir(parents=True, exist_ok=True)
     init_app(app)
+
+    @app.before_request
+    def protect_mutating_requests():
+        if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
+            return None
+        origin = request.headers.get("Origin")
+        if origin and origin.rstrip("/") != request.host_url.rstrip("/"):
+            abort(403)
+        return None
+
+    @app.after_request
+    def add_security_headers(response):
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        return response
 
     @app.context_processor
     def inject_user():
@@ -164,20 +196,46 @@ def create_app():
     @master_required
     def campaign_new():
         if request.method == "POST":
+            visibility = request.form.get("visibility", "private")
+            if visibility not in CAMPAIGN_VISIBILITIES:
+                abort(400)
             campaign_id = execute(
-                """INSERT INTO campaigns (owner_id, name, description, system, cover, invite_code)
-                   VALUES (?, ?, ?, ?, ?, ?)""",
+                """INSERT INTO campaigns (owner_id, name, description, system, cover, visibility, invite_code)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 (
                     current_user()["id"],
-                    request.form["name"],
-                    request.form.get("description", ""),
-                    request.form["system"],
-                    request.form.get("cover", ""),
-                    secrets.token_hex(4).upper(),
+                    clean_text(request.form["name"], 100),
+                    clean_text(request.form.get("description", ""), 2000),
+                    clean_text(request.form["system"], 80),
+                    clean_text(request.form.get("cover", ""), 500),
+                    visibility,
+                    invite_value_for_visibility(visibility),
                 ),
             )
             return redirect(url_for("campaign_detail", campaign_id=campaign_id))
         return render_template("campaigns/new.html")
+
+    @app.route("/campaign/<int:campaign_id>/edit", methods=["GET", "POST"])
+    @master_required
+    def campaign_edit(campaign_id):
+        campaign = campaign_access(campaign_id, owner_only=True)
+        if request.method == "POST":
+            visibility = request.form.get("visibility", campaign["visibility"])
+            if visibility not in CAMPAIGN_VISIBILITIES:
+                abort(400)
+            invite_code = invite_value_for_visibility(
+                visibility,
+                campaign["invite_code"] if visibility == "private" and campaign["visibility"] == "private" else None,
+            )
+            execute(
+                """UPDATE campaigns SET name=?,description=?,system=?,cover=?,visibility=?,invite_code=?,updated_at=CURRENT_TIMESTAMP
+                   WHERE id=?""",
+                (clean_text(request.form["name"], 100), clean_text(request.form.get("description"), 2000),
+                 clean_text(request.form["system"], 80), clean_text(request.form.get("cover"), 500),
+                 visibility, invite_code, campaign_id),
+            )
+            return redirect(url_for("campaign_detail", campaign_id=campaign_id))
+        return render_template("campaigns/new.html", campaign=campaign)
 
     @app.post("/campaign/quick")
     @master_required
@@ -185,7 +243,7 @@ def create_app():
         campaign_id = execute(
             """INSERT INTO campaigns (owner_id, name, description, system, invite_code, quick_session)
                VALUES (?, ?, ?, ?, ?, 1)""",
-            (current_user()["id"], "Sessão rápida", "Uma sala pronta para jogar agora.", "Sistema livre", secrets.token_hex(4).upper()),
+            (current_user()["id"], "Sessão rápida", "Uma sala pronta para jogar agora.", "Sistema livre", generate_invite_code()),
         )
         return redirect(url_for("game_room", campaign_id=campaign_id))
 
@@ -198,7 +256,11 @@ def create_app():
                WHERE m.campaign_id = ?""",
             (campaign_id,),
         )
-        assets = query("SELECT * FROM assets WHERE campaign_id = ? ORDER BY favorite DESC, id DESC", (campaign_id,))
+        assets = query(
+            """SELECT *, item_type AS kind, image_url AS file_url FROM library_items
+               WHERE campaign_id = ? ORDER BY updated_at DESC, id DESC""",
+            (campaign_id,),
+        )
         maps = query("SELECT * FROM maps WHERE campaign_id = ? ORDER BY active DESC, id DESC", (campaign_id,))
         tokens = query("SELECT * FROM tokens WHERE campaign_id = ? ORDER BY token_type, name", (campaign_id,))
         return render_template("campaigns/detail.html", campaign=campaign, players=players, assets=assets, maps=maps, tokens=tokens, is_owner=can_manage_campaign(campaign))
@@ -207,10 +269,17 @@ def create_app():
         if not file or not file.filename:
             return ""
         extension = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
-        allowed = {"png", "jpg", "jpeg", "webp", "gif"} if image_only else app.config["ALLOWED_EXTENSIONS"]
-        if extension not in allowed:
+        if image_only:
+            try:
+                validate_image_upload(file)
+            except ValueError as error:
+                abort(400, str(error))
+        elif extension not in app.config["ALLOWED_EXTENSIONS"]:
             abort(400, "Tipo de arquivo não permitido.")
-        filename = f"{secrets.token_hex(8)}-{secure_filename(file.filename)}"
+        safe_name = secure_filename(file.filename)
+        if not safe_name:
+            abort(400, "Nome de arquivo inválido.")
+        filename = f"{secrets.token_hex(8)}-{safe_name}"
         file.save(Path(app.config["UPLOAD_FOLDER"]) / filename)
         return url_for("uploaded_file", filename=filename)
 
@@ -323,11 +392,19 @@ def create_app():
     @app.post("/campaign/<int:campaign_id>/asset/new")
     @login_required
     def asset_new(campaign_id):
-        campaign_access(campaign_id, owner_only=True)
-        file_url = save_upload(request.files.get("file"))
+        campaign = campaign_access(campaign_id, owner_only=True)
+        file_url = save_upload(request.files.get("file"), image_only=True)
+        item_type = request.form.get("kind", "item")
+        if item_type not in LIBRARY_TYPES:
+            abort(400)
         execute(
-            "INSERT INTO assets (campaign_id, name, kind, file_url, notes) VALUES (?, ?, ?, ?, ?)",
-            (campaign_id, request.form["name"], request.form["kind"], file_url, request.form.get("notes", "")),
+            """INSERT INTO library_items
+               (owner_id,campaign_id,name,item_type,system,description,attributes,abilities,image_url,tags,master_notes)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+            (current_user()["id"], campaign_id, clean_text(request.form["name"], 100), item_type,
+             clean_text(request.form.get("system", campaign["system"]), 80), clean_text(request.form.get("description"), 4000),
+             clean_text(request.form.get("attributes"), 4000), clean_text(request.form.get("abilities"), 4000),
+             file_url, clean_text(request.form.get("tags"), 500), clean_text(request.form.get("master_notes"), 4000)),
         )
         flash("Item adicionado à biblioteca.", "success")
         return redirect(url_for("campaign_detail", campaign_id=campaign_id))
@@ -335,7 +412,7 @@ def create_app():
     @app.post("/campaign/join")
     @login_required
     def campaign_join():
-        campaign = query("SELECT * FROM campaigns WHERE invite_code = ?", (request.form["code"].upper(),), one=True)
+        campaign = query("SELECT * FROM campaigns WHERE visibility = 'private' AND invite_code = ?", (request.form["code"].strip().upper(),), one=True)
         if campaign:
             execute("INSERT OR IGNORE INTO memberships (campaign_id, user_id) VALUES (?, ?)", (campaign["id"], current_user()["id"]))
             return redirect(url_for("campaign_detail", campaign_id=campaign["id"]))
@@ -346,11 +423,350 @@ def create_app():
     @login_required
     def campaign_delete(campaign_id):
         campaign_access(campaign_id, owner_only=True)
-        for table in ("chat_messages", "initiative", "combat_state", "assets", "maps", "tokens", "memberships"):
+        for table in ("chat_messages", "initiative", "combat_state", "library_items", "assets", "maps", "tokens", "memberships"):
             execute(f"DELETE FROM {table} WHERE campaign_id = ?", (campaign_id,))
+        execute("UPDATE character_sheets SET campaign_id = NULL, status = 'draft', master_comment = '' WHERE campaign_id = ?", (campaign_id,))
         execute("DELETE FROM campaigns WHERE id = ?", (campaign_id,))
         flash("Campanha excluida.", "success")
         return redirect(url_for("admin_dashboard" if current_user()["role"] == "admin" else "dashboard"))
+
+    def user_campaigns(user):
+        if user["role"] == "admin":
+            return query("SELECT * FROM campaigns ORDER BY updated_at DESC, id DESC")
+        if user["role"] == "master":
+            return query("SELECT * FROM campaigns WHERE owner_id = ? ORDER BY updated_at DESC, id DESC", (user["id"],))
+        return query(
+            """SELECT c.* FROM campaigns c JOIN memberships m ON m.campaign_id = c.id
+               WHERE m.user_id = ? ORDER BY c.updated_at DESC, c.id DESC""",
+            (user["id"],),
+        )
+
+    @app.get("/api/campaigns")
+    @login_required
+    def api_campaigns():
+        return jsonify({"campaigns": [campaign_to_dict(item) for item in user_campaigns(current_user())]})
+
+    @app.post("/api/campaigns")
+    @master_required
+    def api_campaign_create():
+        data = request.get_json() or {}
+        visibility = data.get("visibility", "private")
+        if visibility not in CAMPAIGN_VISIBILITIES or not clean_text(data.get("name"), 100) or not clean_text(data.get("system"), 80):
+            return jsonify({"error": "Nome, sistema e visibilidade validos sao obrigatorios."}), 400
+        invite_code = invite_value_for_visibility(visibility)
+        campaign_id = execute(
+            """INSERT INTO campaigns (owner_id, name, description, system, cover, visibility, invite_code, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)""",
+            (current_user()["id"], clean_text(data["name"], 100), clean_text(data.get("description"), 2000),
+             clean_text(data["system"], 80), clean_text(data.get("cover"), 500), visibility, invite_code),
+        )
+        return jsonify(campaign_to_dict(query("SELECT * FROM campaigns WHERE id = ?", (campaign_id,), one=True))), 201
+
+    @app.patch("/api/campaigns/<int:campaign_id>")
+    @master_required
+    def api_campaign_update(campaign_id):
+        campaign = campaign_access(campaign_id, owner_only=True)
+        data = request.get_json() or {}
+        visibility = data.get("visibility", campaign["visibility"])
+        name = clean_text(data.get("name", campaign["name"]), 100)
+        system = clean_text(data.get("system", campaign["system"]), 80)
+        if visibility not in CAMPAIGN_VISIBILITIES or not name or not system:
+            return jsonify({"error": "Nome, sistema e visibilidade validos sao obrigatorios."}), 400
+        invite_code = campaign["invite_code"]
+        if visibility == "public":
+            invite_code = invite_value_for_visibility(visibility)
+        elif campaign["visibility"] == "public" or not invite_code or str(invite_code).startswith("PUBLIC-"):
+            invite_code = invite_value_for_visibility(visibility)
+        execute(
+            """UPDATE campaigns SET name = ?, description = ?, system = ?, cover = ?, visibility = ?,
+               invite_code = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?""",
+            (name, clean_text(data.get("description", campaign["description"]), 2000), system,
+             clean_text(data.get("cover", campaign["cover"]), 500),
+             visibility, invite_code, campaign_id),
+        )
+        return jsonify(campaign_to_dict(query("SELECT * FROM campaigns WHERE id = ?", (campaign_id,), one=True)))
+
+    @app.delete("/api/campaigns/<int:campaign_id>")
+    @master_required
+    def api_campaign_delete(campaign_id):
+        campaign_access(campaign_id, owner_only=True)
+        execute(
+            "UPDATE character_sheets SET campaign_id=NULL,status='draft',master_comment='',updated_at=CURRENT_TIMESTAMP WHERE campaign_id=?",
+            (campaign_id,),
+        )
+        execute("DELETE FROM campaigns WHERE id = ?", (campaign_id,))
+        return "", 204
+
+    @app.post("/api/campaigns/join")
+    @login_required
+    def api_campaign_join():
+        user = current_user()
+        if user["role"] != "player":
+            abort(403)
+        code = clean_text((request.get_json() or {}).get("code"), 20).upper()
+        campaign = query("SELECT * FROM campaigns WHERE visibility = 'private' AND invite_code = ?", (code,), one=True)
+        if not campaign:
+            return jsonify({"error": "Codigo de convite nao encontrado."}), 404
+        execute("INSERT OR IGNORE INTO memberships (campaign_id, user_id) VALUES (?, ?)", (campaign["id"], user["id"]))
+        return jsonify(campaign_to_dict(campaign))
+
+    def owned_library_item(item_id):
+        item = query("SELECT * FROM library_items WHERE id = ?", (item_id,), one=True)
+        user = current_user()
+        if not item:
+            abort(404)
+        if user["role"] != "admin" and item["owner_id"] != user["id"]:
+            abort(403)
+        return item
+
+    def validate_owned_campaign(campaign_id):
+        if campaign_id in (None, ""):
+            return None
+        try:
+            campaign_id = int(campaign_id)
+        except (TypeError, ValueError):
+            abort(400)
+        campaign = query("SELECT * FROM campaigns WHERE id = ?", (campaign_id,), one=True)
+        if not campaign or not can_manage_campaign(campaign):
+            abort(403)
+        return campaign_id
+
+    @app.get("/api/library")
+    @master_required
+    def api_library_list():
+        campaign_id = request.args.get("campaign_id")
+        item_type = request.args.get("type")
+        sql = "SELECT * FROM library_items WHERE owner_id = ?"
+        params = [current_user()["id"]]
+        if campaign_id:
+            validate_owned_campaign(campaign_id)
+            sql += " AND campaign_id = ?"
+            params.append(int(campaign_id))
+        if item_type:
+            sql += " AND item_type = ?"
+            params.append(item_type)
+        sql += " ORDER BY updated_at DESC, id DESC"
+        return jsonify({"items": [library_item_to_dict(item) for item in query(sql, tuple(params))]})
+
+    @app.post("/api/library")
+    @master_required
+    def api_library_create():
+        data = request.get_json() or {}
+        item_type = data.get("type", "item")
+        name = clean_text(data.get("name"), 100)
+        if not name or item_type not in LIBRARY_TYPES:
+            return jsonify({"error": "Nome e tipo valido sao obrigatorios."}), 400
+        campaign_id = validate_owned_campaign(data.get("campaign_id"))
+        item_id = execute(
+            """INSERT INTO library_items
+               (owner_id, campaign_id, name, item_type, system, description, attributes, abilities, image_url, tags, master_notes)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (current_user()["id"], campaign_id, name, item_type, clean_text(data.get("system"), 80),
+             clean_text(data.get("description"), 4000), clean_text(data.get("attributes"), 4000),
+             clean_text(data.get("abilities"), 4000), clean_text(data.get("image_url"), 500),
+             clean_text(data.get("tags"), 500), clean_text(data.get("master_notes"), 4000)),
+        )
+        return jsonify(library_item_to_dict(query("SELECT * FROM library_items WHERE id = ?", (item_id,), one=True))), 201
+
+    @app.patch("/api/library/<int:item_id>")
+    @master_required
+    def api_library_update(item_id):
+        item = owned_library_item(item_id)
+        data = request.get_json() or {}
+        item_type = data.get("type", item["item_type"])
+        name = clean_text(data.get("name", item["name"]), 100)
+        if item_type not in LIBRARY_TYPES or not name:
+            return jsonify({"error": "Nome e tipo valido sao obrigatorios."}), 400
+        campaign_id = validate_owned_campaign(data.get("campaign_id", item["campaign_id"]))
+        execute(
+            """UPDATE library_items SET campaign_id=?, name=?, item_type=?, system=?, description=?, attributes=?,
+               abilities=?, image_url=?, tags=?, master_notes=?, updated_at=CURRENT_TIMESTAMP WHERE id=?""",
+            (campaign_id, name, item_type,
+             clean_text(data.get("system", item["system"]), 80), clean_text(data.get("description", item["description"]), 4000),
+             clean_text(data.get("attributes", item["attributes"]), 4000), clean_text(data.get("abilities", item["abilities"]), 4000),
+             clean_text(data.get("image_url", item["image_url"]), 500), clean_text(data.get("tags", item["tags"]), 500),
+             clean_text(data.get("master_notes", item["master_notes"]), 4000), item_id),
+        )
+        return jsonify(library_item_to_dict(query("SELECT * FROM library_items WHERE id = ?", (item_id,), one=True)))
+
+    @app.post("/api/library/<int:item_id>/duplicate")
+    @master_required
+    def api_library_duplicate(item_id):
+        item = owned_library_item(item_id)
+        new_id = execute(
+            """INSERT INTO library_items (owner_id,campaign_id,name,item_type,system,description,attributes,abilities,image_url,tags,master_notes)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+            (item["owner_id"], item["campaign_id"], f"{item['name']} (copia)", item["item_type"], item["system"], item["description"],
+             item["attributes"], item["abilities"], item["image_url"], item["tags"], item["master_notes"]),
+        )
+        return jsonify(library_item_to_dict(query("SELECT * FROM library_items WHERE id = ?", (new_id,), one=True))), 201
+
+    @app.delete("/api/library/<int:item_id>")
+    @master_required
+    def api_library_delete(item_id):
+        owned_library_item(item_id)
+        execute("DELETE FROM library_items WHERE id = ?", (item_id,))
+        return "", 204
+
+    @app.post("/api/library/<int:item_id>/image")
+    @master_required
+    def api_library_image(item_id):
+        owned_library_item(item_id)
+        image_url = save_upload(request.files.get("image"), image_only=True)
+        if not image_url:
+            return jsonify({"error": "Selecione uma imagem."}), 400
+        execute("UPDATE library_items SET image_url=?, updated_at=CURRENT_TIMESTAMP WHERE id=?", (image_url, item_id))
+        return jsonify({"image_url": image_url})
+
+    def get_sheet(sheet_id):
+        sheet = query("SELECT * FROM character_sheets WHERE id = ?", (sheet_id,), one=True)
+        if not sheet:
+            abort(404)
+        return sheet
+
+    def can_review_sheet(sheet, user=None):
+        user = user or current_user()
+        if user["role"] == "admin":
+            return True
+        if user["role"] != "master" or not sheet["campaign_id"]:
+            return False
+        campaign = query("SELECT owner_id FROM campaigns WHERE id = ?", (sheet["campaign_id"],), one=True)
+        return bool(campaign and campaign["owner_id"] == user["id"])
+
+    def validate_sheet_campaign(campaign_id, user):
+        if campaign_id in (None, ""):
+            return None
+        try:
+            campaign_id = int(campaign_id)
+        except (TypeError, ValueError):
+            abort(400)
+        if user["role"] == "master":
+            campaign_access(campaign_id, owner_only=True)
+        elif user["role"] == "player":
+            member = query("SELECT 1 FROM memberships WHERE campaign_id=? AND user_id=?", (campaign_id, user["id"]), one=True)
+            if not member:
+                abort(403)
+        else:
+            abort(403)
+        return campaign_id
+
+    @app.get("/api/sheets")
+    @login_required
+    def api_sheet_list():
+        user = current_user()
+        if user["role"] == "player":
+            sheets = query("SELECT * FROM character_sheets WHERE owner_id=? ORDER BY updated_at DESC", (user["id"],))
+        elif user["role"] == "master":
+            sheets = query(
+                """SELECT DISTINCT s.* FROM character_sheets s LEFT JOIN campaigns c ON c.id=s.campaign_id
+                   WHERE s.owner_id=? OR c.owner_id=? ORDER BY s.updated_at DESC""",
+                (user["id"], user["id"]),
+            )
+        else:
+            sheets = query("SELECT * FROM character_sheets ORDER BY updated_at DESC")
+        return jsonify({"sheets": [sheet_to_dict(sheet) for sheet in sheets]})
+
+    @app.post("/api/sheets")
+    @login_required
+    def api_sheet_create():
+        user = current_user()
+        if user["role"] not in {"player", "master"}:
+            abort(403)
+        data = request.get_json() or {}
+        name = clean_text(data.get("name"), 100)
+        if not name:
+            return jsonify({"error": "O nome da ficha e obrigatorio."}), 400
+        campaign_id = validate_sheet_campaign(data.get("campaign_id"), user)
+        sheet_data = clean_sheet_data(data.get("data", {}))
+        sheet_id = execute(
+            """INSERT INTO character_sheets (owner_id,campaign_id,name,system,status,data)
+               VALUES (?,?,?,?,?,?)""",
+            (user["id"], campaign_id, name, clean_text(data.get("system", "D&D 5e"), 80), "draft",
+             json.dumps(sheet_data, ensure_ascii=False)),
+        )
+        return jsonify(sheet_to_dict(get_sheet(sheet_id))), 201
+
+    @app.patch("/api/sheets/<int:sheet_id>")
+    @login_required
+    def api_sheet_update(sheet_id):
+        sheet = get_sheet(sheet_id)
+        user = current_user()
+        if sheet["owner_id"] != user["id"]:
+            abort(403)
+        data = request.get_json() or {}
+        name = clean_text(data.get("name", sheet["name"]), 100)
+        if not name:
+            return jsonify({"error": "O nome da ficha e obrigatorio."}), 400
+        campaign_id = validate_sheet_campaign(data.get("campaign_id", sheet["campaign_id"]), user)
+        status = "submitted" if sheet["status"] == "approved" else sheet["status"]
+        revision = sheet["revision"] + (1 if sheet["status"] == "approved" else 0)
+        sheet_data = clean_sheet_data(data.get("data", sheet_to_dict(sheet)["data"]))
+        execute(
+            """UPDATE character_sheets SET campaign_id=?,name=?,system=?,status=?,data=?,revision=?,
+               submitted_at=CASE WHEN ?='submitted' THEN CURRENT_TIMESTAMP ELSE submitted_at END,
+               updated_at=CURRENT_TIMESTAMP WHERE id=?""",
+            (campaign_id, name, clean_text(data.get("system", sheet["system"]), 80),
+             status, json.dumps(sheet_data, ensure_ascii=False), revision, status, sheet_id),
+        )
+        return jsonify(sheet_to_dict(get_sheet(sheet_id)))
+
+    @app.post("/api/sheets/<int:sheet_id>/submit")
+    @login_required
+    def api_sheet_submit(sheet_id):
+        sheet = get_sheet(sheet_id)
+        if sheet["owner_id"] != current_user()["id"]:
+            abort(403)
+        if not sheet["campaign_id"]:
+            return jsonify({"error": "Vincule a ficha a uma campanha antes de enviar."}), 400
+        if sheet["status"] == "approved":
+            return jsonify({"error": "Edite a ficha aprovada para iniciar uma nova revisao."}), 409
+        execute("UPDATE character_sheets SET status='submitted',submitted_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE id=?", (sheet_id,))
+        return jsonify(sheet_to_dict(get_sheet(sheet_id)))
+
+    @app.post("/api/sheets/<int:sheet_id>/review")
+    @login_required
+    def api_sheet_review(sheet_id):
+        sheet = get_sheet(sheet_id)
+        if not can_review_sheet(sheet):
+            abort(403)
+        data = request.get_json() or {}
+        status = data.get("status")
+        comment = clean_text(data.get("comment"), 2000)
+        if status not in {"approved", "needs_changes"}:
+            return jsonify({"error": "Decisao de revisao invalida."}), 400
+        if sheet["status"] not in {"submitted", "approved", "needs_changes"}:
+            return jsonify({"error": "A ficha ainda nao foi enviada para revisao."}), 409
+        if status == "needs_changes" and not comment:
+            return jsonify({"error": "Explique o ajuste solicitado."}), 400
+        execute("UPDATE character_sheets SET status=?,master_comment=?,reviewed_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE id=?", (status, comment, sheet_id))
+        return jsonify(sheet_to_dict(get_sheet(sheet_id)))
+
+    @app.post("/api/sheets/<int:sheet_id>/avatar")
+    @login_required
+    def api_sheet_avatar(sheet_id):
+        sheet = get_sheet(sheet_id)
+        if sheet["owner_id"] != current_user()["id"]:
+            abort(403)
+        image_url = save_upload(request.files.get("image"), image_only=True)
+        if not image_url:
+            return jsonify({"error": "Selecione uma imagem."}), 400
+        approved_edit = sheet["status"] == "approved"
+        new_status = "submitted" if approved_edit else sheet["status"]
+        execute(
+            """UPDATE character_sheets SET portrait_url=?,status=?,revision=revision+?,
+               submitted_at=CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE submitted_at END,updated_at=CURRENT_TIMESTAMP WHERE id=?""",
+            (image_url, new_status, 1 if approved_edit else 0, 1 if approved_edit else 0, sheet_id),
+        )
+        return jsonify({"portrait_url": image_url, "status": new_status})
+
+    @app.delete("/api/sheets/<int:sheet_id>")
+    @login_required
+    def api_sheet_delete(sheet_id):
+        sheet = get_sheet(sheet_id)
+        if sheet["owner_id"] != current_user()["id"] or sheet["status"] == "approved":
+            abort(403)
+        execute("DELETE FROM character_sheets WHERE id=?", (sheet_id,))
+        return "", 204
 
     @app.get("/game/<int:campaign_id>")
     @login_required
@@ -596,13 +1012,22 @@ def init_database(app):
         map_columns = {row["name"] for row in query("PRAGMA table_info(maps)")}
         if "fog_enabled" not in map_columns:
             get_db().execute("ALTER TABLE maps ADD COLUMN fog_enabled INTEGER DEFAULT 0")
+        campaign_columns = {row["name"] for row in query("PRAGMA table_info(campaigns)")}
+        for name, definition in [
+            ("visibility", "TEXT NOT NULL DEFAULT 'private'"),
+            ("created_at", "TEXT"),
+            ("updated_at", "TEXT"),
+        ]:
+            if name not in campaign_columns:
+                get_db().execute(f"ALTER TABLE campaigns ADD COLUMN {name} {definition}")
+        get_db().execute("UPDATE campaigns SET created_at=COALESCE(created_at,CURRENT_TIMESTAMP), updated_at=COALESCE(updated_at,CURRENT_TIMESTAMP)")
         get_db().commit()
         execute("UPDATE users SET role = 'player' WHERE role NOT IN ('player', 'master', 'admin')")
         admin = query("SELECT id FROM users WHERE email = ?", ("admin@apexrealms.com",), one=True)
         if not admin:
             execute(
                 "INSERT INTO users (name, nickname, email, password_hash, role, bio, preferences) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                ("Admin Apex", "Admin", "admin@apexrealms.com", generate_password_hash("apex123"), "admin", "Administrador do sistema Apex Realms.", "Gestão, segurança e suporte"),
+                ("Admin Apex", "Admin", "admin@apexrealms.com", generate_password_hash(app.config["ADMIN_INITIAL_PASSWORD"]), "admin", "Administrador do sistema Apex Realms.", "Gestão, segurança e suporte"),
             )
         else:
             execute(
@@ -612,7 +1037,7 @@ def init_database(app):
         reset_done = query("SELECT value FROM app_meta WHERE key = 'launch_reset_v1'", one=True)
         if not reset_done:
             admin = query("SELECT id FROM users WHERE email = ?", ("admin@apexrealms.com",), one=True)
-            for table in ("chat_messages", "initiative", "combat_state", "assets", "maps", "tokens", "memberships"):
+            for table in ("chat_messages", "initiative", "combat_state", "library_items", "character_sheets", "assets", "maps", "tokens", "memberships"):
                 execute(f"DELETE FROM {table}")
             execute("DELETE FROM campaigns")
             execute("DELETE FROM users WHERE id <> ?", (admin["id"],))

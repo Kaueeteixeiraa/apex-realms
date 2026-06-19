@@ -19,12 +19,15 @@ CREATE TABLE IF NOT EXISTS campaigns (
     system TEXT NOT NULL,
     cover TEXT DEFAULT '',
     scene TEXT DEFAULT 'Cena inicial',
-    invite_code TEXT UNIQUE NOT NULL,
+    visibility TEXT NOT NULL DEFAULT 'private' CHECK (visibility IN ('private', 'public')),
+    invite_code TEXT UNIQUE,
     gm_notes TEXT DEFAULT '',
     public_notes TEXT DEFAULT '',
     last_summary TEXT DEFAULT '',
     last_session TEXT DEFAULT CURRENT_TIMESTAMP,
-    quick_session INTEGER DEFAULT 0
+    quick_session INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS memberships (
@@ -111,6 +114,43 @@ CREATE TABLE IF NOT EXISTS combat_state (
     round INTEGER DEFAULT 1,
     started_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS library_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    campaign_id INTEGER REFERENCES campaigns(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    item_type TEXT NOT NULL,
+    system TEXT DEFAULT 'D&D 5e',
+    description TEXT DEFAULT '',
+    attributes TEXT DEFAULT '',
+    abilities TEXT DEFAULT '',
+    image_url TEXT DEFAULT '',
+    tags TEXT DEFAULT '',
+    master_notes TEXT DEFAULT '',
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS character_sheets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    campaign_id INTEGER REFERENCES campaigns(id) ON DELETE SET NULL,
+    name TEXT NOT NULL,
+    system TEXT NOT NULL DEFAULT 'D&D 5e',
+    status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'submitted', 'approved', 'needs_changes')),
+    portrait_url TEXT DEFAULT '',
+    data TEXT NOT NULL DEFAULT '{}',
+    master_comment TEXT DEFAULT '',
+    revision INTEGER NOT NULL DEFAULT 1,
+    submitted_at TEXT,
+    reviewed_at TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_library_owner_campaign ON library_items(owner_id, campaign_id);
+CREATE INDEX IF NOT EXISTS idx_sheets_owner_campaign ON character_sheets(owner_id, campaign_id);
 
 CREATE TABLE IF NOT EXISTS app_meta (
     key TEXT PRIMARY KEY,

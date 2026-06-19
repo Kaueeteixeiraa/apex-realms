@@ -94,12 +94,15 @@
         <label class="library-field"><span>Campanha</span><select name="campaignId" data-library-form-campaign></select><small>Global deixa o recurso disponivel em todas as campanhas.</small></label>
         <label class="library-field"><span>Sistema</span><select name="system" data-library-form-system></select></label>
         <label class="library-field"><span>Visibilidade</span><select name="visibility"><option value="Privado do Mestre">Privado do Mestre</option><option value="Disponivel na mesa">Disponivel na mesa</option><option value="Liberado para jogadores">Liberado para jogadores</option></select></label>
-        <label class="library-field library-field-wide"><span>Descricao e notas</span><textarea name="description" maxlength="600" placeholder="Estatisticas essenciais, segredo, uso em cena ou contexto do recurso."></textarea></label>
+        <label class="library-field library-field-wide"><span>Descricao</span><textarea name="description" maxlength="1200" placeholder="Aparencia, historia, funcao e contexto deste recurso."></textarea></label>
+        <label class="library-field"><span>Atributos / status</span><textarea name="attributes" maxlength="1200" placeholder="PV, CA, nivel, raridade, dano ou dados do sistema."></textarea></label>
+        <label class="library-field"><span>Habilidades</span><textarea name="abilities" maxlength="1200" placeholder="Acoes, magias, efeitos e habilidades especiais."></textarea></label>
         <label class="library-field"><span>Tags</span><input name="tags" maxlength="140" placeholder="chefe, ruina, nivel 5"></label>
+        <label class="library-field"><span>Observacoes do Mestre</span><textarea name="masterNotes" maxlength="1200" placeholder="Segredos e orientacoes que somente o Mestre deve consultar."></textarea></label>
         <div class="library-field library-file-field">
           <span>Arquivo de referencia</span>
           <label class="library-upload" data-library-upload>
-            <input name="file" type="file" accept="image/*,.pdf,.doc,.docx,.txt">
+            <input name="file" type="file" accept="image/jpeg,image/png,image/webp">
             <i><svg><use href="#dash-icon-sheet"></use></svg></i>
             <span><b>Enviar arquivo</b><small data-library-current-file>Nenhum arquivo selecionado.</small></span>
             <em>Procurar</em>
@@ -114,7 +117,8 @@
     </form>
   </dialog>
 
-  <script src="../assets/js/app.js?v=global-toast-v1"></script>
-  <script src="../assets/js/master.js?v=master-library-cards-v1"></script>
+  <script src="../assets/js/mvp-storage.js?v=mvp-core-v1"></script>
+  <script src="../assets/js/app.js?v=mvp-core-v1"></script>
+  <script src="../assets/js/master.js?v=mvp-functional-v1"></script>
 </body>
 </html>

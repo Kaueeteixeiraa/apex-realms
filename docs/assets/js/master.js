@@ -11,7 +11,7 @@ const MASTER_NOTES_KEY = "apex-realms-master-notes";
 
 const masterSystems = ["D&D 5e", "Tormenta 20", "Pathfinder", "Ordem Paranormal", "Sistema Proprio", "Outro"];
 const masterStatuses = ["Preparacao", "Em andamento", "Pausada", "Finalizada"];
-const libraryTypes = ["Monstros", "NPCs", "Itens", "Mapas", "Anotacoes", "Magias", "Armadilhas", "Locais", "Encontros", "Recompensas", "Documentos/lore"];
+const libraryTypes = ["Monstros", "NPCs", "Itens", "Mapas", "Anotacoes", "Magias", "Armadilhas", "Locais", "Encontros", "Recompensas", "Documentos/lore", "Sistema customizado"];
 const MASTER_BANNER_MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MASTER_BANNER_MAX_DATA_CHARS = 900000;
 const MASTER_LIBRARY_IMAGE_MAX_DATA_CHARS = 420000;
@@ -41,13 +41,19 @@ function createInviteCode(existingCodes = readStore(MASTER_CAMPAIGNS_KEY, [])) {
   return `AR-${part()}-${part()}`;
 }
 
+function currentMasterOwnerId() {
+  return window.ApexMvpStore?.ownerId?.() || String(window.ApexStaticAuth?.getUser?.()?.email || "").trim().toLowerCase();
+}
+
 function normalizeCampaign(raw = {}) {
   const createdAt = raw.createdAt || new Date().toISOString();
+  const visibility = raw.visibility === "public" || raw.private === false ? "public" : "private";
   const normalizedInviteCode = window.ApexInvites?.normalizeCode?.(raw.inviteCode || raw.code) || "";
-  const inviteCode = normalizedInviteCode.startsWith("AR-") ? normalizedInviteCode : createInviteCode();
+  const inviteCode = visibility === "private" ? (normalizedInviteCode.startsWith("AR-") ? normalizedInviteCode : createInviteCode()) : "";
   const maxPlayers = Number(raw.maxPlayers || raw.limit || 4);
   return {
-    id: raw.id || `cmp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    id: raw.id || window.ApexMvpStore?.makeId?.("cmp") || `cmp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    ownerId: raw.ownerId || currentMasterOwnerId(),
     name: raw.name || "Campanha sem nome",
     system: raw.system || "D&D 5e",
     description: raw.description || "",
@@ -59,8 +65,8 @@ function normalizeCampaign(raw = {}) {
     inviteCode,
     code: inviteCode,
     archived: Boolean(raw.archived),
-    private: raw.private !== false,
-    visibility: raw.visibility || (raw.private === false ? "public" : "private"),
+    private: visibility === "private",
+    visibility,
     image: raw.image || raw.banner || "",
     players: Array.isArray(raw.players) ? raw.players : [],
     createdAt,
@@ -70,17 +76,23 @@ function normalizeCampaign(raw = {}) {
 
 function readCampaigns() {
   const campaigns = window.ApexInvites?.readCampaigns?.() || readStore(MASTER_CAMPAIGNS_KEY, []);
-  return campaigns.map(normalizeCampaign);
+  const owner = currentMasterOwnerId();
+  return campaigns.map(normalizeCampaign).filter(campaign => !owner || campaign.ownerId === owner);
 }
 
 function saveCampaigns(campaigns) {
+  const owner = currentMasterOwnerId();
   const normalizedCampaigns = campaigns.map(normalizeCampaign);
-  writeStore(MASTER_CAMPAIGNS_ALIAS_KEY, normalizedCampaigns);
+  const otherCampaigns = (window.ApexInvites?.readCampaigns?.() || readStore(MASTER_CAMPAIGNS_KEY, []))
+    .map(normalizeCampaign)
+    .filter(campaign => campaign.ownerId !== owner);
+  const mergedCampaigns = [...normalizedCampaigns, ...otherCampaigns];
+  writeStore(MASTER_CAMPAIGNS_ALIAS_KEY, mergedCampaigns);
   if (window.ApexInvites?.saveCampaigns) {
-    window.ApexInvites.saveCampaigns(normalizedCampaigns);
+    window.ApexInvites.saveCampaigns(mergedCampaigns);
     return;
   }
-  writeStore(MASTER_CAMPAIGNS_KEY, normalizedCampaigns);
+  writeStore(MASTER_CAMPAIGNS_KEY, mergedCampaigns);
 }
 
 function campaignInviteLink(code) {
@@ -237,7 +249,7 @@ function renderDashboard() {
   const campaign = active[0];
   document.body.classList.toggle("dashboard-empty-state", !active.length);
   setText("[data-master-campaign-count]", active.length);
-  renderDashboardInvites(active);
+  renderDashboardInvites(active.filter(item => item.visibility === "private"));
   setText("[data-master-next-session]", campaign ? "A definir" : "Aguardando");
   const recent = document.querySelector("[data-master-recent-campaigns]");
   if (recent) {
@@ -323,8 +335,10 @@ function bindCampaignForm() {
       initialLevel: data.get("initialLevel"),
       maxPlayers: data.get("maxPlayers"),
       status: data.get("status"),
+      visibility: data.get("visibility") || "private",
+      private: data.get("visibility") !== "public",
       banner: form.dataset.bannerData || existing?.banner || "",
-      inviteCode: existing?.inviteCode || existing?.code || createInviteCode(campaigns),
+      inviteCode: data.get("visibility") === "public" ? "" : (existing?.visibility !== "public" && (existing?.inviteCode || existing?.code) || createInviteCode(campaigns)),
       updatedAt: new Date().toISOString()
     });
     const nextCampaigns = existing ? campaigns.map(item => item.id === id ? campaign : item) : [campaign, ...campaigns];
@@ -338,7 +352,7 @@ function bindCampaignForm() {
     form.dataset.bannerData = "";
     if (editingId) editingId.value = "";
     applyCampaignBannerPreview(preview, "");
-    masterToast(existing ? "Campanha atualizada." : "Campanha criada com convite.");
+    masterToast(existing ? "Campanha atualizada." : (campaign.visibility === "private" ? "Campanha criada com convite." : "Campanha publica criada."));
     renderCampaignsPage();
     renderDashboard();
   });
@@ -384,7 +398,8 @@ function renderCampaignsPage() {
     article.querySelector("p").textContent = campaign.description || "Sem descricao cadastrada.";
     article.querySelector("[data-system]").textContent = campaign.system;
     article.querySelector("[data-status]").textContent = campaign.archived ? "Arquivada" : campaign.status;
-    article.querySelector("[data-code]").textContent = campaign.inviteCode;
+    article.querySelector("[data-code]").textContent = campaign.visibility === "public" ? "Publica" : campaign.inviteCode;
+    article.querySelector("[data-campaign-action='copy']").hidden = campaign.visibility === "public";
     list.append(article);
   });
 }
@@ -401,6 +416,7 @@ function bindCampaignActions() {
     const action = button.dataset.campaignAction;
 
     if (action === "copy") {
+      if (!campaign.inviteCode) return;
       await navigator.clipboard?.writeText(campaignInviteLink(campaign.inviteCode));
       masterToast("Link de convite copiado.");
     }
@@ -413,6 +429,7 @@ function bindCampaignActions() {
       form.initialLevel.value = campaign.initialLevel;
       form.maxPlayers.value = campaign.maxPlayers;
       form.status.value = campaign.status;
+      form.visibility.value = campaign.visibility;
       form.dataset.bannerData = campaign.banner || "";
       applyCampaignBannerPreview(document.querySelector("[data-campaign-banner-preview]"), campaign.banner || "");
       if (!document.body.classList.contains("campaigns-page")) {
@@ -424,7 +441,7 @@ function bindCampaignActions() {
         ...campaign,
         id: undefined,
         name: `${campaign.name} (copia)`,
-        inviteCode: createInviteCode(campaigns),
+        inviteCode: campaign.visibility === "private" ? createInviteCode(campaigns) : "",
         code: undefined,
         players: [],
         createdAt: new Date().toISOString(),
@@ -440,6 +457,7 @@ function bindCampaignActions() {
       const settings = readStore(MASTER_SETTINGS_KEY, {});
       if (settings.confirmDestructive !== false && !confirm("Excluir esta campanha?")) return;
       saveCampaigns(campaigns.filter(item => item.id !== id));
+      window.ApexMvpStore?.removeCampaignData?.(id);
       masterToast("Campanha excluida.");
     }
     renderCampaignsPage();
@@ -531,23 +549,32 @@ function bindLibraryPage() {
     const matchedCampaign = campaignById(raw.campaignId) || campaigns.find(campaign => campaign.name === raw.campaign);
     const createdAt = raw.createdAt || new Date().toISOString();
     return {
-      id: raw.id || `lib-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: raw.id || window.ApexMvpStore?.makeId?.("lib") || `lib-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       name: String(raw.name || "Recurso sem nome"),
       type: libraryTypes.includes(raw.type) ? raw.type : (legacyTypes[raw.type] || "Documentos/lore"),
       campaignId: matchedCampaign?.id || "",
       system: raw.system || matchedCampaign?.system || "Todos os sistemas",
       description: String(raw.description || ""),
+      attributes: String(raw.attributes || raw.stats || ""),
+      abilities: String(raw.abilities || ""),
       tags: String(raw.tags || ""),
+      masterNotes: String(raw.masterNotes || raw.notes || ""),
       visibility: raw.visibility || "Privado do Mestre",
       fileName: String(raw.fileName || ""),
       image: String(raw.image || "").startsWith("data:image/") ? raw.image : "",
       favorite: Boolean(raw.favorite),
+      ownerId: raw.ownerId || currentMasterOwnerId(),
       createdAt,
       updatedAt: raw.updatedAt || createdAt
     };
   };
-  const readLibrary = () => readStore(MASTER_LIBRARY_KEY, []).map(normalizeLibraryItem);
-  const saveLibrary = items => writeStore(MASTER_LIBRARY_KEY, items.map(normalizeLibraryItem));
+  const readAllLibrary = () => readStore(MASTER_LIBRARY_KEY, []).map(normalizeLibraryItem);
+  const readLibrary = () => readAllLibrary().filter(item => item.ownerId === currentMasterOwnerId());
+  const saveLibrary = items => {
+    const owner = currentMasterOwnerId();
+    const others = readAllLibrary().filter(item => item.ownerId !== owner);
+    writeStore(MASTER_LIBRARY_KEY, [...items.map(normalizeLibraryItem), ...others]);
+  };
   const addOption = (select, label, value) => select.add(new Option(label, value));
 
   const populateControls = () => {
@@ -695,7 +722,10 @@ function bindLibraryPage() {
     form.elements.system.value = item?.system || campaignById(form.elements.campaignId.value)?.system || "Todos os sistemas";
     form.elements.visibility.value = item?.visibility || "Privado do Mestre";
     form.elements.description.value = item?.description || "";
+    form.elements.attributes.value = item?.attributes || "";
+    form.elements.abilities.value = item?.abilities || "";
     form.elements.tags.value = item?.tags || "";
+    form.elements.masterNotes.value = item?.masterNotes || "";
     form.elements.favorite.checked = Boolean(item?.favorite);
     form.dataset.fileName = item?.fileName || "";
     form.dataset.imageData = item?.image || "";
@@ -752,17 +782,21 @@ function bindLibraryPage() {
     const file = form.elements.file.files?.[0];
     const item = {
       ...existing,
-      id: existing?.id || `lib-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: existing?.id || window.ApexMvpStore?.makeId?.("lib") || `lib-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       name: String(data.get("name") || "").trim(),
       type: data.get("type"),
       campaignId: data.get("campaignId"),
       system: data.get("system"),
       description: String(data.get("description") || "").trim(),
+      attributes: String(data.get("attributes") || "").trim(),
+      abilities: String(data.get("abilities") || "").trim(),
       tags: String(data.get("tags") || "").trim(),
+      masterNotes: String(data.get("masterNotes") || "").trim(),
       visibility: data.get("visibility"),
       fileName: file?.name || form.dataset.fileName || "",
       image: form.dataset.imageData || "",
       favorite: data.get("favorite") === "on",
+      ownerId: currentMasterOwnerId(),
       createdAt: existing?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -786,13 +820,13 @@ function bindLibraryPage() {
     }
     if (action === "edit") openResourceDialog(item);
     if (action === "duplicate") {
-      saveLibrary([{...item, id: `lib-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, name: `${item.name} (copia)`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()}, ...items]);
+      saveLibrary([{...item, id: window.ApexMvpStore?.makeId?.("lib") || `lib-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, name: `${item.name} (copia)`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()}, ...items]);
       renderLibrary();
       masterToast("Recurso duplicado.");
     }
     if (action === "use") {
       const notes = readStore(MASTER_NOTES_KEY, {});
-      const snippet = `[${item.type}] ${item.name}\n${item.description || "Sem descricao."}`;
+      const snippet = [`[${item.type}] ${item.name}`, item.description, item.attributes, item.abilities, item.masterNotes].filter(Boolean).join("\n");
       writeStore(MASTER_NOTES_KEY, {...notes, private: [notes.private, snippet].filter(Boolean).join("\n\n")});
       masterToast("Recurso adicionado as notas privadas da mesa.");
     }
@@ -820,6 +854,8 @@ function bindSheetsPage() {
   if (!document.body.matches("[data-master-page='sheets']")) return;
   const dialog = document.querySelector("[data-sheet-dialog]");
   const form = document.querySelector("[data-sheet-form]");
+  const reviewDialog = document.querySelector("[data-sheet-review-dialog]");
+  const reviewForm = document.querySelector("[data-sheet-review-form]");
   const list = document.querySelector("[data-master-sheets-list]");
   const summary = document.querySelector("[data-sheets-summary]");
   const campaignFilter = document.querySelector("[data-sheet-campaign-filter]");
@@ -829,23 +865,23 @@ function bindSheetsPage() {
   const searchInput = document.querySelector("[data-sheet-search]");
   const campaigns = readCampaigns().filter(campaign => !campaign.archived);
   const sheetTypes = ["Personagem", "NPC", "Monstro"];
-  const sheetStatuses = ["Pendente", "Aprovada", "Bloqueada"];
+  const sheetStatuses = ["Rascunho", "Enviada", "Aprovada", "Precisa de ajuste"];
   const numericFields = new Set(["level", "experience", "str", "dex", "con", "int", "wis", "cha", "proficiency", "inspiration", "hpCurrent", "hpMax", "hpTemp", "armorClass", "initiative", "passivePerception", "spellSaveDc", "spellAttack", "cp", "sp", "ep", "gp", "pp"]);
   const sheetDefaults = {
-    name: "Ficha sem nome", type: "Personagem", campaignId: "", system: "D&D 5e", owner: "Mestre", status: "Pendente",
+    name: "Ficha sem nome", type: "Personagem", campaignId: "", system: "D&D 5e", owner: "Mestre", status: "Rascunho",
     className: "", level: 1, race: "", background: "", alignment: "", experience: 0, concept: "",
     str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, proficiency: 2, inspiration: 0, savingThrows: "",
     hpCurrent: 0, hpMax: 0, hpTemp: 0, armorClass: 10, initiative: 0, speed: "9 m", hitDice: "", passivePerception: 10,
     attacks: "", conditions: "", skills: "", proficiencies: "", spellAbility: "Nenhum", spellSaveDc: 10, spellAttack: 0,
-    spellSlots: "", spells: "", cp: 0, sp: 0, ep: 0, gp: 0, pp: 0, inventory: "", traits: "", ideals: "", bonds: "", flaws: "", story: "", notes: "", masterNotes: "", portrait: ""
+    spellSlots: "", spells: "", cp: 0, sp: 0, ep: 0, gp: 0, pp: 0, inventory: "", traits: "", ideals: "", bonds: "", flaws: "", story: "", notes: "", masterNotes: "", masterComment: "", portrait: ""
   };
   const summaryCards = [
     {label: "Personagens", field: "type", value: "Personagem", icon: "sheet-icon-hero"},
     {label: "NPCs", field: "type", value: "NPC", icon: "dash-icon-group"},
     {label: "Monstros", field: "type", value: "Monstro", icon: "sheet-icon-monster"},
-    {label: "Pendentes", field: "status", value: "Pendente", icon: "sheet-icon-clock"},
+    {label: "Enviadas", field: "status", value: "Enviada", icon: "sheet-icon-clock"},
     {label: "Aprovadas", field: "status", value: "Aprovada", icon: "sheet-icon-check"},
-    {label: "Bloqueadas", field: "status", value: "Bloqueada", icon: "sheet-icon-lock"}
+    {label: "Com ajuste", field: "status", value: "Precisa de ajuste", icon: "sheet-icon-lock"}
   ];
   let portraitProcessing = Promise.resolve("");
 
@@ -856,6 +892,7 @@ function bindSheetsPage() {
     const createdAt = raw.createdAt || new Date().toISOString();
     const normalized = {...sheetDefaults, ...raw};
     numericFields.forEach(name => { normalized[name] = Number(normalized[name] ?? sheetDefaults[name] ?? 0); });
+    const legacyStatus = {Pendente: "Enviada", Bloqueada: "Precisa de ajuste"}[raw.status] || raw.status;
     return {
       ...normalized,
       id: raw.id || `sheet-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -864,20 +901,29 @@ function bindSheetsPage() {
       campaignId: matchedCampaign?.id || "",
       system: raw.system || matchedCampaign?.system || "D&D 5e",
       owner: String(raw.owner || "Mestre"),
-      status: sheetStatuses.includes(raw.status) ? raw.status : "Pendente",
+      status: sheetStatuses.includes(legacyStatus) ? legacyStatus : "Rascunho",
+      ownerId: raw.ownerId || currentMasterOwnerId(),
+      ownerRole: raw.ownerRole || "master",
       portrait: String(raw.portrait || "").startsWith("data:image/") ? raw.portrait : "",
       createdAt,
       updatedAt: raw.updatedAt || createdAt
     };
   };
-  const readSheets = () => {
+  const readAllSheets = () => {
     const primary = readStore(MASTER_SHEETS_KEY, []);
     return (primary.length ? primary : readStore(MASTER_SHEETS_ALIAS_KEY, [])).map(normalizeSheet);
   };
+  const readSheets = () => {
+    const owner = currentMasterOwnerId();
+    const campaignIds = new Set(campaigns.map(campaign => campaign.id));
+    return readAllSheets().filter(sheet => sheet.ownerId === owner || (sheet.ownerRole === "player" && campaignIds.has(sheet.campaignId)));
+  };
   const saveSheets = sheets => {
+    const visibleIds = new Set(readSheets().map(sheet => sheet.id));
+    const outsideScope = readAllSheets().filter(sheet => !visibleIds.has(sheet.id));
     const normalized = sheets.map(normalizeSheet);
-    writeStore(MASTER_SHEETS_KEY, normalized);
-    writeStore(MASTER_SHEETS_ALIAS_KEY, normalized);
+    writeStore(MASTER_SHEETS_KEY, [...normalized, ...outsideScope]);
+    writeStore(MASTER_SHEETS_ALIAS_KEY, [...normalized, ...outsideScope]);
   };
   const addOption = (select, label, value) => select.add(new Option(label, value));
   const populateControls = () => {
@@ -931,7 +977,7 @@ function bindSheetsPage() {
     });
   };
 
-  const statusClass = status => status === "Aprovada" ? "approved" : status === "Bloqueada" ? "locked" : "pending";
+  const statusClass = status => status === "Aprovada" ? "approved" : status === "Precisa de ajuste" ? "locked" : "pending";
   const cardIcon = type => type === "Monstro" ? "sheet-icon-monster" : type === "NPC" ? "dash-icon-group" : "sheet-icon-hero";
   const createSheetCard = sheet => {
     const campaign = campaignById(sheet.campaignId);
@@ -947,10 +993,10 @@ function bindSheetsPage() {
         <header><div><h3></h3><p data-identity></p></div><small data-owner></small></header>
         <div class="sheet-card-context"><span data-campaign></span><span data-system></span></div>
         <div class="sheet-card-vitals"><span><small>Nivel/ND</small><b data-level></b></span><span><small>PV</small><b data-hp></b></span><span><small>CA</small><b data-ac></b></span></div>
+        <p class="sheet-card-review" data-review-comment hidden></p>
         <footer>
           <button type="button" data-sheet-action="open">Abrir ficha</button>
-          <button type="button" data-sheet-action="approve">Aprovar</button>
-          <button type="button" data-sheet-action="lock"></button>
+          <button type="button" data-sheet-action="review">Revisar</button>
           <button type="button" data-sheet-action="duplicate">Duplicar</button>
           <button class="danger" type="button" data-sheet-action="delete">Excluir</button>
         </footer>
@@ -974,9 +1020,15 @@ function bindSheetsPage() {
     article.querySelector("[data-level]").textContent = sheet.level;
     article.querySelector("[data-hp]").textContent = `${sheet.hpCurrent}/${sheet.hpMax}`;
     article.querySelector("[data-ac]").textContent = sheet.armorClass;
-    const approve = article.querySelector("[data-sheet-action='approve']");
-    approve.hidden = sheet.status === "Aprovada";
-    article.querySelector("[data-sheet-action='lock']").textContent = sheet.status === "Bloqueada" ? "Liberar" : "Bloquear";
+    const review = article.querySelector("[data-sheet-action='review']");
+    review.hidden = sheet.ownerRole !== "player" || sheet.status === "Rascunho";
+    article.querySelector("[data-sheet-action='duplicate']").hidden = sheet.ownerRole === "player";
+    article.querySelector("[data-sheet-action='delete']").hidden = sheet.ownerRole === "player";
+    const reviewComment = article.querySelector("[data-review-comment]");
+    if (sheet.masterComment) {
+      reviewComment.hidden = false;
+      reviewComment.textContent = `Comentario: ${sheet.masterComment}`;
+    }
     return article;
   };
 
@@ -1031,6 +1083,7 @@ function bindSheetsPage() {
     });
     if (!sheet) value.name = "";
     form.reset();
+    form.querySelectorAll("input,select,textarea").forEach(input => { input.disabled = false; });
     Object.entries(value).forEach(([name, fieldValue]) => {
       const input = field(name);
       if (input && input.type !== "file") input.value = fieldValue ?? "";
@@ -1042,14 +1095,45 @@ function bindSheetsPage() {
     document.querySelector("[data-sheet-form-kicker]").textContent = sheet ? "Editar ficha" : "Nova ficha";
     document.querySelector("[data-sheet-form-title]").textContent = sheet?.name || "Criar personagem";
     document.querySelector("[data-sheet-save-hint]").textContent = `${value.system} - ${value.type}`;
+    const playerOwned = value.ownerRole === "player";
+    form.classList.toggle("player-sheet-readonly", playerOwned);
+    form.querySelector("[type='submit']").hidden = playerOwned;
+    form.querySelector(".sheet-photo-button").hidden = playerOwned;
+    if (playerOwned) form.querySelectorAll("input,select,textarea").forEach(input => { input.disabled = true; });
     updateAbilityModifiers();
     activateSheetTab("summary");
     dialog.showModal();
   };
+  const openSheetReview = sheet => {
+    reviewForm.reset();
+    reviewForm.elements.sheetId.value = sheet.id;
+    reviewForm.elements.decision.value = sheet.status === "Aprovada" ? "Aprovada" : "Precisa de ajuste";
+    reviewForm.elements.comment.value = sheet.masterComment || "";
+    document.querySelector("[data-sheet-review-name]").textContent = sheet.name;
+    reviewDialog.showModal();
+  };
 
   document.querySelector("[data-sheet-new]")?.addEventListener("click", () => openSheetDialog());
   document.querySelectorAll("[data-sheet-close]").forEach(button => button.addEventListener("click", () => dialog.close()));
+  document.querySelectorAll("[data-sheet-review-close]").forEach(button => button.addEventListener("click", () => reviewDialog.close()));
   dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
+  reviewDialog.addEventListener("click", event => { if (event.target === reviewDialog) reviewDialog.close(); });
+  reviewForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const id = reviewForm.elements.sheetId.value;
+    const decision = reviewForm.elements.decision.value;
+    const comment = reviewForm.elements.comment.value.trim();
+    if (decision === "Precisa de ajuste" && !comment) {
+      reviewForm.elements.comment.setCustomValidity("Explique o que o jogador precisa ajustar.");
+      reviewForm.reportValidity();
+      reviewForm.elements.comment.setCustomValidity("");
+      return;
+    }
+    const sheets = readSheets();
+    saveSheets(sheets.map(sheet => sheet.id === id ? {...sheet, status: decision, masterComment: comment, reviewedAt: new Date().toISOString(), updatedAt: new Date().toISOString()} : sheet));
+    reviewDialog.close();
+    renderSheets();
+  });
   document.querySelectorAll("[data-sheet-tab]").forEach(button => button.addEventListener("click", () => activateSheetTab(button.dataset.sheetTab)));
   document.querySelectorAll("[data-ability] input").forEach(input => input.addEventListener("input", updateAbilityModifiers));
   field("campaignId").addEventListener("change", () => {
@@ -1058,7 +1142,7 @@ function bindSheetsPage() {
     document.querySelector("[data-sheet-save-hint]").textContent = `${field("system").value} - ${field("type").value}`;
   });
   [field("system"), field("type")].forEach(input => input.addEventListener("change", () => {
-    if (!field("id").value) field("status").value = field("type").value === "Personagem" ? "Pendente" : "Aprovada";
+    if (!field("id").value) field("status").value = "Aprovada";
     document.querySelector("[data-sheet-save-hint]").textContent = `${field("system").value} - ${field("type").value}`;
   }));
   field("portraitFile").addEventListener("change", () => {
@@ -1082,6 +1166,7 @@ function bindSheetsPage() {
     const data = Object.fromEntries(new FormData(form).entries());
     const sheets = readSheets();
     const existing = sheets.find(sheet => sheet.id === data.id);
+    if (existing?.ownerRole === "player") return;
     numericFields.forEach(name => { data[name] = Number(data[name] || 0); });
     delete data.portraitFile;
     const sheet = normalizeSheet({
@@ -1106,16 +1191,9 @@ function bindSheetsPage() {
     if (!sheet) return;
     const action = button.dataset.sheetAction;
     if (action === "open") openSheetDialog(sheet);
-    if (action === "approve") {
-      saveSheets(sheets.map(saved => saved.id === sheet.id ? {...saved, status: "Aprovada", updatedAt: new Date().toISOString()} : saved));
-      renderSheets();
-    }
-    if (action === "lock") {
-      saveSheets(sheets.map(saved => saved.id === sheet.id ? {...saved, status: sheet.status === "Bloqueada" ? "Aprovada" : "Bloqueada", updatedAt: new Date().toISOString()} : saved));
-      renderSheets();
-    }
+    if (action === "review") openSheetReview(sheet);
     if (action === "duplicate") {
-      saveSheets([{...sheet, id: undefined, name: `${sheet.name} (copia)`, status: sheet.type === "Personagem" ? "Pendente" : "Aprovada", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()}, ...sheets]);
+      saveSheets([{...sheet, id: undefined, name: `${sheet.name} (copia)`, status: "Aprovada", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()}, ...sheets]);
       renderSheets();
     }
     if (action === "delete") {

@@ -90,7 +90,7 @@
         <label><span>Campanha</span><select name="campaignId" data-sheet-form-campaign></select></label>
         <label><span>Sistema</span><select name="system" data-sheet-form-system></select></label>
         <label><span>Dono/Jogador</span><input name="owner" maxlength="80" placeholder="Mestre ou nome do jogador"></label>
-        <label><span>Status</span><select name="status"><option>Pendente</option><option>Aprovada</option><option>Bloqueada</option></select></label>
+        <label><span>Status</span><select name="status"><option>Rascunho</option><option>Enviada</option><option>Aprovada</option><option>Precisa de ajuste</option></select></label>
       </div>
 
       <nav class="sheet-editor-tabs" aria-label="Secoes da ficha">
@@ -147,7 +147,18 @@
     </form>
   </dialog>
 
-  <script src="../assets/js/app.js?v=global-toast-v1"></script>
-  <script src="../assets/js/master.js?v=master-sheets-v1"></script>
+  <dialog class="sheet-review-dialog" data-sheet-review-dialog>
+    <form data-sheet-review-form>
+      <input type="hidden" name="sheetId">
+      <header><div><small class="master-eyebrow">REVISAO DA FICHA</small><h2 data-sheet-review-name>Personagem</h2><p>A decisao e o comentario ficarao visiveis para o jogador.</p></div><button type="button" data-sheet-review-close aria-label="Fechar">&times;</button></header>
+      <label><span>Decisao</span><select name="decision"><option value="Aprovada">Aprovar ficha</option><option value="Precisa de ajuste">Pedir ajuste</option></select></label>
+      <label><span>Comentario do Mestre</span><textarea name="comment" maxlength="1200" placeholder="Explique a decisao ou o que precisa ser alterado."></textarea></label>
+      <footer><button class="master-ghost" type="button" data-sheet-review-close>Cancelar</button><button class="master-btn" type="submit">Salvar revisao</button></footer>
+    </form>
+  </dialog>
+
+  <script src="../assets/js/mvp-storage.js?v=mvp-core-v1"></script>
+  <script src="../assets/js/app.js?v=mvp-core-v1"></script>
+  <script src="../assets/js/master.js?v=mvp-functional-v1"></script>
 </body>
 </html>

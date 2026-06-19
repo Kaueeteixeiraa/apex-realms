@@ -303,11 +303,15 @@ function generateInviteCode(existingCodes = []) {
 function withInviteCodes(campaigns) {
   const usedCodes = new Set();
   return campaigns.map(campaign => {
+    const visibility = campaign?.visibility === "public" || campaign?.private === false ? "public" : "private";
+    if (visibility === "public") {
+      return {...campaign, visibility, private: false, inviteCode: "", code: ""};
+    }
     const rawInviteCode = normalizeInviteCode(campaign?.inviteCode || campaign?.code);
     const currentCode = rawInviteCode.startsWith("AR-") && !usedCodes.has(compactInviteCode(rawInviteCode)) ? rawInviteCode : "";
     const inviteCode = currentCode || generateInviteCode([...usedCodes]);
     usedCodes.add(compactInviteCode(inviteCode));
-    return {...campaign, inviteCode, code: inviteCode};
+    return {...campaign, visibility, private: true, inviteCode, code: inviteCode};
   });
 }
 
@@ -329,7 +333,7 @@ function saveStaticCampaignsWithInvites(campaigns) {
 function findStaticCampaignByInviteCode(code) {
   const compactCode = compactInviteCode(code);
   if (!compactCode) return null;
-  return readStaticCampaignsWithInvites().find(campaign => !campaign.archived && compactInviteCode(campaign.inviteCode || campaign.code) === compactCode) || null;
+  return readStaticCampaignsWithInvites().find(campaign => campaign.visibility !== "public" && !campaign.archived && compactInviteCode(campaign.inviteCode || campaign.code) === compactCode) || null;
 }
 
 function readPlayerCampaignRegistry() {

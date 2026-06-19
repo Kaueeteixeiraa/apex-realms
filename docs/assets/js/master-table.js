@@ -66,15 +66,17 @@
   }
 
   function readCampaigns() {
+    const owner = window.ApexMvpStore?.ownerId?.() || "";
     const primary = readStore(KEYS.campaigns, []);
     const values = primary.length ? primary : readStore(KEYS.campaignsAlias, []);
     const account = window.ApexStaticAuth?.getUser?.();
     const joined = isPlayerMode && window.ApexInvites?.readJoinedCampaigns ? window.ApexInvites.readJoinedCampaigns(account) : [];
-    const scopedValues = isPlayerMode && joined.length ? joined : values.filter(campaign => {
-      if (!isPlayerMode) return true;
-      const players = Array.isArray(campaign.players) ? campaign.players : [];
-      return players.some(player => normalizeEmail(player.email) === normalizeEmail(account?.email));
-    });
+    const scopedValues = isPlayerMode
+      ? (joined.length ? joined : values.filter(campaign => {
+          const players = Array.isArray(campaign.players) ? campaign.players : [];
+          return players.some(player => normalizeEmail(player.email) === normalizeEmail(account?.email));
+        }))
+      : values.filter(item => !owner || item.ownerId === owner);
     return scopedValues.filter(campaign => !campaign.archived).map(campaign => ({
       ...campaign,
       id: campaign.id || uid("campaign"),
@@ -253,9 +255,10 @@
   }
 
   function buildSources() {
+    const masterOwner = window.ApexMvpStore?.ownerId?.() || "";
     const allPlayers = readStore(KEYS.players, []);
     const sheets = readSheets();
-    const library = readStore(KEYS.library, []);
+    const library = readStore(KEYS.library, []).filter(item => !masterOwner || item.ownerId === masterOwner);
     const approvedPlayers = allPlayers.filter(player => player.campaignId === campaign.id && player.status === "Aprovado");
     const sheetById = id => sheets.find(sheet => sheet.id === id);
     const linkedIds = new Set(approvedPlayers.map(player => player.sheetId).filter(Boolean));

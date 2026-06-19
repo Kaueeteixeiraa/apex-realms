@@ -139,6 +139,13 @@
             </select>
           </div>
           <div class="master-field">
+            <label for="campaign-visibility">Acesso</label>
+            <select id="campaign-visibility" name="visibility">
+              <option value="private">Privada - usa codigo</option>
+              <option value="public">Publica - sem codigo</option>
+            </select>
+          </div>
+          <div class="master-field">
             <label for="campaign-level">Nivel</label>
             <input id="campaign-level" name="initialLevel" type="number" min="1" value="1">
           </div>
@@ -181,14 +188,15 @@
         <div class="campaigns-mini-stats">
           <span><small>Acesso</small><b>Codigo</b></span>
           <span><small>Convite</small><b>Auto</b></span>
-          <span><small>Dados</small><b>Local</b></span>
+          <span title="Nesta publicacao estatica, os dados ficam somente neste navegador."><small>Persistencia</small><b>Neste navegador</b></span>
         </div>
         <div class="master-list campaigns-list" data-master-campaign-list></div>
       </section>
     </section>
   </main>
 
-  <script src="../assets/js/app.js?v=campaign-banners-v1"></script>
-  <script src="../assets/js/master.js?v=campaign-banners-v1"></script>
+  <script src="../assets/js/mvp-storage.js?v=mvp-core-v1"></script>
+  <script src="../assets/js/app.js?v=mvp-core-v1"></script>
+  <script src="../assets/js/master.js?v=mvp-functional-v1"></script>
 </body>
 </html>

@@ -3,176 +3,205 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from werkzeug.security import generate_password_hash
+
 from app import create_app, init_database
-from database import query
+from database import execute, query
 
 
 class ApexRealmsTestCase(unittest.TestCase):
     def setUp(self):
         self.root = Path(tempfile.mkdtemp())
         self.app = create_app()
-        self.app.config.update(TESTING=True, DATABASE=self.root / "test.db", UPLOAD_FOLDER=self.root / "uploads")
+        self.app.config.update(
+            TESTING=True,
+            DATABASE=self.root / "test.db",
+            UPLOAD_FOLDER=self.root / "uploads",
+        )
         Path(self.app.config["UPLOAD_FOLDER"]).mkdir()
         init_database(self.app)
         self.client = self.app.test_client()
+        with self.app.app_context():
+            self.master_id = self.create_user("Mestre Um", "mestre1@example.com", "master")
+            self.other_master_id = self.create_user("Mestre Dois", "mestre2@example.com", "master")
+            self.player_id = self.create_user("Jogador", "player@example.com", "player")
 
-    def login(self, email="mestre@apexrealms.com"):
+    @staticmethod
+    def create_user(name, email, role):
+        return execute(
+            "INSERT INTO users (name,nickname,email,password_hash,role) VALUES (?,?,?,?,?)",
+            (name, name.replace(" ", ""), email, generate_password_hash("apex123"), role),
+        )
+
+    def login(self, email):
         return self.client.post("/login", data={"email": email, "password": "apex123"})
 
-    def test_public_pages_and_auth(self):
-        self.assertEqual(self.client.get("/").status_code, 200)
-        self.assertEqual(self.login().status_code, 302)
-        self.assertEqual(self.client.get("/dashboard").status_code, 200)
-        self.assertEqual(self.client.get("/game/1").status_code, 200)
-
-    def test_role_registration_login_and_admin_panel(self):
-        admin_login = self.login("admin@apexrealms.com")
-        self.assertEqual(admin_login.status_code, 302)
-        self.assertIn("/admin", admin_login.headers["Location"])
-        admin_page = self.client.get("/admin")
-        self.assertEqual(admin_page.status_code, 200)
-        self.assertIn(b"ADMINISTRA", admin_page.data)
-        self.assertEqual(self.client.get("/campaign/new").status_code, 403)
-        self.assertEqual(self.client.post("/campaign/quick").status_code, 403)
-
+    def logout(self):
         self.client.get("/logout")
-        player_register = self.client.post("/register", data={
-            "name": "Bia Torres",
-            "nickname": "Bia",
-            "email": "bia@example.com",
-            "password": "apex123",
-            "role": "player",
-            "preferences": "Investigação",
+
+    def create_campaign(self, visibility="private"):
+        response = self.client.post("/api/campaigns", json={
+            "name": "Portal Astral",
+            "system": "D&D 5e",
+            "description": "Uma campanha real.",
+            "visibility": visibility,
         })
-        self.assertEqual(player_register.status_code, 302)
-        self.assertEqual(self.client.get("/campaign/new").status_code, 403)
-        self.assertEqual(self.client.post("/campaign/quick").status_code, 403)
-        self.assertEqual(self.client.get("/admin").status_code, 403)
-        with self.app.app_context():
-            self.assertEqual(query("SELECT role FROM users WHERE email=?", ("bia@example.com",), one=True)["role"], "player")
+        self.assertEqual(response.status_code, 201)
+        return response.json
 
-        self.client.get("/logout")
-        bad_admin = self.client.post("/register", data={
-            "name": "Admin Sem Código",
-            "nickname": "SemCodigo",
-            "email": "semcodigo@example.com",
-            "password": "apex123",
-            "role": "admin",
-            "admin_code": "ERRADO",
+    def test_campaign_crud_visibility_invite_and_join(self):
+        self.login("mestre1@example.com")
+        private_campaign = self.create_campaign("private")
+        self.assertRegex(private_campaign["invite_code"], r"^AR-[A-Z2-9]{4}-[A-Z2-9]{4}$")
+
+        public_campaign = self.create_campaign("public")
+        self.assertIsNone(public_campaign["invite_code"])
+        updated = self.client.patch(f"/api/campaigns/{public_campaign['id']}", json={"visibility": "private"})
+        self.assertEqual(updated.status_code, 200)
+        self.assertRegex(updated.json["invite_code"], r"^AR-")
+
+        self.logout()
+        self.login("player@example.com")
+        joined = self.client.post("/api/campaigns/join", json={"code": private_campaign["invite_code"]})
+        self.assertEqual(joined.status_code, 200)
+        campaigns = self.client.get("/api/campaigns").json["campaigns"]
+        self.assertEqual([item["id"] for item in campaigns], [private_campaign["id"]])
+
+        self.logout()
+        self.login("mestre1@example.com")
+        self.assertEqual(self.client.delete(f"/api/campaigns/{public_campaign['id']}").status_code, 204)
+        ids = [item["id"] for item in self.client.get("/api/campaigns").json["campaigns"]]
+        self.assertNotIn(public_campaign["id"], ids)
+
+    def test_campaign_delete_unlinks_sheet_and_cross_origin_write_is_blocked(self):
+        self.login("mestre1@example.com")
+        campaign = self.create_campaign()
+        blocked = self.client.post(
+            "/api/campaigns",
+            json={"name": "Cross origin", "system": "D&D 5e", "visibility": "private"},
+            headers={"Origin": "https://example.invalid"},
+        )
+        self.assertEqual(blocked.status_code, 403)
+
+        self.logout()
+        self.login("player@example.com")
+        self.client.post("/api/campaigns/join", json={"code": campaign["invite_code"]})
+        sheet = self.client.post(
+            "/api/sheets",
+            json={"name": "Lyra", "campaign_id": campaign["id"], "data": {}},
+        ).json
+
+        self.logout()
+        self.login("mestre1@example.com")
+        self.assertEqual(self.client.delete(f"/api/campaigns/{campaign['id']}").status_code, 204)
+        with self.app.app_context():
+            stored = query("SELECT campaign_id,status FROM character_sheets WHERE id=?", (sheet["id"],), one=True)
+            self.assertIsNone(stored["campaign_id"])
+            self.assertEqual(stored["status"], "draft")
+
+    def test_master_cannot_manage_another_master_campaign(self):
+        self.login("mestre1@example.com")
+        campaign = self.create_campaign()
+        self.logout()
+        self.login("mestre2@example.com")
+        self.assertEqual(self.client.patch(f"/api/campaigns/{campaign['id']}", json={"name": "Roubada"}).status_code, 403)
+        self.assertEqual(self.client.delete(f"/api/campaigns/{campaign['id']}").status_code, 403)
+
+    def test_library_crud_duplicate_filters_and_isolation(self):
+        self.login("mestre1@example.com")
+        campaign = self.create_campaign()
+        created = self.client.post("/api/library", json={
+            "name": "Guardiao do Veu",
+            "type": "monster",
+            "campaign_id": campaign["id"],
+            "system": "D&D 5e",
+            "description": "Chefe das ruinas.",
+            "attributes": "PV 86; CA 17",
+            "abilities": "Explosao astral",
+            "tags": "chefe, ruinas",
+            "master_notes": "Protege a chave.",
         })
-        self.assertEqual(bad_admin.status_code, 200)
-        with self.app.app_context():
-            self.assertIsNone(query("SELECT id FROM users WHERE email=?", ("semcodigo@example.com",), one=True))
+        self.assertEqual(created.status_code, 201)
+        item = created.json
+        filtered = self.client.get(f"/api/library?campaign_id={campaign['id']}&type=monster").json["items"]
+        self.assertEqual(len(filtered), 1)
+        self.assertEqual(filtered[0]["attributes"], "PV 86; CA 17")
 
-        good_admin = self.client.post("/register", data={
-            "name": "Novo Admin",
-            "nickname": "NAdmin",
-            "email": "novo-admin@example.com",
-            "password": "apex123",
-            "role": "admin",
-            "admin_code": "APEX-ADMIN-2026",
+        changed = self.client.patch(f"/api/library/{item['id']}", json={"abilities": "Explosao astral; Teleporte"})
+        self.assertEqual(changed.status_code, 200)
+        duplicate = self.client.post(f"/api/library/{item['id']}/duplicate")
+        self.assertEqual(duplicate.status_code, 201)
+        self.assertNotEqual(duplicate.json["id"], item["id"])
+
+        self.logout()
+        self.login("mestre2@example.com")
+        self.assertEqual(self.client.get("/api/library").json["items"], [])
+        self.assertEqual(self.client.patch(f"/api/library/{item['id']}", json={"name": "Invasao"}).status_code, 403)
+
+        self.logout()
+        self.login("mestre1@example.com")
+        self.assertEqual(self.client.delete(f"/api/library/{item['id']}").status_code, 204)
+
+    def test_player_sheet_review_comment_and_resubmission(self):
+        self.login("mestre1@example.com")
+        campaign = self.create_campaign()
+        self.logout()
+        self.login("player@example.com")
+        self.assertEqual(self.client.post("/api/campaigns/join", json={"code": campaign["invite_code"]}).status_code, 200)
+        created = self.client.post("/api/sheets", json={
+            "name": "Lyra Vex",
+            "campaign_id": campaign["id"],
+            "system": "D&D 5e",
+            "data": {"className": "Maga", "level": 5, "hpMax": 30},
         })
-        self.assertEqual(good_admin.status_code, 302)
-        self.assertIn("/admin", good_admin.headers["Location"])
-        with self.app.app_context():
-            self.assertEqual(query("SELECT role FROM users WHERE email=?", ("novo-admin@example.com",), one=True)["role"], "admin")
+        self.assertEqual(created.status_code, 201)
+        sheet = created.json
+        self.assertEqual(sheet["status"], "draft")
+        self.assertEqual(self.client.post(f"/api/sheets/{sheet['id']}/submit").json["status"], "submitted")
 
-    def test_admin_can_change_user_roles(self):
-        self.login("admin@apexrealms.com")
-        with self.app.app_context():
-            player = query("SELECT id FROM users WHERE email=?", ("jogador@apexrealms.com",), one=True)
-        response = self.client.post(f"/admin/users/{player['id']}/role", data={"role": "master"})
-        self.assertEqual(response.status_code, 302)
-        with self.app.app_context():
-            self.assertEqual(query("SELECT role FROM users WHERE id=?", (player["id"],), one=True)["role"], "master")
+        self.logout()
+        self.login("mestre1@example.com")
+        requested = self.client.post(f"/api/sheets/{sheet['id']}/review", json={
+            "status": "needs_changes",
+            "comment": "Revise os pontos de vida.",
+        })
+        self.assertEqual(requested.status_code, 200)
+        self.assertEqual(requested.json["master_comment"], "Revise os pontos de vida.")
+        approved = self.client.post(f"/api/sheets/{sheet['id']}/review", json={"status": "approved", "comment": "Pronta para jogar."})
+        self.assertEqual(approved.json["status"], "approved")
 
-        self.client.get("/logout")
-        self.login("jogador@apexrealms.com")
-        self.assertEqual(self.client.get("/campaign/new").status_code, 200)
+        self.logout()
+        self.login("player@example.com")
+        visible = self.client.get("/api/sheets").json["sheets"][0]
+        self.assertEqual(visible["master_comment"], "Pronta para jogar.")
+        edited = self.client.patch(f"/api/sheets/{sheet['id']}", json={"data": {"className": "Maga", "level": 6}})
+        self.assertEqual(edited.json["status"], "submitted")
+        self.assertEqual(edited.json["revision"], 2)
 
-    def test_map_upload_grid_update_and_delete(self):
-        self.login()
+    def test_sheet_and_image_permissions(self):
+        self.login("mestre1@example.com")
+        campaign = self.create_campaign()
+        self.logout()
+        self.login("player@example.com")
+        self.client.post("/api/campaigns/join", json={"code": campaign["invite_code"]})
+        sheet = self.client.post("/api/sheets", json={"name": "Kael", "campaign_id": campaign["id"], "data": {}}).json
+        bad_image = self.client.post(
+            f"/api/sheets/{sheet['id']}/avatar",
+            data={"image": (io.BytesIO(b"not-an-image"), "avatar.png")},
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(bad_image.status_code, 400)
         png = b"\x89PNG\r\n\x1a\n" + b"0" * 100
-        response = self.client.post("/api/campaign/1/map/upload", data={
-            "name": "Arena", "grid_size": "64", "image": (io.BytesIO(png), "arena.png")
-        }, content_type="multipart/form-data")
-        self.assertEqual(response.status_code, 200)
-        map_id = response.json["id"]
-        self.assertEqual(self.client.patch(f"/api/campaign/1/map/{map_id}", json={
-            "grid_size": 72, "grid_enabled": False, "fog_enabled": True
-        }).status_code, 200)
-        with self.app.app_context():
-            scene = query("SELECT * FROM maps WHERE id=?", (map_id,), one=True)
-            self.assertEqual(scene["grid_size"], 72)
-            self.assertEqual(scene["grid_enabled"], 0)
-            self.assertEqual(scene["fog_enabled"], 1)
-        self.assertEqual(self.client.delete(f"/api/campaign/1/map/{map_id}").status_code, 200)
+        valid_image = self.client.post(
+            f"/api/sheets/{sheet['id']}/avatar",
+            data={"image": (io.BytesIO(png), "avatar.png")},
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(valid_image.status_code, 200)
 
-    def test_sheet_update_and_permissions(self):
-        self.login()
-        payload = {"defense": 18, "speed": 12, "temp_hp": 5, "attributes": {"for": 16}, "inventory": "Espada"}
-        self.assertEqual(self.client.patch("/api/campaign/1/token/1", json=payload).status_code, 200)
-        sheet = self.client.get("/api/campaign/1/token/1/sheet").json
-        self.assertEqual(sheet["defense"], 18)
-        self.assertEqual(sheet["attributes"]["for"], 16)
-        self.client.get("/logout")
-        self.login("jogador@apexrealms.com")
-        self.assertEqual(self.client.delete("/api/campaign/1/token/2").status_code, 403)
-
-    def test_combat_damage_temp_hp_heal_and_chat(self):
-        self.login()
-        self.client.patch("/api/campaign/1/token/1", json={"hp": 30, "max_hp": 40, "temp_hp": 5})
-        self.assertEqual(self.client.post("/api/campaign/1/combat/toggle").json["active"], 1)
-        damage = self.client.post("/api/campaign/1/combat/action", json={"token_id": 1, "action": "damage", "amount": 8}).json
-        self.assertEqual((damage["hp"], damage["temp_hp"]), (27, 0))
-        heal = self.client.post("/api/campaign/1/combat/action", json={"token_id": 1, "action": "heal", "amount": 50}).json
-        self.assertEqual(heal["hp"], 40)
-        with self.app.app_context():
-            self.assertTrue(query("SELECT id FROM chat_messages WHERE campaign_id=1 AND kind='combat'", one=True))
-
-    def test_initiative_rounds_roll_and_chat(self):
-        self.login()
-        self.client.post("/api/campaign/1/combat/toggle")
-        for _ in range(3):
-            self.assertEqual(self.client.post("/api/campaign/1/initiative/next").status_code, 200)
-        with self.app.app_context():
-            self.assertGreaterEqual(query("SELECT round FROM combat_state WHERE campaign_id=1", one=True)["round"], 2)
-        self.assertEqual(self.client.post("/api/campaign/1/roll", json={"formula": "2d6+3"}).status_code, 200)
-        self.assertEqual(self.client.post("/api/campaign/1/roll", json={"formula": "banana"}).status_code, 400)
-        self.assertEqual(self.client.post("/api/campaign/1/chat", json={"content": "Olá"}).status_code, 200)
-
-    def test_attack_and_roll_all_initiative(self):
-        self.login()
-        self.client.patch("/api/campaign/1/token/2", json={"defense": 1, "hp": 50, "max_hp": 60})
-        attack = self.client.post("/api/campaign/1/combat/attack", json={
-            "attacker_id": 1, "target_id": 2, "bonus": 20, "damage": "1d6+2"
-        })
-        self.assertEqual(attack.status_code, 200)
-        self.assertTrue(attack.json["hit"])
-        self.assertGreater(attack.json["damage"], 0)
-        rolled = self.client.post("/api/campaign/1/initiative/roll-all")
-        self.assertEqual(rolled.status_code, 200)
-        self.assertEqual(rolled.json["count"], 3)
-
-    def test_security_rejects_player_combat_and_foreign_sheet(self):
-        self.login("jogador@apexrealms.com")
-        self.assertEqual(self.client.post("/api/campaign/1/combat/toggle").status_code, 403)
-        self.assertEqual(self.client.post("/api/campaign/1/combat/action", json={
-            "token_id": 2, "action": "damage", "amount": 999
-        }).status_code, 403)
-        self.assertEqual(self.client.get("/api/campaign/1/token/2/sheet").status_code, 403)
-        self.assertEqual(self.client.get("/api/campaign/1/token/1/sheet").status_code, 200)
-
-    def test_upload_validation_and_grid_limits(self):
-        self.login()
-        bad = self.client.post("/api/campaign/1/map/upload", data={
-            "name": "Arquivo ruim", "image": (io.BytesIO(b"not-an-image"), "mapa.exe")
-        }, content_type="multipart/form-data")
-        self.assertEqual(bad.status_code, 400)
-        response = self.client.patch("/api/campaign/1/map/1", json={"grid_size": 999, "grid_enabled": True})
-        self.assertEqual(response.status_code, 200)
-        with self.app.app_context():
-            self.assertEqual(query("SELECT grid_size FROM maps WHERE id=1", one=True)["grid_size"], 200)
+        self.logout()
+        self.login("mestre2@example.com")
+        self.assertEqual(self.client.post(f"/api/sheets/{sheet['id']}/review", json={"status": "approved"}).status_code, 403)
 
 
 if __name__ == "__main__":

@@ -1,31 +1,103 @@
 <!doctype html>
 <html lang="pt-BR">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Minhas Fichas | Apex Realms</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/css/style.css?v=portal-brand-v1"></head>
-<body class="product-page sheets-hub-page">
-  <aside class="app-sidebar"><a class="app-logo" href="index.html"><svg class="realm-mark" viewBox="0 0 64 64"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="#a47cff" stroke-width="4"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="#55dfff" stroke-width="2"/></svg><span><b>APEX</b><em>REALMS</em></span></a><nav class="app-nav"><small>GERENCIAMENTO</small><a href="dashboard.html"><i>H</i>Dashboard</a><a href="campanhas.html"><i>C</i>Campanhas</a><a href="salas.html"><i>S</i>Salas</a><a class="active" href="fichas.html"><i>F</i>Minhas fichas</a><a href="biblioteca.html"><i>B</i>Biblioteca</a><small>MESTRE</small><a href="mestre.html"><i>M</i>Painel do Mestre</a><a href="fichas-jogadores.html"><i>J</i>Fichas dos jogadores</a><a href="configuracoes.html"><i>A</i>Configuracoes</a></nav><div class="sidebar-profile"><i class="portrait kael"></i><span><b data-user-name>Visitante Apex</b><small><span data-user-role>Conta</span> ativa</small></span><button data-logout>Sair</button></div></aside>
-  <main class="app-main">
-    <header class="app-topbar"><div><small>PERSONAGENS FORA DA MESA</small><h1>Minhas Fichas</h1></div><div class="top-actions"><button class="quiet-button" data-demo-action>Importar ficha</button><button class="btn btn-primary" id="new-sheet">+ Criar nova ficha</button></div></header>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Minhas fichas | Apex Realms</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=player-sheets-v1">
+</head>
+<body class="product-page player-sheets-page">
+  <aside class="app-sidebar">
+    <a class="app-logo" href="index.html" aria-label="Apex Realms"><svg class="realm-mark" viewBox="0 0 64 64"><path d="M32 4a28 28 0 1 0 28 28M46 10a28 28 0 0 1 10 19" fill="none" stroke="#a47cff" stroke-width="4"/><path d="m32 14 14 9v18l-14 9-14-9V23zM18 23l14 8 14-8M32 31v19" fill="none" stroke="#55dfff" stroke-width="2"/></svg><span><b>APEX</b><em>REALMS</em></span></a>
+    <nav class="app-nav" aria-label="Navegacao principal">
+      <small>JOGADOR</small>
+      <a href="dashboard.html"><i>H</i>Dashboard</a>
+      <a href="campanhas.html"><i>C</i>Campanhas</a>
+      <a class="active" href="fichas.html"><i>F</i>Minhas fichas</a>
+      <a href="salas.html"><i>S</i>Salas</a>
+      <small>CONTA</small>
+      <a href="configuracoes.html"><i>A</i>Configuracoes</a>
+    </nav>
+    <div class="sidebar-profile"><span class="master-avatar" data-user-initial>A</span><span><b data-user-name>Jogador Apex</b><small><span data-user-role>Jogador</span> ativo</small></span><button data-logout>Sair</button></div>
+  </aside>
 
-    <section class="sheets-hub-hero"><div><span class="status-live status-idle"><i></i> NENHUMA FICHA CRIADA</span><h2>Seus personagens vao viver aqui.</h2><p>Crie, organize e edite personagens sem precisar entrar em uma sessao. A biblioteca comeca vazia para receber dados reais dos jogadores.</p><div class="sheet-hub-actions"><button class="btn btn-primary" id="new-sheet-card">Criar primeira ficha</button><a class="quiet-button" href="#sheet-permissions">Como funcionam as permissoes</a></div></div><div class="active-sheet-preview"><span><small>ESTADO INICIAL</small><b>Nenhum personagem ativo</b><em>Crie uma ficha para vincular a uma campanha.</em><strong>0 <small>fichas</small></strong></span></div></section>
+  <main class="app-main player-sheets-main">
+    <header class="player-sheets-header">
+      <div><small>PERSONAGENS E AVENTURAS</small><h1>Minhas fichas</h1><p>Crie, vincule e envie seus personagens para aprovacao do Mestre.</p></div>
+      <button class="btn btn-primary" type="button" data-player-sheet-new>Criar ficha</button>
+    </header>
 
-    <section class="sheet-library-toolbar">
-      <label class="sheet-search">Buscar<input id="sheet-search" placeholder="Buscar ficha por nome, classe ou campanha"></label>
-      <select id="filter-system" aria-label="Filtrar por sistema"><option value="all">Todos os sistemas</option><option value="dnd5e">D&D 5e</option></select>
-      <select id="filter-campaign" aria-label="Filtrar por campanha"><option value="all">Todas as campanhas</option><option value="none">Sem campanha</option></select>
-      <select id="filter-class" aria-label="Filtrar por classe"><option value="all">Todas as classes</option></select>
-      <select id="filter-level" aria-label="Filtrar por nivel"><option value="all">Todos os niveis</option></select>
-      <select id="filter-status" aria-label="Filtrar por status"><option value="all">Todos os status</option><option value="active">Ativa</option><option value="archived">Arquivada</option></select>
+    <section class="player-storage-note" aria-label="Modo de persistencia">
+      <i></i><div><b>Dados deste navegador</b><span>Esta publicacao estatica usa armazenamento local. O backend Flask possui persistencia propria quando implantado.</span></div>
     </section>
 
-    <section class="sheet-hub-heading"><div><small>BIBLIOTECA DE PERSONAGENS</small><h2>0 fichas</h2></div><div><button class="active" data-sheet-view="all">Todas</button><button data-sheet-view="favorites">Favoritas</button><button data-sheet-view="archived">Arquivadas</button></div></section>
-    <section class="my-sheet-grid" id="my-sheet-grid">
-      <article class="new-sheet-card"><button type="button" id="new-sheet-card-secondary"><i>+</i><h3>Criar nova ficha</h3><p>Comece com D&D 5e. Outros sistemas serao adicionados a mesma biblioteca.</p></button></article>
+    <section class="player-sheets-toolbar" aria-label="Filtros de fichas">
+      <label><span>Campanha</span><select data-player-sheet-campaign><option value="all">Todas as campanhas</option></select></label>
+      <label><span>Status</span><select data-player-sheet-status><option value="all">Todos os status</option><option>Rascunho</option><option>Enviada</option><option>Aprovada</option><option>Precisa de ajuste</option></select></label>
+      <label class="search"><span>Busca</span><input type="search" data-player-sheet-search placeholder="Nome, classe ou raca"></label>
+      <button type="button" data-player-sheet-clear>Limpar</button>
     </section>
-    <p class="sheet-empty-state show" id="sheet-empty-state">Nenhuma ficha cadastrada ainda.</p>
 
-    <section class="sheet-permissions-overview" id="sheet-permissions"><div><small>CONTROLE E PRIVACIDADE</small><h2>O jogador decide o que cada pessoa ve.</h2><p>A ficha continua pertencendo ao jogador. Mestres recebem acesso apenas quando ela e vinculada a uma campanha.</p></div><div class="permission-explainer"><span><i>F</i><b>Dono da ficha</b><small>Edita, organiza, arquiva e escolhe o compartilhamento.</small></span><span><i>M</i><b>Mestre da campanha</b><small>Visualiza, aprova, bloqueia edicao e adiciona notas privadas.</small></span><span><i>G</i><b>Outros jogadores</b><small>Visualizam somente informacoes liberadas pelo dono.</small></span></div></section>
+    <section class="player-sheets-summary" data-player-sheet-summary aria-label="Resumo das fichas"></section>
+
+    <section class="player-sheets-results">
+      <header><div><small>ARQUIVO DO JOGADOR</small><h2>Personagens</h2></div><b data-player-sheet-count>0</b></header>
+      <div class="player-sheets-grid" data-player-sheets-list></div>
+    </section>
   </main>
 
-  <div class="modal-backdrop sheet-create-modal" id="sheet-create-modal"><section class="sheet-create-dialog"><header><div><small>NOVA FICHA</small><h2>Escolha o sistema</h2><p>A estrutura ficara pronta para novos sistemas no futuro.</p></div><button class="modal-close">x</button></header><div class="sheet-system-options"><button class="active" data-system-choice="dnd5e"><i>D20</i><span><b>Dungeons & Dragons 5e</b><small>Ficha completa com atributos, combate, pericias, magias e inventario.</small></span><em>DISPONIVEL</em></button><button disabled><i>+</i><span><b>Outros sistemas</b><small>Tormenta 20, Pathfinder e sistemas proprios.</small></span><em>EM BREVE</em></button></div><footer><button class="quiet-button modal-close">Cancelar</button><a class="btn btn-primary" href="ficha-dnd.html">Criar ficha D&D 5e -></a></footer></section></div>
-  <script src="assets/js/app.js"></script><script src="assets/js/fichas.js"></script>
-</body></html>
+  <dialog class="player-sheet-dialog" data-player-sheet-dialog>
+    <form data-player-sheet-form>
+      <input type="hidden" name="id">
+      <header>
+        <div class="player-sheet-avatar" data-player-sheet-avatar><span>F</span></div>
+        <div><small data-player-sheet-kicker>NOVA FICHA</small><h2 data-player-sheet-title>Criar personagem</h2><p data-player-sheet-review-state>Salve como rascunho e envie quando estiver pronta.</p></div>
+        <label class="player-sheet-photo">Enviar retrato<input type="file" name="portraitFile" accept="image/jpeg,image/png,image/webp"></label>
+        <button type="button" data-player-sheet-close aria-label="Fechar">&times;</button>
+      </header>
+
+      <div class="player-sheet-review" data-player-sheet-review hidden><small>COMENTARIO DO MESTRE</small><p></p></div>
+
+      <nav class="player-sheet-tabs" aria-label="Secoes da ficha">
+        <button class="active" type="button" data-player-sheet-tab="identity">Identidade</button>
+        <button type="button" data-player-sheet-tab="attributes">Atributos</button>
+        <button type="button" data-player-sheet-tab="combat">Combate</button>
+        <button type="button" data-player-sheet-tab="details">Detalhes</button>
+      </nav>
+
+      <div class="player-sheet-panels">
+        <section class="active" data-player-sheet-panel="identity">
+          <div class="player-sheet-form-grid">
+            <label><span>Nome do personagem</span><input name="name" required maxlength="80"></label>
+            <label><span>Campanha</span><select name="campaignId" data-player-sheet-form-campaign><option value="">Sem campanha</option></select></label>
+            <label><span>Sistema</span><select name="system"><option>D&D 5e</option><option>Tormenta 20</option><option>Pathfinder</option><option>Ordem Paranormal</option><option>Sistema proprio</option></select></label>
+            <label><span>Classe</span><input name="className" maxlength="80"></label>
+            <label><span>Raca / especie</span><input name="race" maxlength="80"></label>
+            <label><span>Nivel</span><input name="level" type="number" min="1" max="30" value="1"></label>
+            <label class="wide"><span>Conceito e historia curta</span><textarea name="concept" maxlength="1600"></textarea></label>
+          </div>
+        </section>
+        <section data-player-sheet-panel="attributes">
+          <div class="player-sheet-abilities"><label>Forca<input name="str" type="number" min="1" max="30" value="10"></label><label>Destreza<input name="dex" type="number" min="1" max="30" value="10"></label><label>Constituicao<input name="con" type="number" min="1" max="30" value="10"></label><label>Inteligencia<input name="int" type="number" min="1" max="30" value="10"></label><label>Sabedoria<input name="wis" type="number" min="1" max="30" value="10"></label><label>Carisma<input name="cha" type="number" min="1" max="30" value="10"></label></div>
+          <label class="player-sheet-wide-field"><span>Pericias e proficiencias</span><textarea name="skills" maxlength="1800"></textarea></label>
+        </section>
+        <section data-player-sheet-panel="combat">
+          <div class="player-sheet-form-grid compact"><label><span>PV atual</span><input name="hpCurrent" type="number" min="0" value="0"></label><label><span>PV maximo</span><input name="hpMax" type="number" min="0" value="0"></label><label><span>Classe de armadura</span><input name="armorClass" type="number" min="0" value="10"></label><label><span>Iniciativa</span><input name="initiative" type="number" value="0"></label><label class="wide"><span>Ataques e habilidades</span><textarea name="attacks" maxlength="1800"></textarea></label></div>
+        </section>
+        <section data-player-sheet-panel="details">
+          <div class="player-sheet-form-grid"><label class="wide"><span>Inventario</span><textarea name="inventory" maxlength="2200"></textarea></label><label class="wide"><span>Magias</span><textarea name="spells" maxlength="2200"></textarea></label><label class="wide"><span>Anotacoes</span><textarea name="notes" maxlength="2200"></textarea></label></div>
+        </section>
+      </div>
+
+      <footer><span data-player-sheet-save-hint>Rascunho local</span><div><button type="button" data-player-sheet-close>Cancelar</button><button class="btn btn-primary" type="submit">Salvar ficha</button></div></footer>
+    </form>
+  </dialog>
+
+  <script src="assets/js/mvp-storage.js?v=mvp-core-v1"></script>
+  <script src="assets/js/app.js?v=mvp-core-v1"></script>
+  <script src="assets/js/fichas.js?v=player-sheets-v1"></script>
+</body>
+</html>
