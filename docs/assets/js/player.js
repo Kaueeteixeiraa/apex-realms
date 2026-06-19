@@ -7,8 +7,8 @@
   const KEYS = {
     campaigns: "apex-realms-campaigns",
     players: "apex_players",
-    sheets: "apex-realms-master-sheets",
-    sheetsAlias: "apex_character_sheets",
+    sheets: "apex_character_sheets",
+    sheetsAlias: "apex-realms-master-sheets",
     profile: "apex_player_profile"
   };
 
@@ -91,10 +91,17 @@
     const campaign = activeCampaign();
     return {
       id: `sheet-${userKey() || "player"}`,
+      ownerId: userKey(),
       ownerEmail: userKey(),
+      ownerRole: "player",
+      owner: profile.nickname || profile.displayName || "Jogador",
       campaignId: campaign?.id || "",
       name: profile.nickname || "Personagem Apex",
       type: "Personagem",
+      system: campaign?.system || "D&D 5e",
+      status: "Rascunho",
+      revision: 1,
+      masterComment: "",
       race: "Humano",
       className: "Aventureiro",
       level: 1,
@@ -111,12 +118,21 @@
       story: "Um aventureiro pronto para entrar no Apex Realms.",
       custom: "",
       portrait: "",
+      createdAt: now(),
       updatedAt: now()
     };
   }
 
+  function sharedSheets() {
+    const primary = readStore(KEYS.sheets, []);
+    return primary.length ? primary : readStore(KEYS.sheetsAlias, []);
+  }
+
   function getSheet() {
-    const saved = readStore(sheetKey(), null);
+    const shared = sharedSheets()
+      .filter(item => item.ownerRole !== "master" && normalizeEmail(item.ownerId || item.ownerEmail) === userKey())
+      .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))[0];
+    const saved = shared || readStore(sheetKey(), null);
     const sheet = saved && typeof saved === "object" ? {...defaultSheet(), ...saved} : defaultSheet();
     const campaign = activeCampaign();
     if (campaign && !sheet.campaignId) sheet.campaignId = campaign.id;
@@ -124,8 +140,7 @@
   }
 
   function saveSharedSheets(sheet) {
-    const primary = readStore(KEYS.sheets, []);
-    const sheets = primary.filter(item => item.id !== sheet.id && item.ownerEmail !== sheet.ownerEmail);
+    const sheets = sharedSheets().filter(item => item.id !== sheet.id);
     const next = [{...sheet, updatedAt: now()}, ...sheets];
     writeStore(KEYS.sheets, next);
     writeStore(KEYS.sheetsAlias, next);
@@ -164,18 +179,25 @@
   }
 
   function saveSheet(sheet) {
-    const normalized = {...defaultSheet(), ...sheet, ownerEmail: userKey(), type: "Personagem", updatedAt: now()};
+    const previous = sharedSheets().find(item => item.id === sheet.id);
+    const approvedEdit = previous?.status === "Aprovada";
+    const normalized = {
+      ...defaultSheet(),
+      ...sheet,
+      ownerId: userKey(),
+      ownerEmail: userKey(),
+      ownerRole: "player",
+      owner: getProfile().nickname || getProfile().displayName || "Jogador",
+      type: "Personagem",
+      status: approvedEdit ? "Enviada" : (sheet.status || "Rascunho"),
+      revision: Number(previous?.revision || sheet.revision || 1) + (approvedEdit ? 1 : 0),
+      submittedAt: approvedEdit ? now() : sheet.submittedAt,
+      updatedAt: now()
+    };
     writeStore(sheetKey(), normalized);
     saveSharedSheets(normalized);
     ensurePlayerRecord(normalized);
     return normalized;
-  }
-
-  function ensureSheetForTable() {
-    const campaign = activeCampaign();
-    const sheet = getSheet();
-    if (campaign && !sheet.campaignId) sheet.campaignId = campaign.id;
-    saveSheet(sheet);
   }
 
   function renderUserChrome() {
@@ -209,9 +231,6 @@
       const result = window.ApexInvites?.joinByCode?.(code, user());
       toast(result?.message || "Convite processado.");
       if (result?.ok) {
-        const sheet = getSheet();
-        sheet.campaignId = result.campaign.id;
-        saveSheet(sheet);
         setTimeout(() => window.location.reload(), 450);
       }
     });
@@ -299,6 +318,7 @@
       campaignSelect.value = sheet.campaignId || "";
     }
     updateSheetPreview(sheet);
+    updateSheetReview(sheet);
     form.addEventListener("submit", event => {
       event.preventDefault();
       const data = Object.fromEntries(new FormData(form).entries());
@@ -314,7 +334,19 @@
         resourceMax: Number(data.resourceMax || 0)
       });
       updateSheetPreview(next);
+      updateSheetReview(next);
       toast("Ficha do jogador salva e sincronizada com a mesa.");
+    });
+    document.querySelector("[data-player-sheet-submit]")?.addEventListener("click", () => {
+      const current = getSheet();
+      if (!current.campaignId) {
+        toast("Vincule a ficha a uma campanha antes de enviar.");
+        return;
+      }
+      const next = saveSheet({...current, status: "Enviada", submittedAt: now()});
+      updateSheetPreview(next);
+      updateSheetReview(next);
+      toast("Ficha enviada para aprovacao do Mestre.");
     });
   }
 
@@ -323,6 +355,16 @@
     if (!preview) return;
     const percent = sheet.hpMax ? Math.max(0, Math.min(100, Math.round(sheet.hpCurrent / sheet.hpMax * 100))) : 0;
     preview.innerHTML = `<small>${sheet.race} - ${sheet.className}</small><h3>${sheet.name}</h3><p>Nivel ${sheet.level} - Defesa ${sheet.armorClass} - Iniciativa ${sheet.initiative}</p><div class="player-hp-bar"><i style="width:${percent}%"></i></div><p>${sheet.hpCurrent}/${sheet.hpMax} PV</p>`;
+  }
+
+  function updateSheetReview(sheet) {
+    const panel = document.querySelector("[data-player-sheet-review]");
+    if (!panel) return;
+    panel.querySelector("[data-player-sheet-status]").textContent = sheet.status || "Rascunho";
+    const comment = panel.querySelector("[data-player-sheet-comment]");
+    comment.textContent = sheet.masterComment || "O retorno do Mestre aparecera aqui.";
+    const submit = panel.querySelector("[data-player-sheet-submit]");
+    submit.hidden = !sheet.campaignId || ["Enviada", "Aprovada"].includes(sheet.status);
   }
 
   function renderProfile() {
@@ -350,15 +392,12 @@
       event.preventDefault();
       const next = {...profile, ...Object.fromEntries(new FormData(form).entries())};
       saveProfile(next);
-      const sheet = getSheet();
-      saveSheet(sheet);
       renderUserChrome();
       toast("Perfil do jogador salvo.");
     });
   }
 
   renderUserChrome();
-  ensureSheetForTable();
   renderDashboard();
   renderCampaigns();
   renderSheet();

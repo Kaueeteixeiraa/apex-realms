@@ -33,7 +33,7 @@
           <p>Edite somente seu personagem. Ao salvar, a ficha fica disponivel na mesa da campanha.</p>
         </div>
         <div class="player-actions">
-          <a class="player-ghost" href="campaigns.html">Campanhas</a>
+          <a class="player-ghost" href="../fichas.html">Todas as fichas</a>
           <a class="player-btn" href="table.html">Abrir mesa</a>
         </div>
       </header>
@@ -102,6 +102,12 @@
         <aside class="player-panel">
           <small class="player-kicker">Preview</small>
           <div class="player-card" data-player-sheet-preview></div>
+          <div class="player-card" style="margin-top:14px" data-player-sheet-review>
+            <small>Revisao do Mestre</small>
+            <h3 data-player-sheet-status>Rascunho</h3>
+            <p data-player-sheet-comment>O retorno do Mestre aparecera aqui.</p>
+            <button class="player-btn" type="button" data-player-sheet-submit>Enviar ao Mestre</button>
+          </div>
           <div class="player-card" style="margin-top:14px">
             <small>Permissoes</small>
             <h3>Controle do jogador</h3>
@@ -112,7 +118,8 @@
     </main>
   </div>
 
-  <script src="../assets/js/app.js?v=player-area-v1"></script>
-  <script src="../assets/js/player.js?v=player-area-v1"></script>
+  <script src="../assets/js/mvp-storage.js?v=mvp-core-v1"></script>
+  <script src="../assets/js/app.js?v=mvp-core-v2"></script>
+  <script src="../assets/js/player.js?v=mvp-functional-v2"></script>
 </body>
 </html>

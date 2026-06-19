@@ -65,12 +65,15 @@
     write(KEYS.library, read(KEYS.library, []).map(item => ({...item, id: item.id || makeId("lib"), ownerId: item.ownerId || owner})));
     const primary = read(KEYS.sheets, []);
     const sheets = primary.length ? primary : read(KEYS.sheetsLegacy, []);
-    const migrated = sheets.map(sheet => ({
-      ...sheet,
-      id: sheet.id || makeId("sheet"),
-      ownerId: sheet.ownerId || (sheet.ownerRole === "player" ? normalizeEmail(sheet.ownerEmail) : owner),
-      ownerRole: sheet.ownerRole || "master"
-    }));
+    const migrated = sheets.map(sheet => {
+      const ownerRole = sheet.ownerRole || (sheet.ownerEmail ? "player" : "master");
+      return {
+        ...sheet,
+        id: sheet.id || makeId("sheet"),
+        ownerId: sheet.ownerId || (ownerRole === "player" ? normalizeEmail(sheet.ownerEmail) : owner),
+        ownerRole
+      };
+    });
     write(KEYS.sheets, migrated);
     write(KEYS.sheetsLegacy, migrated);
   };

@@ -893,6 +893,7 @@ function bindSheetsPage() {
     const normalized = {...sheetDefaults, ...raw};
     numericFields.forEach(name => { normalized[name] = Number(normalized[name] ?? sheetDefaults[name] ?? 0); });
     const legacyStatus = {Pendente: "Enviada", Bloqueada: "Precisa de ajuste"}[raw.status] || raw.status;
+    const ownerRole = raw.ownerRole || (raw.ownerEmail ? "player" : "master");
     return {
       ...normalized,
       id: raw.id || `sheet-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -902,8 +903,8 @@ function bindSheetsPage() {
       system: raw.system || matchedCampaign?.system || "D&D 5e",
       owner: String(raw.owner || "Mestre"),
       status: sheetStatuses.includes(legacyStatus) ? legacyStatus : "Rascunho",
-      ownerId: raw.ownerId || currentMasterOwnerId(),
-      ownerRole: raw.ownerRole || "master",
+      ownerId: raw.ownerId || (ownerRole === "player" ? String(raw.ownerEmail || "").trim().toLowerCase() : currentMasterOwnerId()),
+      ownerRole,
       portrait: String(raw.portrait || "").startsWith("data:image/") ? raw.portrait : "",
       createdAt,
       updatedAt: raw.updatedAt || createdAt
