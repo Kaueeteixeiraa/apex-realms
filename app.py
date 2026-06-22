@@ -885,6 +885,9 @@ def create_app():
             "story": str(data.get("story", token["story"]))[:10000], "custom_fields": str(data.get("custom_fields", token["custom_fields"]))[:5000],
             "resource": max(0, int(data.get("resource", token["resource"]))), "max_resource": max(0, int(data.get("max_resource", token["max_resource"]))),
             "buffs": str(data.get("buffs", token["buffs"]))[:1000], "debuffs": str(data.get("debuffs", token["debuffs"]))[:1000],
+            "weaknesses": str(data.get("weaknesses", token["weaknesses"]))[:2000] if is_master else token["weaknesses"],
+            "resistances": str(data.get("resistances", token["resistances"]))[:2000] if is_master else token["resistances"],
+            "loot": str(data.get("loot", token["loot"]))[:3000] if is_master else token["loot"],
             "public_name": str(data.get("public_name", token["public_name"]))[:100] if is_master else token["public_name"],
             "card_kind": card_kind, "visibility": visibility, "image_visibility": image_visibility,
             "show_life_state": 1 if (data.get("show_life_state", token["show_life_state"]) if is_master else token["show_life_state"]) else 0,
@@ -898,7 +901,8 @@ def create_app():
                    inventory=:inventory,abilities=:abilities,spells=:spells,story=:story,custom_fields=:custom_fields,
                    resource=:resource,max_resource=:max_resource,buffs=:buffs,debuffs=:debuffs,public_name=:public_name,
                    card_kind=:card_kind,visibility=:visibility,image_visibility=:image_visibility,
-                   show_life_state=:show_life_state,share_class_race=:share_class_race,master_notes=:master_notes,locked=:locked
+                   show_life_state=:show_life_state,share_class_race=:share_class_race,master_notes=:master_notes,
+                   weaknesses=:weaknesses,resistances=:resistances,loot=:loot,locked=:locked
                    WHERE id=:id""", {**fields, "id": token_id})
         return jsonify(token_to_view(query("SELECT * FROM tokens WHERE id=?", (token_id,), one=True), campaign, user))
 
@@ -1078,6 +1082,7 @@ def init_database(app):
             ("share_class_race", "INTEGER NOT NULL DEFAULT 0"), ("resource", "INTEGER NOT NULL DEFAULT 0"),
             ("max_resource", "INTEGER NOT NULL DEFAULT 0"), ("buffs", "TEXT DEFAULT ''"),
             ("debuffs", "TEXT DEFAULT ''"), ("master_notes", "TEXT DEFAULT ''"), ("locked", "INTEGER NOT NULL DEFAULT 0"),
+            ("weaknesses", "TEXT DEFAULT ''"), ("resistances", "TEXT DEFAULT ''"), ("loot", "TEXT DEFAULT ''"),
         ]:
             if name not in columns:
                 get_db().execute(f"ALTER TABLE tokens ADD COLUMN {name} {definition}")

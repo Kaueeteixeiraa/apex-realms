@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash
 
 from app import create_app, init_database
 from database import execute, query
+from services.mvp import health_state
 
 
 class ApexRealmsTestCase(unittest.TestCase):
@@ -48,6 +49,13 @@ class ApexRealmsTestCase(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 201)
         return response.json
+
+    def test_health_states_cover_the_full_combat_scale(self):
+        self.assertEqual(health_state(100, 100), "Saudavel")
+        self.assertEqual(health_state(74, 100), "Ferido")
+        self.assertEqual(health_state(49, 100), "Muito Ferido")
+        self.assertEqual(health_state(24, 100), "Critico")
+        self.assertEqual(health_state(0, 100), "Caido")
 
     def test_campaign_crud_visibility_invite_and_join(self):
         self.login("mestre1@example.com")
@@ -275,7 +283,7 @@ class ApexRealmsTestCase(unittest.TestCase):
         self.assertEqual(monster["health_state"], "Ferido")
         self.assertEqual(monster["image_mode"], "silhouette")
         self.assertEqual(monster["image_url"], "")
-        for private_field in ("hp", "max_hp", "resource", "defense", "attributes", "notes", "master_notes"):
+        for private_field in ("hp", "max_hp", "resource", "defense", "attributes", "notes", "master_notes", "weaknesses", "resistances", "loot"):
             self.assertNotIn(private_field, monster)
         self.assertEqual(secret["name"], "Criatura Velada")
         self.assertEqual(secret["card_kind"], "monster")

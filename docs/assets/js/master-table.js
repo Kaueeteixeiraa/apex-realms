@@ -11,7 +11,8 @@
     library: "apex-realms-master-library",
     profile: "apex_master_profile",
     notes: "apex-realms-master-notes",
-    activeCampaign: "apex-realms-table-campaign"
+    activeCampaign: "apex-realms-table-campaign",
+    pendingResource: "apex-realms-pending-table-resource"
   };
   const WORLD = {width: 1600, height: 1000, grid: 50};
   const body = document.body;
@@ -29,6 +30,9 @@
     mapStage: $("[data-map-stage]"),
     mapWorld: $("[data-map-world]"),
     mapImage: $("[data-map-image]"),
+    objectLayer: $("[data-object-layer]"),
+    markerLayer: $("[data-marker-layer]"),
+    fogLayer: $("[data-fog-layer]"),
     tokenLayer: $("[data-token-layer]"),
     effectLayer: $("[data-effect-layer]"),
     measureLayer: $("[data-measure-layer]"),
@@ -43,6 +47,11 @@
     tokenForm: $("[data-token-form]"),
     settingsDialog: $("[data-card-settings-dialog]"),
     settingsForm: $("[data-card-settings-form]"),
+    healthDialog: $("[data-quick-health-dialog]"),
+    healthForm: $("[data-quick-health-form]"),
+    createDialog: $("[data-quick-create-dialog]"),
+    createForm: $("[data-quick-create-form]"),
+    combatHistory: $("[data-combat-history]"),
     rollAnimation: $("[data-roll-animation]"),
     emptyCampaign: $("[data-empty-campaign]")
   };
@@ -100,7 +109,7 @@
 
   function defaultState(campaign) {
     return {
-      version: 3,
+      version: 4,
       live: false,
       scene: {id: "ruins", name: "Ruinas arcanas", image: "../assets/ruins-map.jpg"},
       scenes: [],
@@ -109,6 +118,10 @@
       grid: true,
       snap: false,
       fog: false,
+      fogReveals: [],
+      markers: [],
+      layers: {terrain: true, objects: true, npcs: true, markers: true, tokens: true, effects: true},
+      combat: {active: false, startedAt: "", history: []},
       cardSettings: {
         displayMode: "card",
         showNarrativeHealth: true,
@@ -135,6 +148,7 @@
   let selectedTokenId = "";
   let selectedTokenIds = new Set();
   let pointer = null;
+  let markerType = "Objetivo";
   let spacePressed = false;
   let saveFrame = 0;
 
@@ -152,11 +166,15 @@
       view: {...fallback.view, ...(saved.view || {})},
       cardSettings: {...fallback.cardSettings, ...(saved.cardSettings || {})},
       initiative: {...fallback.initiative, ...(saved.initiative || {})},
+      combat: {...fallback.combat, ...(saved.combat || {}), history: Array.isArray(saved.combat?.history) ? saved.combat.history : []},
+      layers: {...fallback.layers, ...(saved.layers || {})},
       notes: {...fallback.notes, ...(saved.notes || {})},
       tokens: Array.isArray(saved.tokens) ? saved.tokens.map(normalizeToken) : [],
       chat: Array.isArray(saved.chat) ? saved.chat : [],
       rolls: Array.isArray(saved.rolls) ? saved.rolls : [],
       events: Array.isArray(saved.events) ? saved.events : fallback.events,
+      fogReveals: Array.isArray(saved.fogReveals) ? saved.fogReveals : [],
+      markers: Array.isArray(saved.markers) ? saved.markers : [],
       scenes: Array.isArray(saved.scenes) ? saved.scenes : []
     };
   }
@@ -273,17 +291,22 @@
       portrait: raw.portrait || raw.avatar || raw.image || "",
       className: raw.className || "",
       race: raw.race || "",
+      level: Math.max(0, Number(raw.level || 1)),
       hpCurrent: clamp(Number(raw.hpCurrent ?? raw.hp ?? 0), 0, hpMax || Number(raw.hpCurrent ?? raw.hp ?? 0)),
       hpMax,
       resourceCurrent: Math.max(0, Number(raw.resourceCurrent ?? raw.resource ?? raw.manaCurrent ?? 0)),
       resourceMax: Math.max(0, Number(raw.resourceMax ?? raw.maxResource ?? raw.manaMax ?? 0)),
       armorClass: Math.max(0, Number(raw.armorClass ?? raw.defense ?? 10)),
       initiative: Number(raw.initiative || 0),
+      tempHp: Math.max(0, Number(raw.tempHp ?? raw.temp_hp ?? 0)),
       status: raw.status || (sourceType === "Monstro" ? "Hostil" : "Pronto"),
       conditions: String(raw.conditions || ""),
       buffs: String(raw.buffs || ""),
       debuffs: String(raw.debuffs || ""),
       masterNotes: String(raw.masterNotes || ""),
+      weaknesses: String(raw.weaknesses || raw.fraquezas || ""),
+      resistances: String(raw.resistances || raw.resistencias || ""),
+      loot: String(raw.loot || ""),
       cardKind: raw.cardKind || deriveCardKind(raw),
       visibility: raw.hidden ? "secret" : (raw.visibilityLevel || (['public', 'partial', 'secret'].includes(raw.visibility) ? raw.visibility : (isHero ? "public" : "partial"))),
       imageVisibility: raw.imageVisibility || "real",
@@ -301,12 +324,12 @@
   function healthState(entity) {
     const hp = Math.max(0, Number(entity.hpCurrent || 0));
     const maximum = Math.max(1, Number(entity.hpMax || 1));
-    if (hp === 0) return "Derrotado";
+    if (hp === 0) return "Caido";
     const percent = hp / maximum * 100;
     if (percent >= 75) return "Saudavel";
     if (percent >= 50) return "Ferido";
-    if (percent >= 25) return "Gravemente ferido";
-    return "A beira da morte";
+    if (percent >= 25) return "Muito Ferido";
+    return "Critico";
   }
 
   function publicEntityView(raw) {
@@ -340,6 +363,9 @@
       buffs: "",
       debuffs: "",
       masterNotes: "",
+      weaknesses: "",
+      resistances: "",
+      loot: "",
       status: "",
       hpCurrent: showAllyHp ? entity.hpCurrent : undefined,
       hpMax: showAllyHp ? entity.hpMax : undefined,
@@ -430,6 +456,8 @@
     const numberFrom = pattern => Number(attributeText.match(pattern)?.[1] || 0);
     const parsedHp = numberFrom(/(?:PV|HP)\s*[:=]?\s*(\d+)/i);
     const parsedArmor = numberFrom(/(?:CA|DEF)\s*[:=]?\s*(\d+)/i);
+    const parsedInitiative = numberFrom(/(?:INICIATIVA|INI)\s*[:=]?\s*([+-]?\d+)/i);
+    const parsedAgility = numberFrom(/(?:AGILIDADE|DESTREZA|DES)\s*[:=]?\s*(\d+)/i);
     const sourceType = raw.type || "NPC";
     return {
       id: raw.id || uid("source"),
@@ -448,12 +476,18 @@
       resourceCurrent: Number(raw.resourceCurrent ?? raw.manaCurrent ?? 0),
       resourceMax: Number(raw.resourceMax ?? raw.manaMax ?? 0),
       armorClass: Number(raw.armorClass || raw.defense || parsedArmor || 10),
-      initiative: Number(raw.initiative || 0),
+      initiative: raw.initiative !== undefined && raw.initiative !== "" ? Number(raw.initiative) : (parsedInitiative || (parsedAgility ? Math.floor((parsedAgility - 10) / 2) : 0)),
       status: raw.status || "Pronto",
       conditions: raw.conditions || "",
       buffs: raw.buffs || "",
       debuffs: raw.debuffs || "",
       masterNotes: raw.masterNotes || "",
+      weaknesses: raw.weaknesses || raw.fraquezas || "",
+      resistances: raw.resistances || raw.resistencias || "",
+      loot: raw.loot || "",
+      biome: raw.biome || "Qualquer",
+      profession: raw.profession || "",
+      personality: raw.personality || "",
       tags: raw.tags || "",
       cardKind: raw.cardKind || deriveCardKind({...raw, sourceType}),
       visibilityLevel: raw.visibilityLevel || (sourceType === "Personagem" ? "public" : "partial"),
@@ -518,16 +552,12 @@
         portrait: source.portrait,
         className: source.className,
         race: source.race,
+        level: source.level,
         sourceType: source.type,
-        hpCurrent: source.hpCurrent,
-        hpMax: source.hpMax,
-        resourceCurrent: source.resourceCurrent,
-        resourceMax: source.resourceMax,
-        armorClass: source.armorClass,
-        conditions: source.conditions,
-        buffs: source.buffs,
-        debuffs: source.debuffs,
-        masterNotes: source.masterNotes
+        weaknesses: source.weaknesses || token.weaknesses,
+        resistances: source.resistances || token.resistances,
+        loot: source.loot || token.loot,
+        masterNotes: source.masterNotes || token.masterNotes
       });
     });
     syncInitiative();
@@ -565,7 +595,18 @@
 
   function applyView() {
     elements.mapWorld.style.transform = `translate(-50%, -50%) translate(${state.view.panX}px, ${state.view.panY}px) scale(${state.view.zoom})`;
-    $("[data-zoom-label]").textContent = `${Math.round(state.view.zoom * 100)}%`;
+    const zoomSelect = $("[data-zoom-preset]");
+    if (zoomSelect) {
+      const value = String(state.view.zoom);
+      let custom = zoomSelect.querySelector("option[data-custom]");
+      if (![...zoomSelect.options].some(option => option.value === value)) {
+        custom?.remove();
+        custom = new Option(`${Math.round(state.view.zoom * 100)}%`, value, true, true);
+        custom.dataset.custom = "true";
+        zoomSelect.add(custom);
+      }
+      zoomSelect.value = value;
+    }
   }
 
   function renderMap() {
@@ -575,12 +616,62 @@
     elements.mapArea.classList.toggle("fog-on", state.fog);
     elements.mapArea.classList.toggle("token-mode", state.cardSettings.displayMode === "token");
     elements.mapArea.classList.toggle("card-mode", state.cardSettings.displayMode !== "token");
+    Object.entries(state.layers).forEach(([name, visible]) => elements.mapArea.classList.toggle(`layer-${name}-hidden`, !visible));
     $("[data-grid-toggle]").classList.toggle("active", state.grid);
     $("[data-snap-toggle]").classList.toggle("active", state.snap);
     $("[data-fog-toggle]").classList.toggle("active", state.fog);
     $$('[data-tool]').forEach(button => button.classList.toggle("active", button.dataset.tool === state.tool));
     elements.mapStage.className = `vtt-map-stage tool-${state.tool}`;
+    $$('[data-layer-toggle]').forEach(input => { input.checked = state.layers[input.dataset.layerToggle] !== false; });
+    renderFog();
+    renderMarkers();
     applyView();
+  }
+
+  function renderFog() {
+    if (!elements.fogLayer) return;
+    const context = elements.fogLayer.getContext("2d");
+    context.clearRect(0, 0, WORLD.width, WORLD.height);
+    context.fillStyle = isPlayerMode ? "rgba(3,4,8,.97)" : "rgba(4,4,9,.78)";
+    context.fillRect(0, 0, WORLD.width, WORLD.height);
+    context.globalCompositeOperation = "destination-out";
+    state.fogReveals.forEach(reveal => {
+      const radius = Math.max(70, Number(reveal.radius || 150));
+      const gradient = context.createRadialGradient(reveal.x, reveal.y, radius * .58, reveal.x, reveal.y, radius);
+      gradient.addColorStop(0, "rgba(0,0,0,1)");
+      gradient.addColorStop(.72, "rgba(0,0,0,.92)");
+      gradient.addColorStop(1, "rgba(0,0,0,0)");
+      context.fillStyle = gradient;
+      context.beginPath();
+      context.arc(reveal.x, reveal.y, radius, 0, Math.PI * 2);
+      context.fill();
+    });
+    context.globalCompositeOperation = "source-over";
+  }
+
+  function renderMarkers() {
+    if (!elements.markerLayer) return;
+    elements.markerLayer.replaceChildren();
+    state.markers.forEach(marker => {
+      const button = document.createElement("div");
+      button.setAttribute("role", "button");
+      button.tabIndex = 0;
+      button.className = `vtt-map-marker marker-${String(marker.type).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\W+/g, "-")}`;
+      button.style.left = `${marker.x}px`;
+      button.style.top = `${marker.y}px`;
+      button.dataset.markerId = marker.id;
+      button.innerHTML = `<i></i><span></span>`;
+      button.querySelector("i").textContent = marker.type.slice(0, 1).toUpperCase();
+      button.querySelector("span").textContent = marker.label || marker.type;
+      button.title = isPlayerMode ? marker.type : "Clique para remover";
+      if (!isPlayerMode) button.addEventListener("click", () => {
+        state.markers = state.markers.filter(item => item.id !== marker.id);
+        addEvent("Marcador removido", `${marker.type} foi removido do mapa.`);
+        renderMarkers();
+        saveState();
+      });
+      elements.markerLayer.append(button);
+    });
   }
 
   function rosterCard(source) {
@@ -670,6 +761,7 @@
       portrait: source.portrait,
       className: source.className,
       race: source.race,
+      level: source.level,
       x: 650 + (count % 6) * 60,
       y: 430 + Math.floor(count / 6) * 70,
       hpCurrent: source.hpCurrent,
@@ -678,11 +770,15 @@
       resourceMax: source.resourceMax,
       armorClass: source.armorClass,
       initiative: source.initiative,
+      tempHp: 0,
       status: source.type === "Monstro" ? "Hostil" : "Pronto",
       conditions: source.conditions,
       buffs: source.buffs,
       debuffs: source.debuffs,
       masterNotes: source.masterNotes,
+      weaknesses: source.weaknesses,
+      resistances: source.resistances,
+      loot: source.loot,
       cardKind: source.cardKind,
       visibility: source.visibilityLevel,
       imageVisibility: source.imageVisibility,
@@ -721,6 +817,7 @@
 
   function renderTokens() {
     elements.tokenLayer.replaceChildren();
+    const activeEntry = state.combat.active ? state.initiative.entries[state.initiative.current] : null;
     state.tokens.forEach(rawToken => {
       const token = normalizeToken(rawToken);
       const visible = publicEntityView(token);
@@ -729,12 +826,13 @@
       const healthCanBeShown = visible.canSeeStats || Boolean(visible.narrativeHealth);
       const hpPercent = healthCanBeShown && token.hpMax ? clamp(token.hpCurrent / token.hpMax * 100, 0, 100) : 0;
       const typeClass = token.sourceType === "Monstro" ? "hostile" : token.sourceType === "NPC" ? "npc" : "friendly";
-      const stateClasses = [selectedTokenIds.has(token.id) ? "selected" : "", token.locked || (isPlayerMode && !canControlToken(token)) ? "locked" : "", visible.visibility === "secret" ? "secret" : "", healthCanBeShown && token.hpMax && hpPercent <= 25 ? "low-life" : "", healthCanBeShown && token.hpMax && token.hpCurrent <= 0 ? "defeated" : "", `kind-${visible.cardKind}`].filter(Boolean).join(" ");
+      const narrativeState = healthState(token).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-");
+      const stateClasses = [selectedTokenIds.has(token.id) ? "selected" : "", token.locked || (isPlayerMode && !canControlToken(token)) ? "locked" : "", visible.visibility === "secret" ? "secret" : "", healthCanBeShown && token.hpMax && hpPercent <= 25 ? "low-life" : "", healthCanBeShown && token.hpMax && token.hpCurrent <= 0 ? "defeated" : "", activeEntry?.tokenId === token.id ? "turn-active" : "", `health-${narrativeState}`, `kind-${visible.cardKind}`].filter(Boolean).join(" ");
       button.className = `vtt-token vtt-card-token ${typeClass} ${stateClasses}`;
       button.dataset.tokenId = token.id;
       button.style.left = `${token.x}px`;
       button.style.top = `${token.y}px`;
-      const hoverDetails = visible.canSeeStats ? [`PV ${visible.hpCurrent}/${visible.hpMax}`, visible.canSeeResource && visible.resourceMax ? `RE ${visible.resourceCurrent}/${visible.resourceMax}` : "", visible.canSeeDefense ? `CA ${visible.armorClass}` : "", visible.conditions, visible.masterNotes].filter(Boolean) : [visible.sourceType, visible.narrativeHealth].filter(Boolean);
+      const hoverDetails = visible.canSeeStats ? [`PV ${visible.hpCurrent}/${visible.hpMax}`, token.tempHp ? `Escudo ${token.tempHp}` : "", visible.canSeeResource && visible.resourceMax ? `RE ${visible.resourceCurrent}/${visible.resourceMax}` : "", visible.canSeeDefense ? `CA ${visible.armorClass}` : "", visible.conditions, visible.weaknesses ? `Fraquezas: ${visible.weaknesses}` : "", visible.resistances ? `Resistencias: ${visible.resistances}` : "", visible.loot ? `Loot: ${visible.loot}` : "", visible.masterNotes].filter(Boolean) : [visible.sourceType, visible.narrativeHealth].filter(Boolean);
       button.dataset.cardHover = hoverDetails.join(" | ");
       button.setAttribute("aria-label", `${visible.name}. ${hoverDetails.join(". ")}`);
 
@@ -759,8 +857,14 @@
       const name = document.createElement("strong");
       name.textContent = visible.name;
       const type = document.createElement("small");
-      type.textContent = [visible.className, visible.race].filter(Boolean).join(" / ") || visible.sourceType;
+      type.textContent = [[visible.className, visible.race].filter(Boolean).join(" / "), visible.level ? `Nv. ${visible.level}` : ""].filter(Boolean).join(" - ") || visible.sourceType;
       identity.append(name, type);
+      if (visible.canSeeStats && visible.conditions) {
+        const condition = document.createElement("small");
+        condition.className = "vtt-card-condition";
+        condition.textContent = visible.conditions.split(",")[0].trim();
+        identity.append(condition);
+      }
 
       const footer = document.createElement("span");
       footer.className = "vtt-card-footer";
@@ -778,12 +882,33 @@
           armor.innerHTML = `<small>CA</small><b>${visible.armorClass}</b>`;
           footer.append(armor);
         }
+        if (token.tempHp) {
+          const shield = document.createElement("span");
+          shield.className = "vtt-card-shield";
+          shield.innerHTML = `<small>ESC</small><b>${token.tempHp}</b>`;
+          footer.append(shield);
+        }
       } else {
         const narrative = document.createElement("em");
         narrative.textContent = visible.narrativeHealth || (visible.visibility === "secret" ? "Identidade oculta" : "Informacao publica");
         footer.append(narrative);
       }
       button.append(art, identity, footer);
+      if (!isPlayerMode) {
+        const actions = document.createElement("span");
+        actions.className = "vtt-card-actions";
+        actions.innerHTML = `<i role="button" tabindex="0" data-quick-health="damage" title="Aplicar dano">-</i><i role="button" tabindex="0" data-quick-health="heal" title="Aplicar cura">+</i><i role="button" tabindex="0" data-quick-health="shield" title="Escudo temporario">S</i>`;
+        const triggerHealthAction = event => {
+          const action = event.target.closest("[data-quick-health]");
+          if (!action || (event.type === "keydown" && !["Enter", " "].includes(event.key))) return;
+          event.preventDefault();
+          event.stopPropagation();
+          openQuickHealth(token.id, action.dataset.quickHealth);
+        };
+        actions.addEventListener("click", triggerHealthAction);
+        actions.addEventListener("keydown", triggerHealthAction);
+        button.append(actions);
+      }
       elements.tokenLayer.append(button);
     });
   }
@@ -893,6 +1018,13 @@
 
   function beginPointer(event) {
     if (event.button !== 0) return;
+    const healthAction = event.target.closest("[data-quick-health]");
+    if (healthAction) {
+      if (!isPlayerMode) openQuickHealth(healthAction.closest("[data-token-id]")?.dataset.tokenId, healthAction.dataset.quickHealth);
+      event.preventDefault();
+      return;
+    }
+    if (event.target.closest("[data-marker-id]")) return;
     const tokenElement = event.target.closest("[data-token-id]");
     const wantsPan = state.tool === "pan" || spacePressed;
     if (tokenElement && state.tool === "select" && !wantsPan) {
@@ -936,6 +1068,26 @@
     }
     if (state.tool === "ping") {
       createPing(worldPoint(event));
+      return;
+    }
+    if (state.tool === "reveal") {
+      if (isPlayerMode) return blockPlayerAction("A revelacao do mapa e controlada pelo Mestre.");
+      const point = worldPoint(event);
+      state.fog = true;
+      state.fogReveals.push({id: uid("reveal"), x: point.x, y: point.y, radius: 155});
+      state.fogReveals = state.fogReveals.slice(-24);
+      addEvent("Area revelada", "Uma nova parte do mapa ficou visivel para o grupo.");
+      renderMap();
+      saveState();
+      return;
+    }
+    if (state.tool === "marker") {
+      if (isPlayerMode) return blockPlayerAction("Marcadores permanentes sao controlados pelo Mestre.");
+      const point = snapped(worldPoint(event));
+      state.markers.push({id: uid("marker"), type: markerType, label: markerType, x: point.x, y: point.y, createdAt: now()});
+      addEvent("Marcador adicionado", `${markerType} foi marcado no mapa.`);
+      renderMarkers();
+      saveState();
       return;
     }
     selectedTokenId = "";
@@ -1032,7 +1184,7 @@
 
   function setZoom(value, focusEvent = null) {
     const previous = state.view.zoom;
-    const next = clamp(value, .45, 2.4);
+    const next = clamp(value, .25, 4);
     if (focusEvent && previous !== next) {
       const rect = elements.mapStage.getBoundingClientRect();
       const offsetX = focusEvent.clientX - rect.left - rect.width / 2;
@@ -1076,6 +1228,9 @@
       elements.tokenForm.elements.visibility.value = token.visibility;
       elements.tokenForm.elements.imageVisibility.value = token.imageVisibility;
       elements.tokenForm.elements.masterNotes.value = token.masterNotes;
+      elements.tokenForm.elements.weaknesses.value = token.weaknesses;
+      elements.tokenForm.elements.resistances.value = token.resistances;
+      elements.tokenForm.elements.loot.value = token.loot;
       elements.tokenForm.elements.showLifeState.checked = token.showLifeState;
       elements.tokenForm.elements.shareClassRace.checked = token.shareClassRace;
       elements.tokenForm.elements.locked.checked = token.locked;
@@ -1119,10 +1274,14 @@
       token.visibility = data.visibility;
       token.imageVisibility = data.imageVisibility;
       token.masterNotes = data.masterNotes || "";
+      token.weaknesses = data.weaknesses || "";
+      token.resistances = data.resistances || "";
+      token.loot = data.loot || "";
       token.showLifeState = elements.tokenForm.elements.showLifeState.checked;
       token.shareClassRace = elements.tokenForm.elements.shareClassRace.checked;
       token.locked = elements.tokenForm.elements.locked.checked;
     }
+    token.status = healthState(token);
     updateLinkedSheet(token);
     syncInitiative();
     addEvent("Estado atualizado", `${token.name}: ${token.hpCurrent}/${token.hpMax} PV · ${token.status}.`);
@@ -1140,6 +1299,64 @@
     const changed = sheets.some(sheet => sheet.id === token.sourceId);
     if (!changed) return;
     saveSheets(sheets.map(sheet => sheet.id === token.sourceId ? {...sheet, hpCurrent: token.hpCurrent, hpMax: token.hpMax, resourceCurrent: token.resourceCurrent, resourceMax: token.resourceMax, armorClass: token.armorClass, initiative: token.initiative, conditions: token.conditions, updatedAt: now()} : sheet));
+  }
+
+  function openQuickHealth(tokenId, mode = "damage") {
+    const token = state.tokens.find(item => item.id === tokenId);
+    if (!token || !elements.healthDialog || isPlayerMode) return;
+    elements.healthForm.elements.tokenId.value = token.id;
+    elements.healthForm.elements.amount.value = 5;
+    setHealthMode(mode);
+    $("[data-quick-health-target]").textContent = `${token.name} - ${token.hpCurrent}/${token.hpMax} PV${token.tempHp ? ` - ${token.tempHp} de escudo` : ""}`;
+    elements.healthDialog.showModal();
+    elements.healthForm.elements.amount.select();
+  }
+
+  function setHealthMode(mode) {
+    const allowed = ["damage", "heal", "shield"];
+    const value = allowed.includes(mode) ? mode : "damage";
+    elements.healthForm.elements.mode.value = value;
+    const labels = {damage: "Aplicar dano", heal: "Aplicar cura", shield: "Escudo temporario"};
+    $("[data-quick-health-title]").textContent = labels[value];
+    $$('[data-health-mode]').forEach(button => button.classList.toggle("active", button.dataset.healthMode === value));
+  }
+
+  function recordCombatAction(detail, publicDetail = detail) {
+    const entry = {id: uid("combat"), round: state.initiative.round, detail, publicDetail, createdAt: now()};
+    state.combat.history.unshift(entry);
+    state.combat.history = state.combat.history.slice(0, 30);
+    addEvent("Acao de combate", detail, publicDetail);
+  }
+
+  function applyQuickHealth(event) {
+    event.preventDefault();
+    const token = state.tokens.find(item => item.id === elements.healthForm.elements.tokenId.value);
+    if (!token) return;
+    const amount = clamp(Math.floor(Number(elements.healthForm.elements.amount.value || 0)), 1, 9999);
+    const mode = elements.healthForm.elements.mode.value;
+    if (mode === "damage") {
+      const absorbed = Math.min(token.tempHp, amount);
+      token.tempHp -= absorbed;
+      token.hpCurrent = Math.max(0, token.hpCurrent - (amount - absorbed));
+      recordCombatAction(`${token.name} sofreu ${amount} de dano${absorbed ? ` (${absorbed} absorvido pelo escudo)` : ""}.`, `Uma criatura sofreu ${amount} de dano.`);
+    }
+    if (mode === "heal") {
+      const before = token.hpCurrent;
+      token.hpCurrent = Math.min(token.hpMax, token.hpCurrent + amount);
+      recordCombatAction(`${token.name} recuperou ${token.hpCurrent - before} PV.`, `Uma criatura recebeu cura.`);
+    }
+    if (mode === "shield") {
+      token.tempHp += amount;
+      recordCombatAction(`${token.name} recebeu ${amount} de escudo temporario.`, `Uma criatura recebeu protecao temporaria.`);
+    }
+    token.status = healthState(token);
+    updateLinkedSheet(token);
+    elements.healthDialog.close();
+    renderTokens();
+    renderRoster();
+    renderInitiative();
+    renderEvents();
+    saveState();
   }
 
   function openCardSettings() {
@@ -1175,7 +1392,8 @@
     const currentEntries = Array.isArray(state.initiative.entries) ? state.initiative.entries : [];
     state.initiative.entries = state.tokens.map(token => {
       const saved = currentEntries.find(entry => entry.tokenId === token.id);
-      return {tokenId: token.id, value: Number(saved?.value ?? token.initiative ?? 0)};
+      const value = saved?.value ?? (state.combat.active ? Math.floor(Math.random() * 20) + 1 + Number(token.initiative || 0) : token.initiative || 0);
+      return {tokenId: token.id, value: Number(value)};
     }).sort((a, b) => b.value - a.value);
     state.initiative.current = clamp(state.initiative.current, 0, Math.max(0, state.initiative.entries.length - 1));
   }
@@ -1184,11 +1402,14 @@
     syncInitiative();
     const entries = state.initiative.entries;
     elements.initiativeList.replaceChildren();
-    $("[data-round]").textContent = state.initiative.round;
+    $("[data-round]").textContent = state.combat.active ? state.initiative.round : 0;
     const current = entries[state.initiative.current];
     const currentToken = current && state.tokens.find(token => token.id === current.tokenId);
-    $("[data-turn-name]").textContent = currentToken ? publicEntityView(currentToken).name : "Nenhum";
-    if (!entries.length) {
+    $("[data-turn-name]").textContent = state.combat.active && currentToken ? publicEntityView(currentToken).name : "Aguardando combate";
+    $("[data-next-turn]").disabled = isPlayerMode || !state.combat.active;
+    $("[data-start-combat]")?.classList.toggle("active", state.combat.active);
+    renderCombatHistory();
+    if (!state.combat.active || !entries.length) {
       elements.initiativeList.innerHTML = emptyFeed("vtt-sword", "Combate ainda não iniciado", "Adicione personagens ao mapa para montar a ordem de iniciativa.");
       return;
     }
@@ -1208,7 +1429,7 @@
       if (!isPlayerMode) {
         input.addEventListener("change", () => {
           entry.value = Number(input.value || 0);
-          token.initiative = entry.value;
+          token.lastInitiativeRoll = entry.value;
           state.initiative.entries.sort((a, b) => b.value - a.value);
           state.initiative.current = 0;
           renderInitiative();
@@ -1227,30 +1448,63 @@
     });
   }
 
-  function rollInitiative() {
+  function startCombat() {
     if (isPlayerMode) return blockPlayerAction("A iniciativa e controlada pelo Mestre.");
+    if (!state.tokens.length) return setMapStatus("Adicione cartas ao mapa antes de iniciar o combate.", false);
     state.tokens.forEach(token => {
       const source = [...sources.heroes, ...sources.creatures].find(item => item.id === token.sourceId && item.origin === token.sourceOrigin);
-      token.initiative = Math.floor(Math.random() * 20) + 1 + Number(source?.initiative || 0);
+      const modifier = Number(source?.initiative ?? token.initiative ?? 0);
+      token.lastInitiativeRoll = Math.floor(Math.random() * 20) + 1 + modifier;
     });
-    state.initiative.entries = state.tokens.map(token => ({tokenId: token.id, value: token.initiative})).sort((a, b) => b.value - a.value);
+    state.initiative.entries = state.tokens.map(token => ({tokenId: token.id, value: token.lastInitiativeRoll})).sort((a, b) => b.value - a.value);
     state.initiative.current = 0;
     state.initiative.round = 1;
-    addEvent("Iniciativa definida", "A ordem da rodada foi calculada para todo o elenco no mapa.");
+    state.combat.active = true;
+    state.combat.startedAt = now();
+    state.combat.history = [];
+    const first = state.tokens.find(token => token.id === state.initiative.entries[0]?.tokenId);
+    recordCombatAction(`Combate iniciado com ${state.tokens.length} participantes. Primeiro turno: ${first?.name || "indefinido"}.`, `Combate iniciado com ${state.tokens.length} participantes.`);
     renderInitiative();
+    renderTokens();
+    activateSessionTab("initiative");
     saveState();
+  }
+
+  function endCombat() {
+    if (isPlayerMode || !state.combat.active) return;
+    recordCombatAction(`Combate encerrado na rodada ${state.initiative.round}.`, "O combate foi encerrado.");
+    state.combat.active = false;
+    state.initiative.round = 0;
+    state.initiative.current = 0;
+    renderInitiative();
+    renderTokens();
+    saveState();
+  }
+
+  function renderCombatHistory() {
+    if (!elements.combatHistory) return;
+    elements.combatHistory.replaceChildren();
+    state.combat.history.slice(0, 5).forEach(item => {
+      const line = document.createElement("li");
+      line.textContent = isPlayerMode ? (item.publicDetail || "O combate foi atualizado.") : item.detail;
+      elements.combatHistory.append(line);
+    });
   }
 
   function nextTurn() {
     if (isPlayerMode) return blockPlayerAction("O Mestre avanca os turnos da mesa.");
-    if (!state.initiative.entries.length) return;
+    if (!state.combat.active || !state.initiative.entries.length) return;
+    const previous = state.tokens.find(token => token.id === state.initiative.entries[state.initiative.current]?.tokenId);
     state.initiative.current += 1;
     if (state.initiative.current >= state.initiative.entries.length) {
       state.initiative.current = 0;
       state.initiative.round += 1;
       addEvent(`Rodada ${state.initiative.round}`, "Uma nova rodada de combate começou.");
     }
+    const currentToken = state.tokens.find(token => token.id === state.initiative.entries[state.initiative.current]?.tokenId);
+    recordCombatAction(`Turno de ${previous?.name || "participante"} encerrado. Agora: ${currentToken?.name || "participante"}.`, "O turno avancou para o proximo participante.");
     renderInitiative();
+    renderTokens();
     saveState();
   }
 
@@ -1524,8 +1778,8 @@
     elements.chatList.scrollTop = elements.chatList.scrollHeight;
   }
 
-  function addEvent(title, detail) {
-    state.events.unshift({id: uid("event"), title, detail, createdAt: now()});
+  function addEvent(title, detail, publicDetail = "") {
+    state.events.unshift({id: uid("event"), title, detail, publicDetail, createdAt: now()});
     state.events = state.events.slice(0, 80);
     renderEvents();
   }
@@ -1590,6 +1844,99 @@
   function togglePanel(name) {
     const className = `${name}-collapsed`;
     body.classList.toggle(className);
+  }
+
+  function generatedPortrait(name, kind = "NPC") {
+    const initialsValue = initials(name).replace(/[&<>"]/g, character => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[character]));
+    const hue = [...String(name)].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 80 + (kind === "Monstros" ? 300 : 210);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="600" viewBox="0 0 480 600"><defs><radialGradient id="g"><stop stop-color="hsl(${hue} 72% 48%)"/><stop offset="1" stop-color="#090711"/></radialGradient></defs><rect width="480" height="600" fill="url(#g)"/><circle cx="240" cy="245" r="126" fill="#090711" opacity=".64"/><path d="M110 540c20-130 240-130 260 0" fill="#120d20"/><text x="240" y="285" text-anchor="middle" fill="#f0ddff" font-family="serif" font-size="104" font-weight="700">${initialsValue}</text><circle cx="240" cy="245" r="160" fill="none" stroke="#c27cff" stroke-width="4" opacity=".65"/></svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  }
+
+  function saveQuickLibraryItem(item) {
+    const ownerId = window.ApexMvpStore?.ownerId?.() || "";
+    const all = readStore(KEYS.library, []);
+    const normalized = {...item, id: item.id || uid("lib"), ownerId, campaignId: item.campaignId ?? campaign.id, system: item.system || campaign.system, createdAt: item.createdAt || now(), updatedAt: now()};
+    writeStore(KEYS.library, [normalized, ...all]);
+    buildSources();
+    return normalized;
+  }
+
+  function openQuickCreate(type, preset = {}) {
+    if (isPlayerMode || !elements.createDialog) return;
+    elements.createForm.reset();
+    elements.createForm.elements.type.value = type;
+    elements.createForm.elements.name.value = preset.name || "";
+    elements.createForm.elements.level.value = preset.level || 1;
+    elements.createForm.elements.biome.value = preset.biome || "Qualquer";
+    elements.createForm.elements.profession.value = preset.profession || "";
+    elements.createForm.elements.personality.value = preset.personality || "";
+    elements.createForm.elements.description.value = preset.description || preset.shortHistory || "";
+    elements.createForm.elements.attributes.value = preset.attributes || "";
+    $("[data-quick-create-title]").textContent = `Novo ${type === "NPCs" ? "NPC" : type.replace(/s$/, "")}`;
+    elements.createDialog.showModal();
+    elements.createForm.elements.name.focus();
+  }
+
+  function submitQuickCreate(event) {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(elements.createForm).entries());
+    const isEntity = data.type === "NPCs" || data.type === "Monstros";
+    const item = saveQuickLibraryItem({
+      name: data.name.trim(), type: data.type, level: Number(data.level || 1), biome: data.biome,
+      profession: data.profession.trim(), personality: data.personality.trim(), description: data.description.trim(),
+      shortHistory: data.description.trim(), attributes: data.attributes.trim(), abilities: "", tags: [data.biome, data.profession].filter(Boolean).join(", "),
+      visibility: isEntity ? "Disponivel na mesa" : "Privado do Mestre", image: isEntity ? generatedPortrait(data.name, data.type) : ""
+    });
+    elements.createDialog.close();
+    if (isEntity) {
+      const source = sources.creatures.find(entry => entry.id === item.id);
+      if (source) addSourceToMap(source);
+    } else {
+      const snippet = `[${item.type}] ${item.name}\n${item.description || "Sem descricao."}`;
+      state.notes.private = [state.notes.private, snippet].filter(Boolean).join("\n\n");
+      addEvent(`${item.type} criado`, `${item.name} foi preparado durante a sessao.`);
+      renderNotes();
+      saveState();
+    }
+    renderRoster();
+  }
+
+  function generateRandomNpc() {
+    const names = ["Aldren Voss", "Mira Valebris", "Toren Brumafria", "Selene Arkwright", "Bram Ferrovelho", "Ilyra do Luar"];
+    const professions = ["Cartografo", "Mercadora de reliquias", "Ferreiro", "Curandeira", "Capitao da guarda", "Arcanista itinerante"];
+    const personalities = ["Cauteloso e observador", "Carismatica, mas desconfiada", "Direto e leal", "Curiosa e inquieta", "Severo com um senso de honra", "Gentil e cheio de segredos"];
+    const pick = list => list[Math.floor(Math.random() * list.length)];
+    openQuickCreate("NPCs", {name: pick(names), profession: pick(professions), personality: pick(personalities), biome: "Cidade", description: "Conhece rumores locais e pode se tornar aliado, contato ou obstaculo da campanha.", attributes: "PV: 18 | CA: 12 | Iniciativa: 1"});
+  }
+
+  function generateRandomEncounter() {
+    if (isPlayerMode) return;
+    const encounter = [
+      ...Array.from({length: 3}, (_, index) => ({name: `Goblin Batedor ${index + 1}`, tags: "goblin, hostil", attributes: "PV: 12 | CA: 13 | Iniciativa: 2", level: 1, cardKind: "monster"})),
+      {name: "Goblin Xama", tags: "goblin, elite, hostil", attributes: "PV: 28 | CA: 14 | Iniciativa: 1", level: 2, cardKind: "elite", abilities: "Pulso sombrio; Cura tribal"}
+    ];
+    encounter.forEach((preset, index) => setTimeout(() => {
+      const item = saveQuickLibraryItem({...preset, type: "Monstros", biome: "Floresta", description: "Inimigo gerado para encontro rapido.", visibility: "Disponivel na mesa", image: generatedPortrait(preset.name, "Monstros")});
+      const source = sources.creatures.find(entry => entry.id === item.id);
+      if (source) addSourceToMap(source);
+    }, index * 320));
+    addEvent("Encontro gerado", "3 Goblins Batedores e 1 Goblin Xama foram posicionados na mesa.", "Um novo encontro surgiu no mapa.");
+    setMapStatus("Encontro sendo invocado no mapa...", true);
+  }
+
+  function consumePendingResource() {
+    if (isPlayerMode) return;
+    const pending = readStore(KEYS.pendingResource, {});
+    if (!pending.id || (pending.campaignId && pending.campaignId !== campaign.id)) return;
+    localStorage.removeItem(KEYS.pendingResource);
+    if (pending.kind === "map") {
+      const map = sources.maps.find(item => item.id === pending.id);
+      if (map) useResource({...map, kind: "map"});
+      return;
+    }
+    const source = sources.creatures.find(item => item.id === pending.id);
+    if (source) addSourceToMap(source, true);
   }
 
   function openResources(tab = "maps") {
@@ -1702,7 +2049,7 @@
       if (isPlayerMode) return blockPlayerAction("A neblina da cena e controlada pelo Mestre.");
       state.fog = !state.fog; renderMap(); addEvent("Neblina ajustada", state.fog ? "A visão da cena foi reduzida." : "A cena completa foi revelada."); saveState();
     });
-    $("[data-reset-view]").addEventListener("click", () => { state.view = {panX: 0, panY: 0, zoom: 1}; applyView(); saveState(); });
+    $("[data-zoom-preset]")?.addEventListener("change", event => setZoom(Number(event.target.value || 1)));
     $("[data-session-toggle]").addEventListener("click", () => {
       if (isPlayerMode) return blockPlayerAction("A sessao e iniciada pelo Mestre.");
       state.live = !state.live; addEvent(state.live ? "Sessão iniciada" : "Sessão encerrada", state.live ? "A mesa está ao vivo para o grupo." : "O registro da sessão foi pausado."); renderSessionButton(); saveState();
@@ -1712,7 +2059,8 @@
     $("[data-fullscreen]").addEventListener("click", () => document.fullscreenElement ? document.exitFullscreen?.() : document.documentElement.requestFullscreen?.());
     $("[data-roll-form]").addEventListener("submit", event => { event.preventDefault(); rollDice(event.currentTarget.elements.formula.value); event.currentTarget.elements.formula.select(); });
     $("[data-chat-form]").addEventListener("submit", sendChat);
-    $("[data-roll-initiative]").addEventListener("click", rollInitiative);
+    $("[data-start-combat]")?.addEventListener("click", startCombat);
+    $("[data-end-combat]")?.addEventListener("click", endCombat);
     $("[data-next-turn]").addEventListener("click", nextTurn);
     $("[data-clear-rolls]").addEventListener("click", () => { state.rolls = []; renderRolls(); saveState(); });
     $("[data-clear-events]").addEventListener("click", () => { state.events = []; renderEvents(); saveState(); });
@@ -1738,6 +2086,23 @@
     elements.settingsForm?.addEventListener("submit", saveCardSettings);
     $$('[data-close-card-settings]').forEach(button => button.addEventListener("click", () => elements.settingsDialog.close()));
     elements.settingsDialog?.addEventListener("click", event => { if (event.target === elements.settingsDialog) elements.settingsDialog.close(); });
+    elements.healthForm?.addEventListener("submit", applyQuickHealth);
+    $$('[data-health-mode]').forEach(button => button.addEventListener("click", () => setHealthMode(button.dataset.healthMode)));
+    $$('[data-close-quick-health]').forEach(button => button.addEventListener("click", () => elements.healthDialog.close()));
+    elements.healthDialog?.addEventListener("click", event => { if (event.target === elements.healthDialog) elements.healthDialog.close(); });
+    elements.createForm?.addEventListener("submit", submitQuickCreate);
+    $$('[data-close-quick-create]').forEach(button => button.addEventListener("click", () => elements.createDialog.close()));
+    elements.createDialog?.addEventListener("click", event => { if (event.target === elements.createDialog) elements.createDialog.close(); });
+    $$('[data-quick-create]').forEach(button => button.addEventListener("click", () => openQuickCreate(button.dataset.quickCreate)));
+    $("[data-generate-npc]")?.addEventListener("click", generateRandomNpc);
+    $("[data-generate-encounter]")?.addEventListener("click", generateRandomEncounter);
+    $("[data-dock-toggle]")?.addEventListener("click", () => body.classList.toggle("master-dock-collapsed"));
+    $$('[data-layer-toggle]').forEach(input => input.addEventListener("change", () => { state.layers[input.dataset.layerToggle] = input.checked; renderMap(); saveState(); }));
+    $$('[data-marker-type]').forEach(button => button.addEventListener("click", () => {
+      markerType = button.dataset.markerType;
+      $$('[data-marker-type]').forEach(item => item.classList.toggle("active", item === button));
+      setTool("marker");
+    }));
 
     $("[data-close-dialog]").addEventListener("click", () => elements.resourceDialog.close());
     elements.resourceDialog.addEventListener("click", event => { if (event.target === elements.resourceDialog) elements.resourceDialog.close(); });
@@ -1767,6 +2132,7 @@
     if (window.innerWidth <= 900) body.classList.add("roster-collapsed", "session-collapsed");
     if (!populateCampaigns()) return;
     bindEvents();
+    consumePendingResource();
   }
 
   initialize();

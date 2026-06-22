@@ -11,7 +11,7 @@ const MASTER_NOTES_KEY = "apex-realms-master-notes";
 
 const masterSystems = ["D&D 5e", "Tormenta 20", "Pathfinder", "Ordem Paranormal", "Sistema Proprio", "Outro"];
 const masterStatuses = ["Preparacao", "Em andamento", "Pausada", "Finalizada"];
-const libraryTypes = ["Monstros", "NPCs", "Itens", "Mapas", "Anotacoes", "Magias", "Armadilhas", "Locais", "Encontros", "Recompensas", "Documentos/lore", "Sistema customizado"];
+const libraryTypes = ["Monstros", "NPCs", "Itens", "Mapas", "Cidades", "Navios", "Lojas", "Missoes", "Eventos", "Anotacoes", "Magias", "Armadilhas", "Locais", "Encontros", "Recompensas", "Documentos/lore", "Sistema customizado"];
 const MASTER_BANNER_MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MASTER_BANNER_MAX_DATA_CHARS = 900000;
 const MASTER_LIBRARY_IMAGE_MAX_DATA_CHARS = 420000;
@@ -518,6 +518,8 @@ function bindLibraryPage() {
   const campaignFilter = document.querySelector("[data-library-campaign-filter]");
   const typeFilter = document.querySelector("[data-library-type-filter]");
   const systemFilter = document.querySelector("[data-library-system-filter]");
+  const biomeFilter = document.querySelector("[data-library-biome-filter]");
+  const levelFilter = document.querySelector("[data-library-level-filter]");
   const searchInput = document.querySelector("[data-library-search]");
   const summary = document.querySelector("[data-library-summary]");
   let libraryFileProcessing = Promise.resolve("");
@@ -528,6 +530,11 @@ function bindLibraryPage() {
     NPCs: "dash-icon-group",
     Itens: "lib-icon-item",
     Mapas: "lib-icon-map",
+    Cidades: "lib-icon-location",
+    Navios: "lib-icon-map",
+    Lojas: "lib-icon-item",
+    Missoes: "dash-icon-scroll",
+    Eventos: "dash-icon-d20",
     Anotacoes: "lib-icon-note",
     Magias: "lib-icon-magic",
     Armadilhas: "lib-icon-trap",
@@ -554,11 +561,20 @@ function bindLibraryPage() {
       type: libraryTypes.includes(raw.type) ? raw.type : (legacyTypes[raw.type] || "Documentos/lore"),
       campaignId: matchedCampaign?.id || "",
       system: raw.system || matchedCampaign?.system || "Todos os sistemas",
+      level: Math.max(0, Number(raw.level || 0)),
+      biome: String(raw.biome || "Qualquer"),
+      profession: String(raw.profession || raw.subtype || ""),
+      personality: String(raw.personality || ""),
+      shortHistory: String(raw.shortHistory || ""),
       description: String(raw.description || ""),
       attributes: String(raw.attributes || raw.stats || ""),
       abilities: String(raw.abilities || ""),
       tags: String(raw.tags || ""),
       masterNotes: String(raw.masterNotes || raw.notes || ""),
+      weaknesses: String(raw.weaknesses || raw.fraquezas || ""),
+      resistances: String(raw.resistances || raw.resistencias || ""),
+      loot: String(raw.loot || ""),
+      presetId: String(raw.presetId || ""),
       visibility: raw.visibility || "Privado do Mestre",
       fileName: String(raw.fileName || ""),
       image: String(raw.image || "").startsWith("data:image/") ? raw.image : "",
@@ -574,6 +590,25 @@ function bindLibraryPage() {
     const owner = currentMasterOwnerId();
     const others = readAllLibrary().filter(item => item.ownerId !== owner);
     writeStore(MASTER_LIBRARY_KEY, [...items.map(normalizeLibraryItem), ...others]);
+  };
+  const makePresetMap = (name, index) => {
+    const palettes = [["#16362b", "#5f8f58"], ["#38291c", "#bd7a3e"], ["#17283d", "#467da5"], ["#30213f", "#8a5da7"], ["#33363e", "#9098a5"]];
+    const [dark, light] = palettes[index % palettes.length];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000"><defs><pattern id="g" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="#fff" stroke-opacity=".12"/></pattern><radialGradient id="v"><stop stop-color="${light}"/><stop offset="1" stop-color="${dark}"/></radialGradient></defs><rect width="1600" height="1000" fill="url(#v)"/><path d="M0 720C260 530 420 850 700 650S1120 430 1600 620V1000H0Z" fill="#090b12" opacity=".52"/><path d="M180 180 480 120 650 330 430 510 120 420ZM980 150l360 80 90 330-350 130-250-270Z" fill="#0a0b12" opacity=".5" stroke="#d7b9ff" stroke-opacity=".3" stroke-width="8"/><circle cx="790" cy="510" r="150" fill="#11101a" opacity=".76" stroke="#b579ff" stroke-width="9"/><path d="M790 360v300M640 510h300" stroke="#d7c2ff" stroke-opacity=".42" stroke-width="18"/><rect width="1600" height="1000" fill="url(#g)"/><text x="70" y="930" fill="#fff" opacity=".55" font-family="serif" font-size="44">${name}</text></svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  };
+  const ensureStarterCatalog = () => {
+    const items = readLibrary();
+    const cityNames = ["Porto Comercial", "Vila Rural", "Capital Imperial", "Cidade Anã", "Cidade Élfica"];
+    const shipNames = ["Barco Pesqueiro", "Caravela", "Fragata", "Galeao", "Navio Mercante"];
+    const mapNames = ["Cidade Murada", "Floresta Antiga", "Dungeon Subterranea", "Templo Arcano", "Porto Nebuloso", "Navio em Alto-Mar", "Passagem da Montanha", "Vila Fortificada"];
+    const presets = [
+      ...cityNames.map((name, index) => ({presetId: `city-${index}`, name, type: "Cidades", biome: index === 0 ? "Porto" : index === 1 ? "Vila" : "Cidade", description: "Local pronto com distritos, rumores, autoridades e pontos de interesse para uma sessao.", tags: "cidade, local pronto", visibility: "Disponivel na mesa"})),
+      ...shipNames.map((name, index) => ({presetId: `ship-${index}`, name, type: "Navios", biome: "Oceano", profession: name, description: "Embarcacao pronta para viagens, comercio, exploracao ou combate naval.", attributes: `Tripulacao sugerida: ${4 + index * 8}`, tags: "navio, oceano", visibility: "Disponivel na mesa"})),
+      ...mapNames.map((name, index) => ({presetId: `map-${index}`, name, type: "Mapas", biome: ["Cidade", "Floresta", "Dungeon", "Templo", "Porto", "Oceano", "Montanha", "Vila"][index], description: "Mapa tatico pronto para uso imediato na mesa.", image: makePresetMap(name, index), fileName: `${name}.svg`, tags: "mapa pronto, tatico", visibility: "Disponivel na mesa"}))
+    ];
+    const missing = presets.filter(preset => !items.some(item => item.presetId === preset.presetId));
+    if (missing.length) saveLibrary([...missing.map(preset => ({...preset, id: window.ApexMvpStore?.makeId?.("lib") || `lib-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, system: "Todos os sistemas", campaignId: "", ownerId: currentMasterOwnerId(), favorite: false})), ...items]);
   };
   const addOption = (select, label, value) => select.add(new Option(label, value));
 
@@ -591,6 +626,9 @@ function bindLibraryPage() {
     addOption(systemFilter, "Todos os sistemas", "all");
     masterSystems.forEach(system => addOption(systemFilter, system, system));
 
+    biomeFilter.replaceChildren();
+    ["Todos os biomas", "Floresta", "Deserto", "Montanha", "Cidade", "Oceano", "Pântano", "Dungeon", "Templo", "Porto", "Vila", "Castelo", "Qualquer"].forEach((biome, index) => addOption(biomeFilter, biome, index === 0 ? "all" : biome));
+
     form.elements.type.replaceChildren();
     libraryTypes.forEach(type => addOption(form.elements.type, type, type));
     form.elements.campaignId.replaceChildren();
@@ -607,12 +645,19 @@ function bindLibraryPage() {
     return true;
   };
   const matchesSystem = item => systemFilter.value === "all" || item.system === "Todos os sistemas" || item.system === systemFilter.value;
+  const matchesBiome = item => biomeFilter.value === "all" || item.biome === "Qualquer" || item.biome === biomeFilter.value;
+  const matchesLevel = item => {
+    if (levelFilter.value === "all") return true;
+    if (levelFilter.value === "1-4") return item.level >= 1 && item.level <= 4;
+    if (levelFilter.value === "5-10") return item.level >= 5 && item.level <= 10;
+    return item.level >= 11;
+  };
   const matchesSearch = item => {
     const term = searchInput.value.trim().toLocaleLowerCase("pt-BR");
     if (!term) return true;
-    return [item.name, item.description, item.tags, item.type, campaignById(item.campaignId)?.name].some(value => String(value || "").toLocaleLowerCase("pt-BR").includes(term));
+    return [item.name, item.description, item.shortHistory, item.profession, item.personality, item.biome, item.tags, item.type, campaignById(item.campaignId)?.name].some(value => String(value || "").toLocaleLowerCase("pt-BR").includes(term));
   };
-  const visibleWithoutType = items => items.filter(item => matchesScope(item) && matchesSystem(item) && matchesSearch(item));
+  const visibleWithoutType = items => items.filter(item => matchesScope(item) && matchesSystem(item) && matchesBiome(item) && matchesLevel(item) && matchesSearch(item));
 
   const renderSummary = items => {
     const scopedItems = visibleWithoutType(items);
@@ -653,7 +698,7 @@ function bindLibraryPage() {
         <p></p>
         <div class="library-card-tags" data-tags></div>
         <footer>
-          <button type="button" data-library-action="use">Levar a mesa</button>
+          <button type="button" data-library-action="use">Adicionar à Mesa</button>
           <button type="button" data-library-action="edit">Editar</button>
           <button type="button" data-library-action="duplicate">Duplicar</button>
           <button class="danger" type="button" data-library-action="delete">Excluir</button>
@@ -669,7 +714,7 @@ function bindLibraryPage() {
     article.querySelector("[data-type]").textContent = item.type;
     article.querySelector("h3").textContent = item.name;
     article.querySelector("[data-scope]").textContent = campaign ? campaign.name : "Global";
-    article.querySelector("[data-system]").textContent = item.system;
+    article.querySelector("[data-system]").textContent = `${item.system}${item.level ? ` - Nv. ${item.level}` : ""}`;
     article.querySelector("[data-visibility]").textContent = item.visibility;
     article.querySelector("p").textContent = item.description || "Sem descricao cadastrada.";
     const tags = article.querySelector("[data-tags]");
@@ -720,10 +765,18 @@ function bindLibraryPage() {
     form.elements.type.value = item?.type || (typeFilter.value !== "all" ? typeFilter.value : "Monstros");
     form.elements.campaignId.value = item?.campaignId || (campaignFilter.value !== "all" && campaignFilter.value !== "global" ? campaignFilter.value : "");
     form.elements.system.value = item?.system || campaignById(form.elements.campaignId.value)?.system || "Todos os sistemas";
+    form.elements.level.value = item?.level || 1;
+    form.elements.biome.value = item?.biome || "Qualquer";
     form.elements.visibility.value = item?.visibility || "Privado do Mestre";
+    form.elements.profession.value = item?.profession || "";
+    form.elements.personality.value = item?.personality || "";
+    form.elements.shortHistory.value = item?.shortHistory || "";
     form.elements.description.value = item?.description || "";
     form.elements.attributes.value = item?.attributes || "";
     form.elements.abilities.value = item?.abilities || "";
+    form.elements.weaknesses.value = item?.weaknesses || "";
+    form.elements.resistances.value = item?.resistances || "";
+    form.elements.loot.value = item?.loot || "";
     form.elements.tags.value = item?.tags || "";
     form.elements.masterNotes.value = item?.masterNotes || "";
     form.elements.favorite.checked = Boolean(item?.favorite);
@@ -787,9 +840,17 @@ function bindLibraryPage() {
       type: data.get("type"),
       campaignId: data.get("campaignId"),
       system: data.get("system"),
+      level: Number(data.get("level") || 0),
+      biome: data.get("biome"),
+      profession: String(data.get("profession") || "").trim(),
+      personality: String(data.get("personality") || "").trim(),
+      shortHistory: String(data.get("shortHistory") || "").trim(),
       description: String(data.get("description") || "").trim(),
       attributes: String(data.get("attributes") || "").trim(),
       abilities: String(data.get("abilities") || "").trim(),
+      weaknesses: String(data.get("weaknesses") || "").trim(),
+      resistances: String(data.get("resistances") || "").trim(),
+      loot: String(data.get("loot") || "").trim(),
       tags: String(data.get("tags") || "").trim(),
       masterNotes: String(data.get("masterNotes") || "").trim(),
       visibility: data.get("visibility"),
@@ -825,8 +886,17 @@ function bindLibraryPage() {
       masterToast("Recurso duplicado.");
     }
     if (action === "use") {
+      if (["Monstros", "NPCs", "Mapas"].includes(item.type)) {
+        const targetCampaign = item.campaignId || (campaignFilter.value !== "all" && campaignFilter.value !== "global" ? campaignFilter.value : campaigns[0]?.id);
+        if (targetCampaign) {
+          localStorage.setItem("apex-realms-table-campaign", targetCampaign);
+          writeStore("apex-realms-pending-table-resource", {id: item.id, campaignId: targetCampaign, kind: item.type === "Mapas" ? "map" : "token"});
+          location.href = "table.html";
+          return;
+        }
+      }
       const notes = readStore(MASTER_NOTES_KEY, {});
-      const snippet = [`[${item.type}] ${item.name}`, item.description, item.attributes, item.abilities, item.masterNotes].filter(Boolean).join("\n");
+      const snippet = [`[${item.type}] ${item.name}`, item.description, item.shortHistory, item.attributes, item.abilities, item.weaknesses && `Fraquezas: ${item.weaknesses}`, item.resistances && `Resistencias: ${item.resistances}`, item.loot && `Loot: ${item.loot}`, item.masterNotes].filter(Boolean).join("\n");
       writeStore(MASTER_NOTES_KEY, {...notes, private: [notes.private, snippet].filter(Boolean).join("\n\n")});
       masterToast("Recurso adicionado as notas privadas da mesa.");
     }
@@ -836,16 +906,19 @@ function bindLibraryPage() {
     }
   });
 
-  [campaignFilter, typeFilter, systemFilter].forEach(control => control.addEventListener("change", renderLibrary));
+  [campaignFilter, typeFilter, systemFilter, biomeFilter, levelFilter].forEach(control => control.addEventListener("change", renderLibrary));
   searchInput.addEventListener("input", renderLibrary);
   document.querySelector("[data-library-clear-filters]")?.addEventListener("click", () => {
     campaignFilter.value = "all";
     typeFilter.value = "all";
     systemFilter.value = "all";
+    biomeFilter.value = "all";
+    levelFilter.value = "all";
     searchInput.value = "";
     renderLibrary();
   });
 
+  ensureStarterCatalog();
   populateControls();
   renderLibrary();
 }

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=vtt-core-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=card-arrival-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=vtt-advanced-v3">
   <link rel="stylesheet" href="../assets/css/player.css?v=card-tokens-v1">
 </head>
 <body class="vtt-page player-table-mode" data-master-page="table" data-player-page="table" data-table-version="2">
@@ -86,8 +86,10 @@
         <div class="vtt-map-stage" data-map-stage>
           <div class="vtt-map-world" data-map-world>
             <div class="vtt-map-image" data-map-image></div>
+            <div class="vtt-object-layer" data-object-layer></div>
             <div class="vtt-map-grid" data-map-grid></div>
-            <div class="vtt-fog-layer" data-fog-layer></div>
+            <canvas class="vtt-fog-layer" data-fog-layer width="1600" height="1000"></canvas>
+            <div class="vtt-marker-layer" data-marker-layer></div>
             <svg class="vtt-measure-layer" data-measure-layer aria-hidden="true"></svg>
             <div class="vtt-token-layer" data-token-layer></div>
             <div class="vtt-effect-layer" data-effect-layer></div>
@@ -112,7 +114,7 @@
 
         <div class="vtt-zoom-controls">
           <button type="button" data-zoom="-0.1" aria-label="Diminuir zoom"><svg><use href="#vtt-minus"></use></svg></button>
-          <button type="button" data-reset-view><span data-zoom-label>100%</span></button>
+          <select data-zoom-preset aria-label="Zoom do mapa"><option value="0.25">25%</option><option value="0.5">50%</option><option value="1" selected>100%</option><option value="2">200%</option><option value="4">400%</option></select>
           <button type="button" data-zoom="0.1" aria-label="Aumentar zoom"><svg><use href="#vtt-plus"></use></svg></button>
         </div>
 
@@ -161,9 +163,9 @@
           </section>
 
           <section class="vtt-tab-panel" data-tab-panel="initiative">
-            <header class="vtt-combat-header"><span><small>Rodada</small><b data-round>1</b></span><span><small>Turno</small><b data-turn-name>Nenhum</b></span><button type="button" data-next-turn>Proximo turno</button></header>
+            <header class="vtt-combat-header"><span><small>Rodada</small><b data-round>0</b></span><span><small>Turno</small><b data-turn-name>Aguardando combate</b></span><button type="button" data-next-turn>Próximo turno</button></header>
             <div class="vtt-initiative-list" data-initiative-list></div>
-            <button class="vtt-secondary-action" type="button" data-roll-initiative>Rolar iniciativa do elenco</button>
+            <footer class="vtt-combat-footer"><ol data-combat-history></ol></footer>
           </section>
 
           <section class="vtt-tab-panel" data-tab-panel="rolls">
@@ -220,6 +222,6 @@
   <script src="../assets/js/app.js?v=mvp-core-v2"></script>
   <script src="../assets/js/session-state.js?v=vtt-core-v1"></script>
   <script src="../assets/js/player.js?v=mvp-functional-v2"></script>
-  <script src="../assets/js/master-table.js?v=card-arrival-v1"></script>
+  <script src="../assets/js/master-table.js?v=vtt-advanced-v3"></script>
 </body>
 </html>

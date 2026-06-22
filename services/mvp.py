@@ -54,15 +54,15 @@ def health_state(hp, maximum):
     maximum = max(1, int(maximum or 1))
     hp = max(0, int(hp or 0))
     if hp == 0:
-        return "Derrotado"
+        return "Caido"
     percent = hp / maximum * 100
     if percent >= 75:
         return "Saudavel"
     if percent >= 50:
         return "Ferido"
     if percent >= 25:
-        return "Gravemente ferido"
-    return "A beira da morte"
+        return "Muito Ferido"
+    return "Critico"
 
 
 def campaign_card_settings(campaign):

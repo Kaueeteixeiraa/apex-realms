@@ -92,6 +92,9 @@ CREATE TABLE IF NOT EXISTS tokens (
     buffs TEXT DEFAULT '',
     debuffs TEXT DEFAULT '',
     master_notes TEXT DEFAULT '',
+    weaknesses TEXT DEFAULT '',
+    resistances TEXT DEFAULT '',
+    loot TEXT DEFAULT '',
     locked INTEGER NOT NULL DEFAULT 0
 );
 

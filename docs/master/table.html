@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=vtt-core-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=card-arrival-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=vtt-advanced-v3">
 </head>
 <body class="vtt-page" data-master-page="table" data-table-version="2">
   <svg class="vtt-symbols" aria-hidden="true">
@@ -31,6 +31,9 @@
     <symbol id="vtt-close" viewBox="0 0 48 48"><path d="m10 10 28 28M38 10 10 38"/></symbol>
     <symbol id="vtt-plus" viewBox="0 0 48 48"><path d="M24 8v32M8 24h32"/></symbol>
     <symbol id="vtt-minus" viewBox="0 0 48 48"><path d="M8 24h32"/></symbol>
+    <symbol id="vtt-shield" viewBox="0 0 48 48"><path d="M24 5 39 11v12c0 10-6 17-15 21C15 40 9 33 9 23V11L24 5Z"/><path d="M24 13v22M16 23h16"/></symbol>
+    <symbol id="vtt-marker" viewBox="0 0 48 48"><path d="M24 43s14-13 14-25a14 14 0 1 0-28 0c0 12 14 25 14 25Z"/><circle cx="24" cy="18" r="5"/></symbol>
+    <symbol id="vtt-wand" viewBox="0 0 48 48"><path d="m9 39 25-25 5 5-25 25-5-5Z"/><path d="M33 5v6M23 10l4 4M40 12h5M37 25l4 4M15 6l3 6"/></symbol>
   </svg>
 
   <div class="vtt-shell">
@@ -86,8 +89,10 @@
         <div class="vtt-map-stage" data-map-stage>
           <div class="vtt-map-world" data-map-world>
             <div class="vtt-map-image" data-map-image></div>
+            <div class="vtt-object-layer" data-object-layer></div>
             <div class="vtt-map-grid" data-map-grid></div>
-            <div class="vtt-fog-layer" data-fog-layer></div>
+            <canvas class="vtt-fog-layer" data-fog-layer width="1600" height="1000"></canvas>
+            <div class="vtt-marker-layer" data-marker-layer></div>
             <svg class="vtt-measure-layer" data-measure-layer aria-hidden="true"></svg>
             <div class="vtt-token-layer" data-token-layer></div>
             <div class="vtt-effect-layer" data-effect-layer></div>
@@ -103,6 +108,8 @@
           <button class="active" type="button" data-grid-toggle aria-label="Alternar grade" title="Grade"><svg><use href="#vtt-grid"></use></svg><span>Grade</span></button>
           <button type="button" data-snap-toggle aria-label="Encaixar na grade" title="Encaixar na grade"><svg><use href="#vtt-d20"></use></svg><span>Encaixe</span></button>
           <button type="button" data-fog-toggle aria-label="Alternar neblina" title="Neblina"><svg><use href="#vtt-eye"></use></svg><span>Neblina</span></button>
+          <button type="button" data-tool="reveal" aria-label="Revelar neblina" title="Revelar neblina"><svg><use href="#vtt-wand"></use></svg><span>Revelar</span></button>
+          <button type="button" data-tool="marker" aria-label="Adicionar marcador" title="Adicionar marcador"><svg><use href="#vtt-marker"></use></svg><span>Marcador</span></button>
         </nav>
 
         <div class="vtt-map-status">
@@ -112,9 +119,17 @@
 
         <div class="vtt-zoom-controls">
           <button type="button" data-zoom="-0.1" aria-label="Diminuir zoom"><svg><use href="#vtt-minus"></use></svg></button>
-          <button type="button" data-reset-view><span data-zoom-label>100%</span></button>
+          <select data-zoom-preset aria-label="Zoom do mapa"><option value="0.25">25%</option><option value="0.5">50%</option><option value="1" selected>100%</option><option value="2">200%</option><option value="4">400%</option></select>
           <button type="button" data-zoom="0.1" aria-label="Aumentar zoom"><svg><use href="#vtt-plus"></use></svg></button>
         </div>
+
+        <aside class="vtt-master-dock" data-master-dock>
+          <header><div><small>Ferramentas rápidas</small><b>Mestre</b></div><button type="button" data-dock-toggle aria-label="Recolher ferramentas">&#8249;</button></header>
+          <section><span>Criação</span><div class="vtt-master-create-grid"><button type="button" data-quick-create="NPCs">NPC</button><button type="button" data-quick-create="Monstros">Monstro</button><button type="button" data-quick-create="Itens">Item</button><button type="button" data-quick-create="Eventos">Evento</button><button type="button" data-quick-create="Lojas">Loja</button><button type="button" data-quick-create="Missoes">Missão</button></div></section>
+          <section><span>Geração</span><div class="vtt-master-generate"><button type="button" data-generate-npc><svg><use href="#vtt-users"></use></svg>NPC aleatório</button><button type="button" data-generate-encounter><svg><use href="#vtt-sword"></use></svg>Encontro</button></div></section>
+          <section><span>Camadas</span><div class="vtt-layer-grid"><label><input type="checkbox" data-layer-toggle="terrain" checked>Terreno</label><label><input type="checkbox" data-layer-toggle="objects" checked>Objetos</label><label><input type="checkbox" data-layer-toggle="npcs" checked>NPCs</label><label><input type="checkbox" data-layer-toggle="markers" checked>Marcadores</label><label><input type="checkbox" data-layer-toggle="tokens" checked>Personagens</label><label><input type="checkbox" data-layer-toggle="effects" checked>Efeitos</label></div></section>
+          <section><span>Marcadores</span><div class="vtt-marker-palette"><button type="button" data-marker-type="Casa">Casa</button><button type="button" data-marker-type="Loja">Loja</button><button type="button" data-marker-type="Missão">Missão</button><button type="button" data-marker-type="Combate">Combate</button><button type="button" data-marker-type="Perigo">Perigo</button><button type="button" data-marker-type="Objetivo">Objetivo</button></div></section>
+        </aside>
 
         <section class="vtt-dice-dock" data-dice-dock>
           <button class="vtt-dice-main" type="button" data-roll="1d20"><svg><use href="#vtt-d20"></use></svg><span><small>Rolagem rápida</small><b>Rolar D20</b></span></button>
@@ -161,9 +176,9 @@
           </section>
 
           <section class="vtt-tab-panel" data-tab-panel="initiative">
-            <header class="vtt-combat-header"><span><small>Rodada</small><b data-round>1</b></span><span><small>Turno</small><b data-turn-name>Nenhum</b></span><button type="button" data-next-turn>Próximo turno</button></header>
+            <header class="vtt-combat-header"><span><small>Rodada</small><b data-round>0</b></span><span><small>Turno</small><b data-turn-name>Aguardando combate</b></span><button type="button" data-next-turn>Próximo turno</button></header>
             <div class="vtt-initiative-list" data-initiative-list></div>
-            <button class="vtt-secondary-action" type="button" data-roll-initiative>Rolar iniciativa do elenco</button>
+            <footer class="vtt-combat-footer"><div><button class="vtt-secondary-action" type="button" data-start-combat>Iniciar combate</button><button class="vtt-secondary-action danger" type="button" data-end-combat>Encerrar</button></div><ol data-combat-history></ol></footer>
           </section>
 
           <section class="vtt-tab-panel" data-tab-panel="rolls">
@@ -207,6 +222,8 @@
         <label><span>CA / Defesa</span><input type="number" min="0" name="armorClass"></label><label><span>Iniciativa</span><input type="number" name="initiative"></label>
         <label><span>Status</span><select name="status"><option>Pronto</option><option>Ferido</option><option>Inconsciente</option><option>Oculto</option><option>Hostil</option><option>Derrotado</option></select></label><label><span>Condições</span><input name="conditions"></label>
         <label><span>Buffs</span><input name="buffs"></label><label><span>Debuffs</span><input name="debuffs"></label>
+        <label data-master-only><span>Fraquezas</span><input name="weaknesses"></label><label data-master-only><span>Resistências</span><input name="resistances"></label>
+        <label class="wide" data-master-only><span>Loot</span><input name="loot" placeholder="Tesouros, itens e recompensas"></label>
         <label data-master-only><span>Nome público</span><input name="publicName" placeholder="Criatura Desconhecida"></label><label data-master-only><span>Tipo de carta</span><select name="cardKind"><option value="player">Personagem</option><option value="npc-ally">NPC aliado</option><option value="npc-neutral">NPC neutro</option><option value="npc-hostile">NPC hostil</option><option value="monster">Monstro</option><option value="elite">Elite</option><option value="boss">Chefe</option></select></label>
         <label data-master-only><span>Visibilidade</span><select name="visibility"><option value="public">Público</option><option value="partial">Parcial</option><option value="secret">Secreto</option></select></label><label data-master-only><span>Imagem para jogadores</span><select name="imageVisibility"><option value="real">Imagem real</option><option value="silhouette">Silhueta</option><option value="hidden">Oculta</option></select></label>
         <label class="wide" data-master-only><span>Observações privadas do Mestre</span><textarea name="masterNotes"></textarea></label>
@@ -214,6 +231,14 @@
       </div>
       <footer><a href="sheets.html" class="vtt-token-sheet-link">Abrir ficha completa</a><button type="button" data-remove-token>Remover do mapa</button><button type="submit">Salvar alterações</button></footer>
     </form>
+  </dialog>
+
+  <dialog class="vtt-compact-dialog" data-quick-health-dialog>
+    <form data-quick-health-form><input type="hidden" name="tokenId"><input type="hidden" name="mode"><header><div><small>Ação rápida</small><h2 data-quick-health-title>Aplicar dano</h2><p data-quick-health-target></p></div><button type="button" data-close-quick-health aria-label="Fechar">&times;</button></header><div class="vtt-health-mode"><button type="button" data-health-mode="damage">Dano</button><button type="button" data-health-mode="heal">Cura</button><button type="button" data-health-mode="shield">Escudo</button></div><label><span>Valor</span><input name="amount" type="number" min="1" max="9999" value="5" required></label><footer><button type="button" data-close-quick-health>Cancelar</button><button type="submit">Aplicar</button></footer></form>
+  </dialog>
+
+  <dialog class="vtt-compact-dialog" data-quick-create-dialog>
+    <form data-quick-create-form><input type="hidden" name="type"><header><div><small>Criação durante a sessão</small><h2 data-quick-create-title>Novo recurso</h2><p>Salve na biblioteca sem sair da mesa.</p></div><button type="button" data-close-quick-create aria-label="Fechar">&times;</button></header><div class="vtt-quick-create-fields"><label class="wide"><span>Nome</span><input name="name" maxlength="80" required></label><label><span>Nível</span><input name="level" type="number" min="0" value="1"></label><label><span>Bioma</span><select name="biome"><option>Qualquer</option><option>Floresta</option><option>Deserto</option><option>Montanha</option><option>Cidade</option><option>Oceano</option><option>Pântano</option></select></label><label><span>Profissão / tipo</span><input name="profession" maxlength="80"></label><label><span>Personalidade</span><input name="personality" maxlength="120"></label><label class="wide"><span>Descrição</span><textarea name="description" maxlength="800"></textarea></label><label class="wide"><span>Atributos</span><textarea name="attributes" maxlength="800" placeholder="PV: 20 | CA: 14 | Iniciativa: 2"></textarea></label></div><footer><button type="button" data-close-quick-create>Cancelar</button><button type="submit">Salvar e usar</button></footer></form>
   </dialog>
 
   <dialog class="vtt-token-dialog" data-card-settings-dialog>
@@ -230,6 +255,6 @@
   <script src="../assets/js/mvp-storage.js?v=mvp-core-v1"></script>
   <script src="../assets/js/app.js?v=mvp-core-v1"></script>
   <script src="../assets/js/session-state.js?v=vtt-core-v1"></script>
-  <script src="../assets/js/master-table.js?v=card-arrival-v1"></script>
+  <script src="../assets/js/master-table.js?v=vtt-advanced-v3"></script>
 </body>
 </html>

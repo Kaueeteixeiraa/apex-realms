@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css?v=global-toast-v1">
-  <link rel="stylesheet" href="../assets/css/master.css?v=master-library-cards-v1">
+  <link rel="stylesheet" href="../assets/css/master.css?v=vtt-advanced-v3">
 </head>
 <body class="master-area library-page" data-master-page="library">
   <svg class="dashboard-symbols" aria-hidden="true">
@@ -66,6 +66,8 @@
       <label><span>Biblioteca de</span><select data-library-campaign-filter></select></label>
       <label><span>Tipo de recurso</span><select data-library-type-filter></select></label>
       <label><span>Sistema</span><select data-library-system-filter></select></label>
+      <label><span>Bioma</span><select data-library-biome-filter></select></label>
+      <label><span>Nível</span><select data-library-level-filter><option value="all">Todos</option><option value="1-4">1 a 4</option><option value="5-10">5 a 10</option><option value="11+">11+</option></select></label>
       <label class="library-search"><span>Busca rapida</span><input type="search" data-library-search placeholder="Nome, tag ou descricao"></label>
       <button type="button" data-library-clear-filters title="Limpar filtros">Limpar</button>
     </section>
@@ -93,10 +95,18 @@
         <label class="library-field"><span>Tipo</span><select name="type" data-library-form-type></select></label>
         <label class="library-field"><span>Campanha</span><select name="campaignId" data-library-form-campaign></select><small>Global deixa o recurso disponivel em todas as campanhas.</small></label>
         <label class="library-field"><span>Sistema</span><select name="system" data-library-form-system></select></label>
+        <label class="library-field"><span>Nível</span><input name="level" type="number" min="0" max="99" value="1"></label>
+        <label class="library-field"><span>Bioma</span><select name="biome"><option>Qualquer</option><option>Floresta</option><option>Deserto</option><option>Montanha</option><option>Cidade</option><option>Oceano</option><option>Pântano</option><option>Dungeon</option><option>Templo</option><option>Porto</option><option>Vila</option><option>Castelo</option></select></label>
         <label class="library-field"><span>Visibilidade</span><select name="visibility"><option value="Privado do Mestre">Privado do Mestre</option><option value="Disponivel na mesa">Disponivel na mesa</option><option value="Liberado para jogadores">Liberado para jogadores</option></select></label>
+        <label class="library-field"><span>Profissão / subtipo</span><input name="profession" maxlength="100" placeholder="Mercador, morto-vivo, fragata..."></label>
+        <label class="library-field"><span>Personalidade</span><input name="personality" maxlength="180" placeholder="Cauteloso, leal, manipulador..."></label>
+        <label class="library-field library-field-wide"><span>História curta</span><textarea name="shortHistory" maxlength="700"></textarea></label>
         <label class="library-field library-field-wide"><span>Descricao</span><textarea name="description" maxlength="1200" placeholder="Aparencia, historia, funcao e contexto deste recurso."></textarea></label>
         <label class="library-field"><span>Atributos / status</span><textarea name="attributes" maxlength="1200" placeholder="PV, CA, nivel, raridade, dano ou dados do sistema."></textarea></label>
         <label class="library-field"><span>Habilidades</span><textarea name="abilities" maxlength="1200" placeholder="Acoes, magias, efeitos e habilidades especiais."></textarea></label>
+        <label class="library-field"><span>Fraquezas</span><textarea name="weaknesses" maxlength="600"></textarea></label>
+        <label class="library-field"><span>Resistências</span><textarea name="resistances" maxlength="600"></textarea></label>
+        <label class="library-field library-field-wide"><span>Loot</span><input name="loot" maxlength="500" placeholder="Moedas, itens e recompensas"></label>
         <label class="library-field"><span>Tags</span><input name="tags" maxlength="140" placeholder="chefe, ruina, nivel 5"></label>
         <label class="library-field"><span>Observacoes do Mestre</span><textarea name="masterNotes" maxlength="1200" placeholder="Segredos e orientacoes que somente o Mestre deve consultar."></textarea></label>
         <div class="library-field library-file-field">
@@ -119,6 +129,6 @@
 
   <script src="../assets/js/mvp-storage.js?v=mvp-core-v1"></script>
   <script src="../assets/js/app.js?v=mvp-core-v1"></script>
-  <script src="../assets/js/master.js?v=mvp-functional-v1"></script>
+  <script src="../assets/js/master.js?v=vtt-advanced-v3"></script>
 </body>
 </html>
