@@ -2,12 +2,63 @@
 const authForms = document.querySelectorAll("[data-auth-form]");
 const authQuery = new URLSearchParams(window.location.search);
 const pendingInviteCode = window.ApexInvites?.normalizeCode?.(authQuery.get("invite")) || "";
+const AUTH_REDIRECT_DELAY = 1350;
+
+function createAuthTransition() {
+  let overlay = document.querySelector("[data-auth-transition]");
+  if (overlay) return overlay;
+  overlay = document.createElement("div");
+  overlay.className = "auth-transition";
+  overlay.dataset.authTransition = "true";
+  overlay.setAttribute("role", "status");
+  overlay.setAttribute("aria-live", "polite");
+  overlay.innerHTML = `
+    <div class="auth-transition-panel">
+      <div class="auth-transition-orbit" aria-hidden="true">
+        <i></i><i></i><i></i>
+        <span class="auth-transition-die die-one">20</span>
+        <span class="auth-transition-die die-two">12</span>
+        <span class="auth-transition-die die-three">8</span>
+        <div class="auth-transition-mark"><img src="assets/apex-mini-logo.svg" alt=""></div>
+      </div>
+      <small>APEX REALMS</small>
+      <h2 data-auth-transition-title>Abrindo o portal</h2>
+      <p data-auth-transition-message>Preparando sua mesa...</p>
+      <div class="auth-transition-progress" aria-hidden="true"><span></span></div>
+    </div>
+  `;
+  document.body.append(overlay);
+  return overlay;
+}
 
 function setAuthStatus(form, message, type = "info") {
   const status = form.querySelector("[data-auth-status]");
   if (!status) return;
   status.textContent = message;
   status.dataset.status = type;
+}
+
+function startAuthTransition(form, mode) {
+  const overlay = createAuthTransition();
+  const isRegister = mode === "register";
+  const title = overlay.querySelector("[data-auth-transition-title]");
+  const message = overlay.querySelector("[data-auth-transition-message]");
+  const submit = form.querySelector("button[type='submit']");
+  const card = form.closest(".login-home-card, .register-home-card, .auth-card");
+
+  if (title) title.textContent = isRegister ? "Criando seu acesso" : "Abrindo o portal";
+  if (message) message.textContent = isRegister ? "Forjando seu perfil no Apex Realms..." : "Validando acesso e preparando sua mesa...";
+
+  if (submit) {
+    submit.disabled = true;
+    submit.setAttribute("aria-busy", "true");
+    submit.dataset.originalText = submit.dataset.originalText || submit.textContent.trim();
+    submit.innerHTML = `<span>${isRegister ? "Criando acesso" : "Entrando"}</span><i aria-hidden="true"></i>`;
+  }
+
+  document.body.classList.add("auth-is-entering");
+  card?.classList.add("is-entering");
+  requestAnimationFrame(() => overlay.classList.add("active"));
 }
 
 function joinPendingInvite(user) {
@@ -25,18 +76,19 @@ function redirectAfterAuth() {
   const target = inviteResult ? (user?.role === "player" ? "player/dashboard.html" : homeRoute) : (next && window.ApexStaticAuth?.canAccessRoute(user, next) ? next : homeRoute);
   setTimeout(() => {
     window.location.href = target;
-  }, 520);
+  }, AUTH_REDIRECT_DELAY);
 }
 
-function signInStaticUser(user) {
+function signInStaticUser(user, form, mode) {
   window.ApexStaticAuth?.saveUser(user);
   window.ApexStaticAuth?.applyUser();
-  showPrototypeToast?.(`Entrando como ${window.ApexStaticAuth?.roleLabel(user.role) || "usuario"}...`);
+  startAuthTransition(form, mode);
   redirectAfterAuth();
 }
 
 authForms.forEach(form => form.addEventListener("submit", event => {
   event.preventDefault();
+  if (form.dataset.authBusy === "true") return;
   if (!form.reportValidity()) return;
 
   const formData = new FormData(form);
@@ -56,8 +108,9 @@ authForms.forEach(form => form.addEventListener("submit", event => {
       setAuthStatus(form, "Senha invalida.", "error");
       return;
     }
+    form.dataset.authBusy = "true";
     setAuthStatus(form, "Sessao validada. Abrindo dashboard...", "success");
-    signInStaticUser(account);
+    signInStaticUser(account, form, mode);
     return;
   }
 
@@ -65,6 +118,7 @@ authForms.forEach(form => form.addEventListener("submit", event => {
     setAuthStatus(form, "Este e-mail ja possui uma conta.", "error");
     return;
   }
+  form.dataset.authBusy = "true";
   setAuthStatus(form, "Conta criada. Abrindo dashboard...", "success");
   const account = window.ApexStaticAuth?.upsertAccount({
     name: String(formData.get("name") || "Aventureiro Apex").trim(),
@@ -74,7 +128,7 @@ authForms.forEach(form => form.addEventListener("submit", event => {
     role: publicRole,
     avatar: ""
   });
-  signInStaticUser(account);
+  signInStaticUser(account, form, mode);
 }));
 
 if (pendingInviteCode) {
