@@ -51,6 +51,8 @@
     healthForm: $("[data-quick-health-form]"),
     createDialog: $("[data-quick-create-dialog]"),
     createForm: $("[data-quick-create-form]"),
+    removeSelectedMarker: $("[data-remove-selected-marker]"),
+    clearMarkers: $("[data-clear-markers]"),
     combatHistory: $("[data-combat-history]"),
     rollAnimation: $("[data-roll-animation]"),
     emptyCampaign: $("[data-empty-campaign]")
@@ -147,6 +149,7 @@
   let resourceTab = "maps";
   let selectedTokenId = "";
   let selectedTokenIds = new Set();
+  let selectedMarkerId = "";
   let pointer = null;
   let markerType = "Objetivo";
   let spacePressed = false;
@@ -214,6 +217,32 @@
 
   function initials(name) {
     return escapeText(name).trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase() || "AR";
+  }
+
+  // Card image loading: every sheet/library/quick-created entity passes through this resolver.
+  function isRenderableImageSource(value) {
+    const source = String(value || "").trim();
+    return /^(data:image\/|https?:\/\/|\.{0,2}\/|assets\/|\/)/i.test(source);
+  }
+
+  function firstRenderableImage(...values) {
+    return values.map(value => String(value || "").trim()).find(isRenderableImageSource) || "";
+  }
+
+  function resolveEntityImage(raw = {}) {
+    return firstRenderableImage(
+      raw.portrait,
+      raw.avatar,
+      raw.image,
+      raw.imageUrl,
+      raw.imageURL,
+      raw.fileUrl,
+      raw.fileURL,
+      raw.cover,
+      raw.coverImage,
+      raw.referenceImage,
+      raw.banner
+    );
   }
 
   function currentUser() {
@@ -288,7 +317,7 @@
       sourceType,
       name: raw.name || "Sem nome",
       publicName: raw.publicName || "",
-      portrait: raw.portrait || raw.avatar || raw.image || "",
+      portrait: resolveEntityImage(raw),
       className: raw.className || "",
       race: raw.race || "",
       level: Math.max(0, Number(raw.level || 1)),
@@ -389,9 +418,10 @@
 
   function avatarContent(container, item) {
     container.replaceChildren();
-    if (item.portrait || item.avatar || item.image) {
+    const source = resolveEntityImage(item);
+    if (source) {
       const image = document.createElement("img");
-      image.src = item.portrait || item.avatar || item.image;
+      image.src = source;
       image.alt = "";
       container.append(image);
     } else {
@@ -417,7 +447,7 @@
         playerId: player.id,
         name: sheet.name || player.nickname || player.name,
         owner: player.name,
-        portrait: sheet.portrait || player.avatar,
+        portrait: resolveEntityImage({...sheet, avatar: player.avatar}),
         type: "Personagem",
         connected: isRecentlyActive(player.lastAccess),
         permissions: player.permissions || {}
@@ -467,7 +497,7 @@
       publicName: raw.publicName || "",
       type: sourceType,
       owner: raw.owner || "Mestre",
-      portrait: raw.portrait || raw.avatar || raw.image || "",
+      portrait: resolveEntityImage(raw),
       className: raw.className || raw.race || raw.type || "Aventureiro",
       race: raw.race || "",
       level: Number(raw.level || 1),
@@ -549,7 +579,7 @@
       return normalizeToken({
         ...token,
         name: source.name,
-        portrait: source.portrait,
+        portrait: resolveEntityImage(source),
         className: source.className,
         race: source.race,
         level: source.level,
@@ -649,6 +679,85 @@
     context.globalCompositeOperation = "source-over";
   }
 
+  function markerClass(type) {
+    return String(type || "Objetivo").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\W+/g, "-");
+  }
+
+  function renderMarkerActions() {
+    if (!elements.removeSelectedMarker) return;
+    elements.removeSelectedMarker.disabled = isPlayerMode || !selectedMarkerId || !state.markers.some(marker => marker.id === selectedMarkerId);
+  }
+
+  function closeMarkerContextMenu() {
+    document.querySelector("[data-marker-context-menu]")?.remove();
+  }
+
+  // Marker controls: click selects, explicit actions remove, and saved session state is updated.
+  function selectMarker(markerId, announce = true) {
+    if (!state.markers.some(marker => marker.id === markerId)) selectedMarkerId = "";
+    else selectedMarkerId = markerId;
+    closeMarkerContextMenu();
+    renderMarkers();
+    renderMarkerActions();
+    if (announce && selectedMarkerId) {
+      const marker = state.markers.find(item => item.id === selectedMarkerId);
+      setMapStatus(`Marcador selecionado: ${marker?.label || marker?.type}`, true);
+    }
+  }
+
+  function removeMarker(markerId = selectedMarkerId) {
+    if (isPlayerMode || !markerId) return;
+    const marker = state.markers.find(item => item.id === markerId);
+    if (!marker) return;
+    state.markers = state.markers.filter(item => item.id !== markerId);
+    if (selectedMarkerId === markerId) selectedMarkerId = "";
+    closeMarkerContextMenu();
+    addEvent("Marcador removido", `${marker.label || marker.type} foi removido do mapa.`);
+    renderMarkers();
+    renderMarkerActions();
+    saveState();
+  }
+
+  function clearMarkers() {
+    if (isPlayerMode || !state.markers.length) return;
+    if (!window.confirm("Remover todos os marcadores deste mapa?")) return;
+    const total = state.markers.length;
+    state.markers = [];
+    selectedMarkerId = "";
+    closeMarkerContextMenu();
+    addEvent("Marcadores limpos", `${total} marcador${total === 1 ? "" : "es"} removido${total === 1 ? "" : "s"} do mapa.`);
+    renderMarkers();
+    renderMarkerActions();
+    saveState();
+  }
+
+  function openMarkerContextMenu(marker, event) {
+    if (isPlayerMode) return;
+    event.preventDefault();
+    event.stopPropagation();
+    selectedMarkerId = marker.id;
+    renderMarkers();
+    renderMarkerActions();
+    closeMarkerContextMenu();
+    const menu = document.createElement("div");
+    menu.className = "vtt-marker-context-menu";
+    menu.dataset.markerContextMenu = "true";
+    menu.style.left = `${event.clientX}px`;
+    menu.style.top = `${event.clientY}px`;
+    menu.innerHTML = `<small>Marcador</small><b></b><button type="button">Remover marcador</button>`;
+    menu.querySelector("b").textContent = marker.label || marker.type;
+    menu.addEventListener("pointerdown", event => event.stopPropagation());
+    menu.querySelector("button").addEventListener("click", event => {
+      event.stopPropagation();
+      removeMarker(marker.id);
+    });
+    document.body.append(menu);
+    const rect = menu.getBoundingClientRect();
+    menu.style.left = `${Math.min(event.clientX, window.innerWidth - rect.width - 12)}px`;
+    menu.style.top = `${Math.min(event.clientY, window.innerHeight - rect.height - 12)}px`;
+    setTimeout(() => window.addEventListener("pointerdown", closeMarkerContextMenu, {once: true}), 0);
+  }
+
   function renderMarkers() {
     if (!elements.markerLayer) return;
     elements.markerLayer.replaceChildren();
@@ -656,22 +765,34 @@
       const button = document.createElement("div");
       button.setAttribute("role", "button");
       button.tabIndex = 0;
-      button.className = `vtt-map-marker marker-${String(marker.type).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\W+/g, "-")}`;
+      button.className = `vtt-map-marker marker-${markerClass(marker.type)}${marker.id === selectedMarkerId ? " selected" : ""}`;
       button.style.left = `${marker.x}px`;
       button.style.top = `${marker.y}px`;
       button.dataset.markerId = marker.id;
       button.innerHTML = `<i></i><span></span>`;
       button.querySelector("i").textContent = marker.type.slice(0, 1).toUpperCase();
       button.querySelector("span").textContent = marker.label || marker.type;
-      button.title = isPlayerMode ? marker.type : "Clique para remover";
-      if (!isPlayerMode) button.addEventListener("click", () => {
-        state.markers = state.markers.filter(item => item.id !== marker.id);
-        addEvent("Marcador removido", `${marker.type} foi removido do mapa.`);
-        renderMarkers();
-        saveState();
-      });
+      button.title = isPlayerMode ? marker.type : "Clique para selecionar. Botao direito remove.";
+      if (!isPlayerMode) {
+        button.addEventListener("click", event => {
+          event.stopPropagation();
+          selectMarker(marker.id);
+        });
+        button.addEventListener("contextmenu", event => openMarkerContextMenu(marker, event));
+        button.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            selectMarker(marker.id);
+          }
+          if (event.key === "Delete" || event.key === "Backspace") {
+            event.preventDefault();
+            removeMarker(marker.id);
+          }
+        });
+      }
       elements.markerLayer.append(button);
     });
+    renderMarkerActions();
   }
 
   function rosterCard(source) {
@@ -758,7 +879,7 @@
       owner: source.owner || "",
       name: source.name,
       publicName: source.publicName || "",
-      portrait: source.portrait,
+      portrait: resolveEntityImage(source),
       className: source.className,
       race: source.race,
       level: source.level,
@@ -1030,6 +1151,8 @@
     if (tokenElement && state.tool === "select" && !wantsPan) {
       const token = state.tokens.find(item => item.id === tokenElement.dataset.tokenId);
       if (!token) return;
+      selectedMarkerId = "";
+      closeMarkerContextMenu();
       if (event.shiftKey) {
         selectedTokenIds.has(token.id) ? selectedTokenIds.delete(token.id) : selectedTokenIds.add(token.id);
         selectedTokenId = token.id;
@@ -1084,15 +1207,20 @@
     if (state.tool === "marker") {
       if (isPlayerMode) return blockPlayerAction("Marcadores permanentes sao controlados pelo Mestre.");
       const point = snapped(worldPoint(event));
-      state.markers.push({id: uid("marker"), type: markerType, label: markerType, x: point.x, y: point.y, createdAt: now()});
+      const marker = {id: uid("marker"), type: markerType, label: markerType, x: point.x, y: point.y, createdAt: now()};
+      state.markers.push(marker);
+      selectedMarkerId = marker.id;
       addEvent("Marcador adicionado", `${markerType} foi marcado no mapa.`);
       renderMarkers();
       saveState();
       return;
     }
+    selectedMarkerId = "";
+    closeMarkerContextMenu();
     selectedTokenId = "";
     selectedTokenIds.clear();
     renderTokens();
+    renderMarkers();
   }
 
   function movePointer(event) {
@@ -1150,21 +1278,45 @@
   }
 
   function drawMeasurement(start, end) {
+    // Measurement ruler logic: visual SVG only; distance math remains in measurementDistance().
     elements.measureLayer.setAttribute("viewBox", `0 0 ${WORLD.width} ${WORLD.height}`);
     elements.measureLayer.replaceChildren();
+    const distance = measurementDistance(start, end);
+    const midX = (start.x + end.x) / 2;
+    const midY = (start.y + end.y) / 2 - 12;
+    const bgWidth = Math.max(86, distance.length * 13 + 26);
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    defs.innerHTML = `<filter id="vtt-measure-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("x1", start.x);
     line.setAttribute("y1", start.y);
     line.setAttribute("x2", end.x);
     line.setAttribute("y2", end.y);
     line.setAttribute("class", "vtt-measure-line");
+    const startPoint = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    startPoint.setAttribute("cx", start.x);
+    startPoint.setAttribute("cy", start.y);
+    startPoint.setAttribute("r", "8");
+    startPoint.setAttribute("class", "vtt-measure-point");
+    const endPoint = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    endPoint.setAttribute("cx", end.x);
+    endPoint.setAttribute("cy", end.y);
+    endPoint.setAttribute("r", "8");
+    endPoint.setAttribute("class", "vtt-measure-point end");
+    const labelBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    labelBg.setAttribute("x", midX - bgWidth / 2);
+    labelBg.setAttribute("y", midY - 18);
+    labelBg.setAttribute("width", bgWidth);
+    labelBg.setAttribute("height", "30");
+    labelBg.setAttribute("rx", "11");
+    labelBg.setAttribute("class", "vtt-measure-label-bg");
     const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    label.setAttribute("x", (start.x + end.x) / 2);
-    label.setAttribute("y", (start.y + end.y) / 2 - 12);
+    label.setAttribute("x", midX);
+    label.setAttribute("y", midY + 3);
     label.setAttribute("text-anchor", "middle");
     label.setAttribute("class", "vtt-measure-label");
-    label.textContent = measurementDistance(start, end);
-    elements.measureLayer.append(line, label);
+    label.textContent = distance;
+    elements.measureLayer.append(defs, line, startPoint, endPoint, labelBg, label);
   }
 
   function measurementDistance(start, end) {
@@ -1853,6 +2005,28 @@
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   }
 
+  function normalizedLookupText(value) {
+    return String(value || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\b\d+\b/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function findReusableCreatureImage(preset = {}) {
+    const name = normalizedLookupText(preset.name);
+    const tags = normalizedLookupText(preset.tags);
+    const candidates = [...sources.creatures, ...sources.library].filter(item => ["Monstro", "NPC", "Monstros", "NPCs"].includes(item.type || item.sourceType));
+    const match = candidates.find(item => {
+      const itemName = normalizedLookupText(item.name);
+      const itemTags = normalizedLookupText(item.tags);
+      return itemName && (itemName === name || name.includes(itemName) || itemName.includes(name) || (tags && itemTags && tags.split(" ").some(tag => itemTags.includes(tag))));
+    });
+    return resolveEntityImage(match || {});
+  }
+
   function saveQuickLibraryItem(item) {
     const ownerId = window.ApexMvpStore?.ownerId?.() || "";
     const all = readStore(KEYS.library, []);
@@ -1913,16 +2087,91 @@
   function generateRandomEncounter() {
     if (isPlayerMode) return;
     const encounter = [
-      ...Array.from({length: 3}, (_, index) => ({name: `Goblin Batedor ${index + 1}`, tags: "goblin, hostil", attributes: "PV: 12 | CA: 13 | Iniciativa: 2", level: 1, cardKind: "monster"})),
-      {name: "Goblin Xama", tags: "goblin, elite, hostil", attributes: "PV: 28 | CA: 14 | Iniciativa: 1", level: 2, cardKind: "elite", abilities: "Pulso sombrio; Cura tribal"}
+      ...Array.from({length: 3}, (_, index) => ({name: `Mecânico Sombrio ${index + 1}`, tags: "f1, mecanico, sombra, hostil", attributes: "PV: 12 | CA: 13 | Iniciativa: 2", level: 1, cardKind: "monster", abilities: "Chave encantada; Cortina de fumaça"})),
+      {name: "Engenheiro Rival", tags: "f1, elite, hostil", attributes: "PV: 28 | CA: 14 | Iniciativa: 1", level: 2, cardKind: "elite", abilities: "Telemetria proibida; Pit stop sombrio"}
     ];
     encounter.forEach((preset, index) => setTimeout(() => {
-      const item = saveQuickLibraryItem({...preset, type: "Monstros", biome: "Floresta", description: "Inimigo gerado para encontro rapido.", visibility: "Disponivel na mesa", image: generatedPortrait(preset.name, "Monstros")});
+      const image = findReusableCreatureImage(preset) || generatedPortrait(preset.name, "Monstros");
+      const item = saveQuickLibraryItem({...preset, type: "Monstros", biome: "Cidade", description: "Ameaça gerada para encontro rapido na pista.", visibility: "Disponivel na mesa", image});
       const source = sources.creatures.find(entry => entry.id === item.id);
       if (source) addSourceToMap(source);
     }, index * 320));
-    addEvent("Encontro gerado", "3 Goblins Batedores e 1 Goblin Xama foram posicionados na mesa.", "Um novo encontro surgiu no mapa.");
+    addEvent("Encontro gerado", "Mecânicos Sombrios e um Engenheiro Rival foram posicionados na mesa.", "Um novo encontro surgiu no mapa.");
     setMapStatus("Encontro sendo invocado no mapa...", true);
+  }
+
+  function formulaOnePortrait(name, accent = "#9b78ff", role = "Piloto") {
+    const safeName = escapeText(name).replace(/[&<>"]/g, character => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[character]));
+    const initialsValue = initials(name).replace(/[&<>"]/g, character => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[character]));
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="600" viewBox="0 0 480 600"><defs><radialGradient id="bg" cx="50%" cy="28%" r="72%"><stop stop-color="${accent}"/><stop offset=".45" stop-color="#171028"/><stop offset="1" stop-color="#05050a"/></radialGradient><linearGradient id="visor" x1="0" x2="1"><stop stop-color="#55dfff"/><stop offset=".5" stop-color="#f4e7ff"/><stop offset="1" stop-color="#a47cff"/></linearGradient></defs><rect width="480" height="600" fill="url(#bg)"/><path d="M64 520c33-120 319-120 352 0v80H64z" fill="#090713"/><path d="M148 232c0-90 184-90 184 0 0 90-184 90-184 0Z" fill="#090713" stroke="${accent}" stroke-width="8"/><path d="M137 224c38-43 168-43 206 0l-18 58H155z" fill="url(#visor)" opacity=".88"/><path d="M158 325h164l35 108H123z" fill="#130e1f" stroke="${accent}" stroke-width="5"/><path d="M110 454h260M122 492h236" stroke="${accent}" stroke-width="8" opacity=".55"/><text x="240" y="386" text-anchor="middle" fill="#fff" font-family="serif" font-size="82" font-weight="800">${initialsValue}</text><text x="240" y="552" text-anchor="middle" fill="#f2bf72" font-family="Arial" font-size="24" font-weight="800" letter-spacing="4">${role}</text><text x="240" y="54" text-anchor="middle" fill="#eee7ff" font-family="serif" font-size="24" font-weight="800">${safeName}</text></svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  }
+
+  function formulaOneTrackMap() {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000"><defs><radialGradient id="night" cx="50%" cy="45%" r="75%"><stop stop-color="#23143d"/><stop offset=".55" stop-color="#070710"/><stop offset="1" stop-color="#030307"/></radialGradient><filter id="glow"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><rect width="1600" height="1000" fill="url(#night)"/><path d="M185 588C123 429 262 207 520 170c279-40 333 140 476 127 136-13 174-146 315-101 152 48 191 280 69 420-116 132-342 130-480 72-141-59-192-177-342-139-155 39-235 168-373 39Z" fill="none" stroke="#1a1725" stroke-width="132" stroke-linecap="round" stroke-linejoin="round"/><path d="M185 588C123 429 262 207 520 170c279-40 333 140 476 127 136-13 174-146 315-101 152 48 191 280 69 420-116 132-342 130-480 72-141-59-192-177-342-139-155 39-235 168-373 39Z" fill="none" stroke="#353046" stroke-width="94" stroke-linecap="round" stroke-linejoin="round"/><path d="M185 588C123 429 262 207 520 170c279-40 333 140 476 127 136-13 174-146 315-101 152 48 191 280 69 420-116 132-342 130-480 72-141-59-192-177-342-139-155 39-235 168-373 39Z" fill="none" stroke="#9b78ff" stroke-width="4" stroke-dasharray="28 22" filter="url(#glow)"/><path d="M1180 650h155" stroke="#fff" stroke-width="18" stroke-dasharray="16 14"/><path d="M220 680h250" stroke="#55dfff" stroke-width="8" opacity=".8" filter="url(#glow)"/><path d="M1120 226h185" stroke="#f2bf72" stroke-width="8" opacity=".85" filter="url(#glow)"/><g fill="#ffffff14">${Array.from({length: 90}, (_, index) => `<circle cx="${(index * 137) % 1600}" cy="${(index * 83) % 1000}" r="${index % 5 === 0 ? 2.5 : 1.4}"/>`).join("")}</g><text x="74" y="92" fill="#f2bf72" font-family="serif" font-size="38" font-weight="800">GRANDE PREMIO ARCANO</text><text x="74" y="132" fill="#bfa7ff" font-family="Arial" font-size="18" font-weight="800" letter-spacing="4">PISTA: CIRCUITO DO PORTAL VELOZ</text></svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  }
+
+  // Formula 1 RPG mock data: a full table session used to validate real play behavior.
+  function seedFormulaOneRpgSession() {
+    if (isPlayerMode) return;
+    const simTag = "formula-one-rpg";
+    const tokenData = [
+      {name: "Kael Volante", sourceType: "Personagem", className: "Piloto Arcano", race: "Equipe Aurora", cardKind: "player", x: 335, y: 654, hpCurrent: 44, hpMax: 44, resourceCurrent: 3, resourceMax: 5, armorClass: 15, initiative: 4, conditions: "Foco total", image: formulaOnePortrait("Kael Volante", "#55dfff", "PILOTO")},
+      {name: "Mira Vértice", sourceType: "Personagem", className: "Estrategista", race: "Equipe Apex", cardKind: "player", x: 405, y: 604, hpCurrent: 38, hpMax: 42, resourceCurrent: 5, resourceMax: 6, armorClass: 14, initiative: 5, conditions: "DRS ativo", image: formulaOnePortrait("Mira Vértice", "#a47cff", "PILOTO")},
+      {name: "Dante Pit", sourceType: "Personagem", className: "Especialista de Box", race: "Equipe Eclipse", cardKind: "player", x: 495, y: 548, hpCurrent: 36, hpMax: 40, resourceCurrent: 4, resourceMax: 4, armorClass: 13, initiative: 2, image: formulaOnePortrait("Dante Pit", "#f2bf72", "PILOTO")},
+      {name: "Selene Box", sourceType: "NPC", className: "Engenheira Aliada", race: "Box Arcano", cardKind: "npc-ally", x: 230, y: 705, hpCurrent: 24, hpMax: 24, armorClass: 12, initiative: 1, image: formulaOnePortrait("Selene Box", "#63dfb1", "ALIADA")},
+      {name: "Mecânico Sombrio 1", sourceType: "Monstro", className: "Sabotador", cardKind: "monster", x: 915, y: 520, hpCurrent: 12, hpMax: 12, armorClass: 13, initiative: 2, conditions: "Oculto na fumaça", weaknesses: "Luz alta, ultrapassagem limpa", loot: "Kit de reparo sombrio", image: formulaOnePortrait("Mecânico Sombrio", "#ff557e", "HOSTIL")},
+      {name: "Mecânico Sombrio 2", sourceType: "Monstro", className: "Sabotador", cardKind: "monster", x: 1000, y: 565, hpCurrent: 12, hpMax: 12, armorClass: 13, initiative: 2, weaknesses: "Luz alta, ultrapassagem limpa", loot: "Porca encantada", image: formulaOnePortrait("Mecânico Sombrio", "#ff557e", "HOSTIL")},
+      {name: "Engenheiro Rival", sourceType: "Monstro", className: "Controlador de Telemetria", cardKind: "elite", x: 1085, y: 475, hpCurrent: 28, hpMax: 28, armorClass: 14, initiative: 3, resistances: "Pressão psicológica", loot: "Mapa de telemetria proibida", image: formulaOnePortrait("Engenheiro Rival", "#ed775f", "ELITE")},
+      {name: "Entidade da Velocidade", sourceType: "Monstro", className: "Chefe Lendário", cardKind: "boss", x: 1212, y: 640, hpCurrent: 86, hpMax: 96, resourceCurrent: 7, resourceMax: 9, armorClass: 17, initiative: 6, conditions: "Acelerando", weaknesses: "Pit stop perfeito", resistances: "Chuva, colisão, medo", loot: "Coroa do Grande Prêmio Arcano", image: formulaOnePortrait("Entidade da Velocidade", "#f0b85d", "CHEFE")}
+    ];
+    state.scene = {id: "formula-one-arcane-circuit", name: "Grande Prêmio Arcano", image: formulaOneTrackMap(), description: "Pista de F1 em universo dark fantasy."};
+    state.view = {panX: 0, panY: 0, zoom: 1};
+    state.grid = true;
+    state.fog = false;
+    state.tokens = state.tokens.filter(token => token.simulationTag !== simTag);
+    tokenData.forEach(item => state.tokens.push(normalizeToken({
+      ...item,
+      id: uid("f1-token"),
+      sourceId: `f1-${markerClass(item.name)}`,
+      sourceOrigin: "simulation",
+      owner: item.sourceType === "Personagem" ? "Jogador" : "Mestre",
+      visibility: item.sourceType === "Monstro" ? "partial" : "public",
+      imageVisibility: "real",
+      showLifeState: true,
+      shareClassRace: item.sourceType !== "Monstro",
+      simulationTag: simTag,
+      portrait: item.image
+    })));
+    state.markers = state.markers.filter(marker => marker.simulationTag !== simTag);
+    state.markers.push(
+      {id: uid("marker"), type: "Perigo", label: "Curva 7 perigosa", x: 960, y: 512, simulationTag: simTag, createdAt: now()},
+      {id: uid("marker"), type: "Objetivo", label: "Zona de DRS", x: 335, y: 682, simulationTag: simTag, createdAt: now()},
+      {id: uid("marker"), type: "Combate", label: "Área de colisão", x: 1060, y: 575, simulationTag: simTag, createdAt: now()},
+      {id: uid("marker"), type: "Loja", label: "Box mágico", x: 224, y: 710, simulationTag: simTag, createdAt: now()},
+      {id: uid("marker"), type: "Missão", label: "Bandeira amarela", x: 785, y: 275, simulationTag: simTag, createdAt: now()},
+      {id: uid("marker"), type: "Casa", label: "Linha de chegada", x: 1260, y: 650, simulationTag: simTag, createdAt: now()}
+    );
+    selectedMarkerId = "";
+    selectedTokenIds = new Set();
+    state.chat.unshift(
+      {id: uid("message"), author: "Narrador Apex", avatar: "", scope: "group", message: "A chuva violeta cai sobre o Circuito do Portal Veloz. O safety car fantasma acabou de sumir.", createdAt: now()},
+      {id: uid("message"), author: "Mira Vértice", avatar: formulaOnePortrait("Mira Vértice", "#a47cff", "PILOTO"), scope: "group", message: "Vou forçar DRS na reta principal. Se a entidade acelerar, cubram a Curva 7.", createdAt: now()}
+    );
+    state.rolls.unshift({id: uid("roll"), author: "Kael Volante", formula: "1d20+5", values: [16], modifier: 5, total: 21, critical: false, createdAt: now()});
+    state.events.unshift(
+      {id: uid("event"), title: "Sessão F1 carregada", detail: "Pilotos, rivais, marcadores, chat, rolagem e mapa foram preparados para teste completo.", publicDetail: "A corrida arcana começou.", createdAt: now()},
+      {id: uid("event"), title: "Evento de pista", detail: "Chuva, safety car e falha de motor estão disponíveis como complicações narrativas.", publicDetail: "A pista ficou instável.", createdAt: now()}
+    );
+    state.notes.private = [state.notes.private, "[F1 RPG] Possíveis eventos: chuva intensa, safety car fantasma, pneu furado, pit stop mágico, ultrapassagem arriscada, falha de motor."].filter(Boolean).join("\n\n");
+    addEvent("Simulação F1 RPG", "Mesa preparada com pilotos, equipes, pista, rivais, marcadores e combate.", "A sessão temática começou.");
+    syncInitiative();
+    renderAll();
+    startCombat();
+    activateSessionTab("initiative");
+    setMapStatus("Simulação F1 RPG pronta para jogar.", true);
+    saveState();
   }
 
   function consumePendingResource() {
@@ -2032,6 +2281,7 @@
   }
 
   function bindEvents() {
+    // Future table extensions: plug new dock buttons, tools, shortcuts and modal flows here.
     elements.campaignSelect.addEventListener("change", () => selectCampaign(elements.campaignSelect.value));
     $$('[data-toggle-panel]').forEach(button => button.addEventListener("click", () => togglePanel(button.dataset.togglePanel)));
     $$('[data-roster-tab]').forEach(button => button.addEventListener("click", () => activateRosterTab(button.dataset.rosterTab)));
@@ -2096,7 +2346,10 @@
     $$('[data-quick-create]').forEach(button => button.addEventListener("click", () => openQuickCreate(button.dataset.quickCreate)));
     $("[data-generate-npc]")?.addEventListener("click", generateRandomNpc);
     $("[data-generate-encounter]")?.addEventListener("click", generateRandomEncounter);
+    $("[data-run-f1-simulation]")?.addEventListener("click", seedFormulaOneRpgSession);
     $("[data-dock-toggle]")?.addEventListener("click", () => body.classList.toggle("master-dock-collapsed"));
+    elements.removeSelectedMarker?.addEventListener("click", () => removeMarker());
+    elements.clearMarkers?.addEventListener("click", clearMarkers);
     $$('[data-layer-toggle]').forEach(input => input.addEventListener("change", () => { state.layers[input.dataset.layerToggle] = input.checked; renderMap(); saveState(); }));
     $$('[data-marker-type]').forEach(button => button.addEventListener("click", () => {
       markerType = button.dataset.markerType;
@@ -2122,7 +2375,12 @@
       if (event.key.toLowerCase() === "g") { state.grid = !state.grid; renderMap(); saveState(); }
       if (event.key === "+" || event.key === "=") setZoom(state.view.zoom + .1);
       if (event.key === "-") setZoom(state.view.zoom - .1);
-      if (event.key === "Escape") { selectedTokenId = ""; selectedTokenIds.clear(); elements.measureLayer.replaceChildren(); renderTokens(); }
+      if ((event.key === "Delete" || event.key === "Backspace") && selectedMarkerId) {
+        event.preventDefault();
+        removeMarker();
+        return;
+      }
+      if (event.key === "Escape") { selectedTokenId = ""; selectedMarkerId = ""; selectedTokenIds.clear(); closeMarkerContextMenu(); elements.measureLayer.replaceChildren(); renderTokens(); renderMarkers(); }
     });
     window.addEventListener("keyup", event => { if (event.code === "Space") spacePressed = false; });
   }

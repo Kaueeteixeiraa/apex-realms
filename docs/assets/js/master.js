@@ -16,6 +16,10 @@ const MASTER_BANNER_MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MASTER_BANNER_MAX_DATA_CHARS = 900000;
 const MASTER_LIBRARY_IMAGE_MAX_DATA_CHARS = 420000;
 
+function isRenderableMasterImage(value) {
+  return /^(data:image\/|https?:\/\/|\.{0,2}\/|assets\/|\/)/i.test(String(value || "").trim());
+}
+
 function readStore(key, fallback = []) {
   try {
     const data = JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
@@ -577,7 +581,7 @@ function bindLibraryPage() {
       presetId: String(raw.presetId || ""),
       visibility: raw.visibility || "Privado do Mestre",
       fileName: String(raw.fileName || ""),
-      image: String(raw.image || "").startsWith("data:image/") ? raw.image : "",
+      image: isRenderableMasterImage(raw.image) ? String(raw.image).trim() : "",
       favorite: Boolean(raw.favorite),
       ownerId: raw.ownerId || currentMasterOwnerId(),
       createdAt,
